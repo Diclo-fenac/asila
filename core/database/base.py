@@ -5,8 +5,8 @@ class Base(DeclarativeBase):
 
 class PlatformBase(Base):
     """Base for Platform/Meta database models."""
-    pass
+    __abstract__ = True
 
 class TenantBase(Base):
     """Base for Tenant-specific database models."""
-    pass
+    __abstract__ = True
