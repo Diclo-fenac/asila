@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "asila"
+version = "0.1.0"
+description = "Verified Information Hub for Governments"
+authors = ["Gemini CLI <bot@asila.gov>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = "^0.27.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.27"}
+asyncpg = "^0.29.0"
+pydantic-settings = "^2.2.1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+httpx = "^0.27.0"
+alembic = "^1.13.1"
+redis = {extras = ["hiredis"], version = "^5.0.1"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.2"
+pytest-asyncio = "^0.23.5"
+httpx = "^0.27.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry-core.masonry.api"
