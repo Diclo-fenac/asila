@@ -46,12 +46,21 @@ class RecursiveChunker:
             return [text]
 
         separator = separators[0]
+        if not separator: # Handle empty string separator for character-level splitting
+            return list(text)
+            
         splits = text.split(separator)
         
         result = []
-        for s in splits:
-            if len(s) <= self.chunk_size:
-                result.append(s + separator)
+        for i, s in enumerate(splits):
+            if not s and i < len(splits) - 1: # Skip empty splits unless it's the last one
+                continue
+            
+            # Re-attach the separator except for the last element
+            chunk_with_sep = s + separator if i < len(splits) - 1 else s
+            
+            if len(chunk_with_sep) <= self.chunk_size:
+                result.append(chunk_with_sep)
             else:
                 # If this piece is still too big, move to the next separator
                 result.extend(self._recursive_split(s, separators[1:]))
