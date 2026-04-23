@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
+    
+    GOOGLE_API_KEY: str
+    GEMINI_MODEL: str = "gemini-1.5-pro"
+    EMBEDDING_MODEL: str = "models/text-embedding-004"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

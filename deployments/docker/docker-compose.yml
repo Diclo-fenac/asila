@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgis/postgis:15-3.3 # Includes PostGIS
+    image: timescale/timescaledb-ha:pg15-all
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,8 +11,6 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    command: >
-      sh -c "docker-entrypoint.sh postgres -c shared_preload_libraries=pgvector"
 
   redis:
     image: redis:7-alpine

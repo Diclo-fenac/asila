@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Security &amp; Settings Modal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#6B8E7D",
+          "background-main": "#F4F4F5",
+          "background-sidebar": "#EAEAEB",
+          "surface-user": "#E2E2E4",
+          "surface-ai": "#FFFFFF",
+          "text-main": "#27272A",
+          "text-muted": "#71717A",
+          "border-main": "#D4D4D8",
+        },
+        fontFamily: {
+          "sans": ["'IBM Plex Sans'", "sans-serif"],
+          "mono": ["'IBM Plex Mono'", "monospace"],
+        },
+        borderRadius: {
+          "sm": "4px",
+          "md": "6px",
+          "lg": "8px",
+          "DEFAULT": "4px"
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body class="bg-background-main text-text-main h-screen w-full flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-black/40 z-40"></div>
+<div class="relative z-50 w-full max-w-[480px] bg-surface-ai rounded-md shadow-lg border border-border-main flex flex-col">
+<div class="flex items-center justify-between px-6 py-4 border-b border-border-main">
+<h2 class="text-[18px] font-semibold text-text-main">System Preferences</h2>
+<button class="text-text-muted hover:text-text-main transition-transform hover:rotate-90">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 flex flex-col gap-6">
+<div class="bg-background-main border border-border-main rounded-sm p-4 flex gap-3 items-start">
+<span class="material-symbols-outlined text-text-main mt-0.5">shield_lock</span>
+<div>
+<h3 class="text-[14px] font-medium text-text-main mb-1">GovCloud Level 4 Compliant</h3>
+<p class="text-[13px] text-text-muted">Session Data Not Stored</p>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<label class="text-[15px] font-medium text-text-main cursor-pointer select-none" for="high-contrast">High Contrast Mode</label>
+<div class="shrink-0">
+<label class="relative flex h-5 w-9 cursor-pointer items-center rounded-full border-none bg-border-main p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors">
+<div class="h-4 w-4 rounded-full bg-surface-ai shadow-sm transition-transform"></div>
+<input class="invisible absolute" id="high-contrast" type="checkbox"/>
+</label>
+</div>
+</div>
+<hr class="border-border-main"/>
+<div class="flex items-center justify-between">
+<label class="text-[15px] font-medium text-text-main cursor-pointer select-none" for="syntax-highlighting">Enable Code Syntax Highlighting</label>
+<div class="shrink-0">
+<label class="relative flex h-5 w-9 cursor-pointer items-center rounded-full border-none bg-border-main p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors">
+<div class="h-4 w-4 rounded-full bg-surface-ai shadow-sm transition-transform"></div>
+<input checked="" class="invisible absolute" id="syntax-highlighting" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-border-main bg-background-main rounded-b-md flex justify-end">
+<button class="px-4 py-2 bg-primary text-surface-ai rounded-sm text-[14px] font-medium hover:bg-opacity-90 transition-colors">Save Changes</button>
+</div>
+</div>
+</body></html>

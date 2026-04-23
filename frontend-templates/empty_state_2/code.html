@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aasila - Empty State</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#13ec83",
+          "background-light": "#f6f8f7",
+          "background-dark": "#102219",
+          "sidebar-bg": "#eaeaea",
+          "main-bg": "#f4f4f5",
+          "surface": "#ffffff",
+          "text-main": "#27272a",
+          "text-muted": "#71717a",
+          "border-color": "#d4d4d8",
+          "surface-user": "#e2e2e4"
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.125rem", "sm": "0.25rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+</style>
+</head>
+<body class="bg-main-bg text-text-main h-screen flex overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-[260px] bg-sidebar-bg flex-shrink-0 flex flex-col p-4 border-r border-border-color/50">
+<div class="mb-6">
+<h1 class="text-text-main font-semibold text-base mb-4">Aasila</h1>
+<button class="w-full bg-surface-user hover:bg-border-color text-text-main text-sm font-medium py-2 px-4 rounded-sm transition-colors duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+        New Workspace
+      </button>
+</div>
+<div class="mt-auto">
+<div class="flex items-center gap-2 text-text-muted text-xs font-medium cursor-pointer hover:text-text-main transition-colors">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+        Settings
+      </div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col relative h-full">
+<!-- Top Area (Empty for future sticky header if needed, but PRD doesn't specify for empty state) -->
+<header class="h-12 w-full flex-shrink-0"></header>
+<!-- Center Content -->
+<div class="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto pb-32">
+<div class="max-w-[768px] w-full flex flex-col items-center">
+<h2 class="text-[24px] font-semibold text-text-main mb-8 text-center">
+          How can I assist your department today?
+        </h2>
+<!-- Suggestion Chips Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-[600px]">
+<button class="h-[80px] bg-surface border border-border-color rounded-sm p-4 flex items-center justify-center text-sm font-medium text-text-main hover:bg-sidebar-bg transition-colors duration-150 text-center">
+            Summarize regulation
+          </button>
+<button class="h-[80px] bg-surface border border-border-color rounded-sm p-4 flex items-center justify-center text-sm font-medium text-text-main hover:bg-sidebar-bg transition-colors duration-150 text-center">
+            Draft memo
+          </button>
+<button class="h-[80px] bg-surface border border-border-color rounded-sm p-4 flex items-center justify-center text-sm font-medium text-text-main hover:bg-sidebar-bg transition-colors duration-150 text-center">
+            Analyze dataset
+          </button>
+<button class="h-[80px] bg-surface border border-border-color rounded-sm p-4 flex items-center justify-center text-sm font-medium text-text-main hover:bg-sidebar-bg transition-colors duration-150 text-center">
+            Review policy
+          </button>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Input -->
+<div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-main-bg via-main-bg to-transparent flex justify-center">
+<div class="w-full max-w-[768px] relative">
+<input class="w-full h-[56px] bg-surface border border-border-color rounded-sm pl-4 pr-12 text-[15px] text-text-main placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow duration-150" placeholder="Message Aasila..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:opacity-80 transition-opacity flex items-center justify-center w-8 h-8 rounded-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</main>
+</body></html>

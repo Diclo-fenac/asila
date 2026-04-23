@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#EAEAEB",
+                      "on-surface": "#27272A",
+                      "inverse-surface": "#102219",
+                      "on-secondary-container": "#27272A",
+                      "secondary-fixed-dim": "#89d89e",
+                      "outline-variant": "#EAEAEB",
+                      "surface-container-low": "#F4F4F5",
+                      "primary-fixed-dim": "#00e37d",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed": "#ffddb3",
+                      "on-primary-fixed": "#00210d",
+                      "inverse-primary": "#00e37d",
+                      "on-background": "#27272A",
+                      "on-tertiary": "#ffffff",
+                      "tertiary": "#815609",
+                      "outline": "#D4D4D8",
+                      "on-secondary-fixed-variant": "#005229",
+                      "surface-container-lowest": "#FFFFFF",
+                      "surface-dim": "#EAEAEB",
+                      "on-tertiary-fixed": "#291800",
+                      "on-primary": "#102219",
+                      "on-primary-container": "#00210d",
+                      "secondary": "#71717A",
+                      "background": "#F4F4F5",
+                      "primary-fixed": "#5eff9c",
+                      "on-tertiary-container": "#794f01",
+                      "on-error-container": "#93000a",
+                      "surface-container-highest": "#D4D4D8",
+                      "surface-container-high": "#E2E2E4",
+                      "surface": "#F4F4F5",
+                      "primary": "#13ec83",
+                      "on-surface-variant": "#71717A",
+                      "tertiary-fixed-dim": "#f6bc6a",
+                      "surface-bright": "#FFFFFF",
+                      "on-secondary-fixed": "#00210d",
+                      "inverse-on-surface": "#F4F4F5",
+                      "on-secondary": "#FFFFFF",
+                      "surface-container": "#EAEAEB",
+                      "secondary-fixed": "#a4f4b8",
+                      "on-primary-fixed-variant": "#005229",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#633f00",
+                      "tertiary-container": "#ffc471",
+                      "surface-tint": "#13ec83",
+                      "primary-container": "#13ec83",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#E2E2E4",
+                      "brand-sage": "#6B8E7D"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": ["Inter"],
+                      "body": ["IBM Plex Sans"],
+                      "label": ["IBM Plex Sans"],
+                      "mono": ["IBM Plex Mono"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'IBM Plex Sans', sans-serif; }
+        .mono-font { font-family: 'IBM Plex Mono', monospace; }
+        .sparkline-bar { width: 4px; border-radius: 1px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen">
+<!-- SideNavBar (from Shared Components JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-50 bg-slate-100 dark:bg-slate-950 h-screen w-64 border-r border-outline/30">
+<!-- Sidebar Header -->
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-slate-200 dark:bg-slate-800 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-slate-600">corporate_fare</span>
+</div>
+<div>
+<h2 class="font-['IBM_Plex_Mono'] font-bold text-slate-900 dark:text-white uppercase text-sm tracking-tight">Industrial Slate</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Global Admin</p>
+</div>
+</div>
+<button class="w-full bg-slate-900 text-white text-xs font-bold py-3 px-4 rounded-sm tracking-widest uppercase hover:bg-slate-800 transition-colors">
+                System Backup
+            </button>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-4 mt-4 space-y-1">
+<p class="px-4 mb-2 text-[10px] font-bold text-slate-400 tracking-widest uppercase">Management</p>
+<!-- Active Tab: Tenants -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border-r-2 border-emerald-500 font-['Inter'] text-[15px] uppercase tracking-wider font-semibold transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="corporate_fare">corporate_fare</span>
+<span>Tenants</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900 font-['Inter'] text-[15px] uppercase tracking-wider font-semibold transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+<span>System Health</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900 font-['Inter'] text-[15px] uppercase tracking-wider font-semibold transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings_applications">settings_applications</span>
+<span>Global Settings</span>
+</a>
+</nav>
+<!-- Sidebar Footer -->
+<div class="p-4 border-t border-outline/20">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors font-['Inter'] text-[15px] uppercase tracking-wider font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span>Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors font-['Inter'] text-[15px] uppercase tracking-wider font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<div class="flex-1 ml-64 flex flex-col">
+<!-- TopAppBar (from Shared Components JSON) -->
+<header class="docked full-width top-0 z-40 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex justify-between items-center w-full px-6 h-16 sticky top-0">
+<div class="flex items-center gap-6 flex-1">
+<h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">AdminPanel</h1>
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="w-full bg-slate-100 border-none rounded-sm py-1.5 pl-10 pr-4 text-sm focus:ring-1 focus:ring-emerald-500" placeholder="Search tenants..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden ml-2">
+<img alt="Global Administrator Profile" class="w-full h-full object-cover" data-alt="Close-up professional portrait of a tech administrator in a clean office environment with neutral lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm7yufKiH9XQ4xo8rSHk8e_jZC_ZeSkC4jMQ_uvt1QdGLaX2h6STQ5I9Pun10nk0s_iHUK_yOTLd7xWFckF-6DetEu918IPjOOEoSI1SaRCNCZGwXRzCwgayffIS39idcWKTCI6GxjoS5ajDVbVertXRs8pVM60V5Ze3inGTFOn6sWuy7fdvJYNaknKlGpsdYhUNhRcr6I6oMuTiKHAaZBRp7KLoczyxZ9lwN1NLR0-ZLy4DuZWj19jFeLL9z3j5-5boAue9_yDWc"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="p-8 max-w-7xl mx-auto w-full">
+<!-- Page Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-[24px] font-semibold text-on-surface mb-1">Platform Tenant Management</h2>
+<p class="text-secondary text-sm">Onboard and manage isolated organizational environments.</p>
+</div>
+<button class="bg-brand-sage text-white flex items-center gap-2 px-5 py-2.5 rounded-[4px] font-semibold text-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-lg">add</span>
+                    Onboard New Tenant
+                </button>
+</div>
+<!-- Dashboard Stats Brief (Asymmetric UI Detail) -->
+<div class="grid grid-cols-12 gap-6 mb-10">
+<div class="col-span-8 bg-surface-bright border border-outline/40 p-6 rounded-[4px] flex items-center justify-between">
+<div class="space-y-1">
+<span class="text-[10px] uppercase tracking-widest text-secondary font-bold">Total Clusters</span>
+<div class="text-3xl font-mono text-on-surface">32</div>
+</div>
+<div class="h-12 w-[1px] bg-outline/20"></div>
+<div class="space-y-1">
+<span class="text-[10px] uppercase tracking-widest text-secondary font-bold">Health Index</span>
+<div class="text-3xl font-mono text-emerald-600">99.4%</div>
+</div>
+<div class="h-12 w-[1px] bg-outline/20"></div>
+<div class="space-y-1">
+<span class="text-[10px] uppercase tracking-widest text-secondary font-bold">Uptime</span>
+<div class="text-3xl font-mono text-on-surface">1,402h</div>
+</div>
+</div>
+<div class="col-span-4 bg-slate-900 p-6 rounded-[4px] text-white flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">System Status</span>
+<span class="material-symbols-outlined text-emerald-400 text-sm">check_circle</span>
+</div>
+<p class="text-sm font-mono text-slate-300">All regional nodes functioning within normal parameters.</p>
+</div>
+</div>
+<!-- Tenant Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Tenant Card: Active 1 -->
+<div class="bg-surface-bright border border-outline p-5 rounded-[4px] flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-on-surface">Stark Industries</h3>
+<span class="mono-font text-[12px] text-secondary">GOC-042</span>
+</div>
+<span class="px-2 py-0.5 rounded-[2px] bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-wider border border-emerald-200 uppercase">Active</span>
+</div>
+<div class="flex items-end gap-1 h-8">
+<div class="sparkline-bar bg-emerald-400 h-1/2"></div>
+<div class="sparkline-bar bg-emerald-400 h-3/4"></div>
+<div class="sparkline-bar bg-emerald-400 h-1/3"></div>
+<div class="sparkline-bar bg-emerald-400 h-5/6"></div>
+<div class="sparkline-bar bg-emerald-400 h-2/3"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-3/4"></div>
+<div class="sparkline-bar bg-emerald-400 h-5/6"></div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-4 border-t border-outline/10">
+<span class="text-[11px] text-secondary font-medium uppercase">Last Sync: 2m ago</span>
+<button class="text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Tenant Card: Provisioning -->
+<div class="bg-surface-bright border border-outline p-5 rounded-[4px] flex flex-col gap-4 relative overflow-hidden">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-on-surface">Wayne Enterprises</h3>
+<span class="mono-font text-[12px] text-secondary">GOC-059</span>
+</div>
+<span class="px-2 py-0.5 rounded-[2px] bg-amber-50 text-amber-700 text-[10px] font-bold tracking-wider border border-amber-200 uppercase flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>
+                            Provisioning
+                        </span>
+</div>
+<div class="flex-1 flex items-center justify-center py-2">
+<div class="flex flex-col items-center gap-2">
+<div class="w-full max-w-[120px] h-1 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-amber-400 w-2/3 animate-pulse"></div>
+</div>
+<span class="text-[10px] mono-font text-secondary">Creating DB Schema...</span>
+</div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-4 border-t border-outline/10">
+<span class="text-[11px] text-secondary font-medium uppercase">Est: 45s remaining</span>
+<button class="text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-lg">cancel</span>
+</button>
+</div>
+</div>
+<!-- Tenant Card: Active 2 -->
+<div class="bg-surface-bright border border-outline p-5 rounded-[4px] flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-on-surface">LexCorp Global</h3>
+<span class="mono-font text-[12px] text-secondary">GOC-021</span>
+</div>
+<span class="px-2 py-0.5 rounded-[2px] bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-wider border border-emerald-200 uppercase">Active</span>
+</div>
+<div class="flex items-end gap-1 h-8">
+<div class="sparkline-bar bg-slate-200 h-1/4"></div>
+<div class="sparkline-bar bg-emerald-400 h-2/4"></div>
+<div class="sparkline-bar bg-emerald-400 h-3/4"></div>
+<div class="sparkline-bar bg-slate-200 h-1/4"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-5/6"></div>
+<div class="sparkline-bar bg-emerald-400 h-3/4"></div>
+<div class="sparkline-bar bg-slate-200 h-1/4"></div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-4 border-t border-outline/10">
+<span class="text-[11px] text-secondary font-medium uppercase">Last Sync: 14m ago</span>
+<button class="text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Tenant Card: Offline -->
+<div class="bg-surface-bright border border-outline p-5 rounded-[4px] flex flex-col gap-4 opacity-70">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-on-surface">Cyberdyne Systems</h3>
+<span class="mono-font text-[12px] text-secondary">GOC-012</span>
+</div>
+<span class="px-2 py-0.5 rounded-[2px] bg-slate-100 text-slate-600 text-[10px] font-bold tracking-wider border border-slate-300 uppercase">Offline</span>
+</div>
+<div class="flex items-end gap-1 h-8">
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+<div class="sparkline-bar bg-slate-200 h-1/6"></div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-4 border-t border-outline/10">
+<span class="text-[11px] text-secondary font-medium uppercase">Maintenance Schedule: 22:00</span>
+<button class="text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-lg">settings_backup_restore</span>
+</button>
+</div>
+</div>
+<!-- Tenant Card: Active 3 -->
+<div class="bg-surface-bright border border-outline p-5 rounded-[4px] flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-on-surface">Oscorp Bio</h3>
+<span class="mono-font text-[12px] text-secondary">GOC-088</span>
+</div>
+<span class="px-2 py-0.5 rounded-[2px] bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-wider border border-emerald-200 uppercase">Active</span>
+</div>
+<div class="flex items-end gap-1 h-8">
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+<div class="sparkline-bar bg-emerald-400 h-5/6"></div>
+<div class="sparkline-bar bg-emerald-400 h-4/6"></div>
+<div class="sparkline-bar bg-emerald-400 h-full"></div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-4 border-t border-outline/10">
+<span class="text-[11px] text-secondary font-medium uppercase">Last Sync: Just now</span>
+<button class="text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Tenant Card: New Onboarding Entry -->
+<div class="bg-dashed border-2 border-dashed border-outline/40 p-5 rounded-[4px] flex flex-col items-center justify-center gap-3 text-secondary hover:border-brand-sage/60 hover:text-brand-sage transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl">domain_add</span>
+<span class="text-xs font-bold uppercase tracking-widest">Add Custom Tenant</span>
+</div>
+</div>
+</main>
+</div>
+<!-- Success Toast (Visualized) -->
+<div class="fixed bottom-6 right-6 z-[100] animate-in fade-in slide-in-from-bottom-4">
+<div class="bg-on-surface text-white px-5 py-4 rounded-[4px] border-l-4 border-emerald-400 flex items-center gap-4 shadow-xl">
+<span class="material-symbols-outlined text-emerald-400">check_circle</span>
+<div class="flex flex-col">
+<span class="text-sm font-semibold tracking-tight">SUCCESS</span>
+<span class="text-[12px] text-slate-300">Tenant configured successfully.</span>
+</div>
+<button class="ml-4 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</body></html>

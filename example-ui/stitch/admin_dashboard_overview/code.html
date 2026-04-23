@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aasila Admin Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#F4F4F5",
+                    "primary-fixed": "#5eff9c",
+                    "surface-bright": "#FFFFFF",
+                    "outline": "#D4D4D8",
+                    "surface-variant": "#EAEAEB",
+                    "surface-container-high": "#E2E2E4",
+                    "primary": "#13ec83",
+                    "on-primary-fixed-variant": "#005229",
+                    "surface-tint": "#13ec83",
+                    "on-tertiary-fixed-variant": "#633f00",
+                    "primary-fixed-dim": "#00e37d",
+                    "on-secondary-container": "#27272A",
+                    "on-background": "#27272A",
+                    "tertiary-container": "#ffc471",
+                    "inverse-on-surface": "#F4F4F5",
+                    "secondary": "#71717A",
+                    "on-surface-variant": "#71717A",
+                    "on-secondary-fixed": "#00210d",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffddb3",
+                    "surface": "#F4F4F5",
+                    "on-secondary": "#FFFFFF",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-container": "#794f01",
+                    "on-primary-fixed": "#00210d",
+                    "on-primary-container": "#00210d",
+                    "primary-container": "#13ec83",
+                    "background": "#F4F4F5",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#102219",
+                    "secondary-container": "#E2E2E4",
+                    "tertiary-fixed-dim": "#f6bc6a",
+                    "surface-container-lowest": "#FFFFFF",
+                    "on-tertiary-fixed": "#291800",
+                    "outline-variant": "#EAEAEB",
+                    "on-surface": "#27272A",
+                    "tertiary": "#815609",
+                    "surface-container-highest": "#D4D4D8",
+                    "on-primary": "#102219",
+                    "secondary-fixed-dim": "#89d89e",
+                    "on-secondary-fixed-variant": "#005229",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed": "#a4f4b8",
+                    "surface-dim": "#EAEAEB",
+                    "inverse-primary": "#00e37d",
+                    "surface-container": "#EAEAEB"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"],
+                    "mono": ["IBM Plex Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .thin-scrollbar::-webkit-scrollbar { width: 4px; }
+        .thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .thin-scrollbar::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 2px; }
+        .document-canvas {
+            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 border-r border-slate-200 flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-1">
+<img alt="Aasila Admin Avatar" class="w-8 h-8 rounded-full border border-outline" data-alt="Close-up portrait of a professional administrator with a neutral expression, soft lighting, minimalist office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGqo_0MDkqu0cndXeX3asrsVDyVELTe8-xkXW6E_kEDxpNNMDd-DnuVeV4rlvUW_-obwUGG5sleOCYpo__QF0wADpvxErLD2AIIuksjCfCoTyelRNuaIdhEDvBPAo6ByR8hD6dtbyofZnhz6eWhw35GkDT4E8AGVqNaUxnP02djXQxbsl69Mk2OPxVYPC4qMhiDbr-eeICJzJINUScavDsHE1JjqH8OTt3EfFDjSteudq7xEb3IG2iKIhstQ9cewr0D3mTroZS0y4"/>
+<div class="flex flex-col">
+<span class="font-mono font-bold text-lg text-slate-900">Aasila Tenant</span>
+<span class="text-[10px] uppercase tracking-widest text-slate-500 font-mono">Admin Console</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<!-- Dashboard (Active) -->
+<a class="flex items-center gap-3 px-3 py-2 text-emerald-700 font-semibold border-r-2 border-emerald-500 bg-slate-200/50 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[15px] tracking-tight">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-[15px] tracking-tight">Tenants</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[15px] tracking-tight">Documents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span class="text-[15px] tracking-tight">User Roles</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="text-[15px] tracking-tight">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[15px] tracking-tight">Settings</span>
+</a>
+</nav>
+<div class="px-3 mt-auto space-y-4">
+<button class="w-full py-2.5 bg-on-primary text-primary-container text-xs font-mono font-bold uppercase tracking-wider rounded-sm hover:opacity-90 transition-opacity">
+                New System Report
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="text-[15px] tracking-tight">Help Center</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 w-full">
+<div class="flex items-center gap-6">
+<span class="font-black text-emerald-600 font-mono text-lg tracking-tighter">AASILA</span>
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+</span>
+<input class="bg-surface-container-high border-none rounded-sm pl-10 pr-4 py-1.5 text-xs font-mono w-64 focus:ring-1 focus:ring-emerald-500 outline-none placeholder:text-slate-400" placeholder="GLOBAL_SEARCH_DB..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<button class="text-slate-400 hover:text-emerald-500 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-emerald-500 transition-all">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+<div class="h-8 w-px bg-slate-200 mx-2"></div>
+<img alt="Administrator Profile" class="w-8 h-8 rounded-sm bg-slate-100 border border-outline" data-alt="Headshot of a modern professional with glasses in a minimalist bright setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzd5opnzC6dCzu8QcRW4nOsP4LOW6pTqV5JCkKvOKVDJqJp603hU-s2rR3gqc59dEb7XbZOgmKFSmJgabWoJHWMVzfe6w3bktWtWslDYfUuqFT1AvIGgBuyEUZ6lbsU3zfEjycZUR_iYEPN-As7flyU0WTy-wVzhTtLQ8QdMX0si1lejLsmAYehiWdbV4pW2F9PGxiVJlP6M6cbu1rNI6KniNYxH9g6zrYN9KYuPRZFL_ru9H55UJDch1Hb3wsbOqzpeWwQYkfwkI"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Page Header -->
+<div class="flex justify-between items-end border-b border-outline pb-6">
+<div>
+<div class="text-[10px] font-mono text-secondary uppercase tracking-[0.2em] mb-1">System Overview / Main</div>
+<h1 class="text-2xl font-bold tracking-tight text-on-surface">Admin Dashboard</h1>
+</div>
+<div class="flex items-center gap-2 text-xs font-mono text-secondary">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    SYSTEM_LIVE: 99.98% UPTIME
+                </div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Metric Card: Total Queries -->
+<div class="col-span-12 lg:col-span-4 bg-surface-bright p-6 border border-outline/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="text-[11px] font-mono uppercase tracking-widest text-secondary">Total Queries</span>
+<span class="material-symbols-outlined text-emerald-600 text-sm" data-icon="trending_up">trending_up</span>
+</div>
+<div class="text-3xl font-mono font-bold">128,492</div>
+<div class="text-[10px] text-emerald-600 mt-1">+12.4% FROM LAST SESSION</div>
+</div>
+<div class="mt-8 h-12 w-full flex items-end gap-[2px]">
+<div class="bg-emerald-500/20 w-full h-[40%]"></div>
+<div class="bg-emerald-500/20 w-full h-[60%]"></div>
+<div class="bg-emerald-500/20 w-full h-[45%]"></div>
+<div class="bg-emerald-500/20 w-full h-[70%]"></div>
+<div class="bg-emerald-500/20 w-full h-[55%]"></div>
+<div class="bg-emerald-500/20 w-full h-[85%]"></div>
+<div class="bg-emerald-500/40 w-full h-[100%]"></div>
+</div>
+</div>
+<!-- Metric Card: Active Users -->
+<div class="col-span-12 lg:col-span-4 bg-surface-bright p-6 border border-outline/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="text-[11px] font-mono uppercase tracking-widest text-secondary">Active Users</span>
+<span class="material-symbols-outlined text-emerald-600 text-sm" data-icon="group">group</span>
+</div>
+<div class="text-3xl font-mono font-bold">4,821</div>
+<div class="text-[10px] text-slate-400 mt-1">CURRENTLY AUTHENTICATED</div>
+</div>
+<div class="mt-8 h-12 w-full flex items-end gap-[2px]">
+<div class="bg-slate-200 w-full h-[30%]"></div>
+<div class="bg-slate-200 w-full h-[35%]"></div>
+<div class="bg-slate-200 w-full h-[32%]"></div>
+<div class="bg-slate-200 w-full h-[40%]"></div>
+<div class="bg-slate-200 w-full h-[38%]"></div>
+<div class="bg-slate-200 w-full h-[45%]"></div>
+<div class="bg-primary w-full h-[42%]"></div>
+</div>
+</div>
+<!-- System Status Widget -->
+<div class="col-span-12 lg:col-span-4 bg-on-primary text-primary-container p-6 border border-on-primary flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<div class="text-[11px] font-mono uppercase tracking-widest opacity-70">System Status</div>
+<div class="text-xl font-bold mt-2">All Nodes Operational</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="dns">dns</span>
+</div>
+<div class="space-y-3 mt-6">
+<div class="flex justify-between text-[10px] font-mono border-b border-primary/20 pb-1">
+<span>LATENCY</span>
+<span>24ms</span>
+</div>
+<div class="flex justify-between text-[10px] font-mono border-b border-primary/20 pb-1">
+<span>STORAGE</span>
+<span>64% CAPACITY</span>
+</div>
+<div class="flex justify-between text-[10px] font-mono border-b border-primary/20 pb-1">
+<span>API_LOAD</span>
+<span>STABLE</span>
+</div>
+</div>
+</div>
+<!-- Recent Activity List (Asymmetric Width) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-bright border border-outline/30 flex flex-col">
+<div class="p-6 border-b border-outline/20 flex justify-between items-center">
+<h3 class="text-sm font-bold uppercase tracking-widest font-mono">Recent Activity Log</h3>
+<button class="text-[10px] font-mono text-emerald-600 hover:underline">EXPORT_CSV</button>
+</div>
+<div class="divide-y divide-outline/10 overflow-hidden">
+<!-- Activity Item -->
+<div class="p-4 flex items-center gap-4 hover:bg-surface transition-colors">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<div class="flex-1 text-[13px]">
+<span class="font-bold text-on-surface">Admin_Sarah</span>
+<span class="text-secondary">uploaded document</span>
+<span class="font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm">Q3_financial_report.pdf</span>
+</div>
+<div class="text-[10px] font-mono text-slate-400">02:14 PM</div>
+</div>
+<!-- Activity Item -->
+<div class="p-4 flex items-center gap-4 hover:bg-surface transition-colors">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+<div class="flex-1 text-[13px]">
+<span class="font-bold text-on-surface">Sys_Automate</span>
+<span class="text-secondary">updated user role for</span>
+<span class="font-bold text-on-surface">j.doe@aasila.com</span>
+</div>
+<div class="text-[10px] font-mono text-slate-400">01:55 PM</div>
+</div>
+<!-- Activity Item -->
+<div class="p-4 flex items-center gap-4 hover:bg-surface transition-colors">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+<div class="flex-1 text-[13px]">
+<span class="font-bold text-on-surface">Security_Daemon</span>
+<span class="text-secondary">flagged suspicious login from</span>
+<span class="font-mono text-error border border-error/20 px-1.5 py-0.5 rounded-sm">192.168.1.45</span>
+</div>
+<div class="text-[10px] font-mono text-slate-400">12:30 PM</div>
+</div>
+<!-- Activity Item -->
+<div class="p-4 flex items-center gap-4 hover:bg-surface transition-colors">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<div class="flex-1 text-[13px]">
+<span class="font-bold text-on-surface">Dev_Mark</span>
+<span class="text-secondary">pushed update to</span>
+<span class="font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm">auth_v2_stable</span>
+</div>
+<div class="text-[10px] font-mono text-slate-400">11:12 AM</div>
+</div>
+</div>
+</div>
+<!-- Secondary Document View / Quick Action -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-high p-6 border border-outline/30 relative overflow-hidden group">
+<div class="relative z-10">
+<div class="text-[10px] font-mono text-secondary uppercase tracking-widest mb-2">Internal Note</div>
+<p class="text-sm text-on-surface italic leading-relaxed">
+                                "The Q4 infrastructure migration is scheduled for Sunday 02:00 UTC. Ensure all tenant leads are notified by Friday EOD."
+                            </p>
+<div class="mt-6 flex items-center gap-2">
+<img alt="Reviewer" class="w-6 h-6 rounded-full grayscale opacity-50" data-alt="Portrait of a serious senior manager in a white architectural studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcAzIi_PNXCPoeYA2E5Y1KFggnxseRKeOi8fj4M7QjG0O38zLZZXCASkN1MTd_fMwddKhJzeRJPvwQ5kziHjeakeFJCbYs2TN2fCIeC-nc-tyy0Qy1GnGD-VIdjU-paigulhwh0oH6eceF0ddH_aRqDwZg1E0AeaM0aieYyTEsabXvGjs6DLVs3SOHh2q2aeNL2f7cR3QxeMN9I-kasSjiYSqbw8F4KfY546d2VDCjiqUwoYujk5i5Sou2Ckdxykl6Zs2_iV-o39Y"/>
+<span class="text-[10px] font-mono text-slate-500">— Chief Operating Officer</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-9xl" data-icon="format_quote">format_quote</span>
+</div>
+</div>
+<div class="bg-surface-bright border border-outline/30 p-6">
+<h4 class="text-[11px] font-mono uppercase tracking-widest mb-4">Quick Diagnostic</h4>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center p-4 border border-outline hover:border-emerald-500 hover:text-emerald-600 transition-all group">
+<span class="material-symbols-outlined mb-2 opacity-50 group-hover:opacity-100" data-icon="refresh">refresh</span>
+<span class="text-[10px] font-mono">REBOOT_NODE</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline hover:border-emerald-500 hover:text-emerald-600 transition-all group">
+<span class="material-symbols-outlined mb-2 opacity-50 group-hover:opacity-100" data-icon="cleaning_services">cleaning_services</span>
+<span class="text-[10px] font-mono">PURGE_CACHE</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline hover:border-emerald-500 hover:text-emerald-600 transition-all group">
+<span class="material-symbols-outlined mb-2 opacity-50 group-hover:opacity-100" data-icon="cloud_sync">cloud_sync</span>
+<span class="text-[10px] font-mono">SYNC_TENANTS</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline hover:border-emerald-500 hover:text-emerald-600 transition-all group">
+<span class="material-symbols-outlined mb-2 opacity-50 group-hover:opacity-100" data-icon="security">security</span>
+<span class="text-[10px] font-mono">SCAN_VULN</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<div class="pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono text-slate-400 gap-4">
+<div class="flex gap-6">
+<span>BUILD_VERSION: 1.0.4-STABLE</span>
+<span>KERNEL: CLOUD_OS_4.2</span>
+</div>
+<div>© 2024 AASILA DATA SYSTEMS. SECURED PROTOCOL.</div>
+</div>
+</div>
+</main>
+</body></html>

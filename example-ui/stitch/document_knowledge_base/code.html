@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aasila - Document Knowledge Base</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#F4F4F5",
+                        "primary-fixed": "#5eff9c",
+                        "surface-bright": "#FFFFFF",
+                        "outline": "#D4D4D8",
+                        "surface-variant": "#EAEAEB",
+                        "surface-container-high": "#E2E2E4",
+                        "primary": "#13ec83",
+                        "on-primary-fixed-variant": "#005229",
+                        "surface-tint": "#13ec83",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "primary-fixed-dim": "#00e37d",
+                        "on-secondary-container": "#27272A",
+                        "on-background": "#27272A",
+                        "tertiary-container": "#ffc471",
+                        "inverse-on-surface": "#F4F4F5",
+                        "secondary": "#71717A",
+                        "on-surface-variant": "#71717A",
+                        "on-secondary-fixed": "#00210d",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffddb3",
+                        "surface": "#F4F4F5",
+                        "on-secondary": "#FFFFFF",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#794f01",
+                        "on-primary-fixed": "#00210d",
+                        "on-primary-container": "#00210d",
+                        "primary-container": "#13ec83",
+                        "background": "#F4F4F5",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#102219",
+                        "secondary-container": "#E2E2E4",
+                        "tertiary-fixed-dim": "#f6bc6a",
+                        "surface-container-lowest": "#FFFFFF",
+                        "on-tertiary-fixed": "#291800",
+                        "outline-variant": "#EAEAEB",
+                        "on-surface": "#27272A",
+                        "tertiary": "#815609",
+                        "surface-container-highest": "#D4D4D8",
+                        "on-primary": "#102219",
+                        "secondary-fixed-dim": "#89d89e",
+                        "on-secondary-fixed-variant": "#005229",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#a4f4b8",
+                        "surface-dim": "#EAEAEB",
+                        "inverse-primary": "#00e37d",
+                        "surface-container": "#EAEAEB"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        .ghost-border { outline: 1px solid #D4D4D880; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 flex flex-col py-6 z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[20px]" data-icon="domain">domain</span>
+</div>
+<div>
+<h1 class="font-['IBM_Plex_Mono'] font-bold text-lg text-slate-900 dark:text-slate-50 leading-none">Aasila Tenant</h1>
+<p class="font-['Inter'] text-[11px] tracking-widest uppercase text-slate-500 mt-1">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-150 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<!-- Tenants -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-150 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+                Tenants
+            </a>
+<!-- Documents (Active) -->
+<a class="flex items-center gap-3 px-3 py-2 text-emerald-700 dark:text-emerald-400 font-semibold border-r-2 border-emerald-500 bg-slate-200/50 dark:bg-slate-800/50 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                Documents
+            </a>
+<!-- User Roles -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-150 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+                User Roles
+            </a>
+<!-- Audit Logs -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-150 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                Audit Logs
+            </a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-150 font-['Inter'] text-[15px] tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="px-3 mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
+<button class="w-full mb-6 py-2 px-4 bg-emerald-600 text-white rounded-sm text-sm font-medium hover:bg-emerald-700 transition-colors">
+                New System Report
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:text-slate-900 transition-colors font-['Inter'] text-[15px]" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+                Help Center
+            </a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 w-full">
+<div class="flex items-center gap-6 flex-1">
+<span class="font-black text-emerald-600 dark:text-emerald-400 font-['IBM_Plex_Mono'] text-sm uppercase tracking-widest">Aasila</span>
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-sm pl-10 pr-4 py-1.5 text-sm focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-400" placeholder="Search knowledge base..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:text-emerald-500 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-emerald-500 transition-all">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<img alt="Administrator Profile" class="w-8 h-8 rounded-full border border-slate-200" data-alt="close up headshot of a professional systems administrator with short hair and modern glasses in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvPvSttR2X-TcqvwwwERHqYbOJs0-hmR9m-_159rcECIadFCSvKgL1ibAgcSze8U2E10oTcWt0cBUApplDRV7sQZL0pPq7WFPGXs037KoxyDo8nEZJx0h-6cB_Fw2SbVgwnLh02EhkJumIG_1fY2noHqRJ0Mj6JVxlfYVYnd3_AXZzqBmy2367-MkNE7Y51rS6itpxK24J9vTEd2bz1Px0Aix-DPBgOLw5B65aOPiNCtpQYp3Yv3a3swQWFDi9VrwTIWS1zi_NuOI"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 pt-24 pb-12 px-12 min-h-screen">
+<!-- Header Section -->
+<div class="flex items-end justify-between mb-10">
+<div>
+<h2 class="text-2xl font-bold text-on-surface tracking-tight mb-1">Document Knowledge Base</h2>
+<p class="text-secondary text-sm font-['IBM_Plex_Mono'] uppercase tracking-wider">System Index / Records / v2.4.0</p>
+</div>
+<button class="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-sm hover:shadow-lg transition-all font-semibold text-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                + Upload Document
+            </button>
+</div>
+<!-- Dashboard Stats Bento Grid -->
+<div class="grid grid-cols-4 gap-6 mb-12">
+<div class="bg-surface-container border border-outline/30 p-6 rounded-sm">
+<p class="text-[11px] font-bold text-secondary uppercase tracking-widest mb-3">Total Documents</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">1,284</span>
+<span class="text-xs text-emerald-600 font-mono">+12.5%</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline/30 p-6 rounded-sm">
+<p class="text-[11px] font-bold text-secondary uppercase tracking-widest mb-3">Storage Used</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">42.8 GB</span>
+<span class="text-xs text-secondary font-mono">of 100 GB</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline/30 p-6 rounded-sm">
+<p class="text-[11px] font-bold text-secondary uppercase tracking-widest mb-3">Active Indices</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">24</span>
+<span class="text-xs text-emerald-600 font-mono">Status: Healthy</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline/30 p-6 rounded-sm">
+<p class="text-[11px] font-bold text-secondary uppercase tracking-widest mb-3">Failed Ingestions</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">3</span>
+<span class="text-xs text-error font-mono">Action Required</span>
+</div>
+</div>
+</div>
+<!-- Document Table Section -->
+<div class="bg-surface-bright ghost-border rounded-sm overflow-hidden">
+<div class="px-6 py-4 bg-surface-container-high border-b border-outline/20 flex items-center justify-between">
+<div class="flex gap-4">
+<button class="text-xs font-bold uppercase tracking-widest text-emerald-600 border-b-2 border-emerald-600 pb-1">All Files</button>
+<button class="text-xs font-bold uppercase tracking-widest text-secondary hover:text-on-surface transition-colors pb-1">Archived</button>
+<button class="text-xs font-bold uppercase tracking-widest text-secondary hover:text-on-surface transition-colors pb-1">Trash</button>
+</div>
+<button class="p-1 hover:bg-surface-variant transition-colors rounded">
+<span class="material-symbols-outlined text-secondary" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container/50 text-[11px] font-bold text-secondary uppercase tracking-widest border-b border-outline/20">
+<th class="px-6 py-4">
+<div class="flex items-center gap-2">
+                                Name
+                                <span class="material-symbols-outlined text-[14px]" data-icon="arrow_downward">arrow_downward</span>
+</div>
+</th>
+<th class="px-6 py-4">Type</th>
+<th class="px-6 py-4">Date Uploaded</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 w-16"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-600" data-icon="article">article</span>
+<div>
+<p class="text-sm font-semibold text-on-surface">system_architecture_2024.pdf</p>
+<p class="text-[11px] text-secondary font-mono">UID: ASL-00129-Z</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-secondary">PDF/Technical</td>
+<td class="px-6 py-4 text-xs text-on-surface">Oct 24, 2023 · 14:22</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Ready</span>
+</td>
+<td class="px-6 py-4">
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+<div>
+<p class="text-sm font-semibold text-on-surface">onboarding_protocols.docx</p>
+<p class="text-[11px] text-secondary font-mono">UID: ASL-00130-B</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-secondary">DOCX/Legal</td>
+<td class="px-6 py-4 text-xs text-on-surface">Oct 25, 2023 · 09:15</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-tertiary-container/30 text-tertiary border border-tertiary-container">Processing</span>
+</td>
+<td class="px-6 py-4">
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="table_chart">table_chart</span>
+<div>
+<p class="text-sm font-semibold text-on-surface">tenant_migration_data.csv</p>
+<p class="text-[11px] text-secondary font-mono">UID: ASL-00131-M</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-secondary">CSV/Raw</td>
+<td class="px-6 py-4 text-xs text-on-surface">Oct 25, 2023 · 10:42</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-error-container text-error">Failed</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-600" data-icon="article">article</span>
+<div>
+<p class="text-sm font-semibold text-on-surface">quarterly_growth_v3.pdf</p>
+<p class="text-[11px] text-secondary font-mono">UID: ASL-00132-F</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-secondary">PDF/Report</td>
+<td class="px-6 py-4 text-xs text-on-surface">Oct 26, 2023 · 16:50</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Ready</span>
+</td>
+<td class="px-6 py-4">
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+<div>
+<p class="text-sm font-semibold text-on-surface">api_documentation_core.docx</p>
+<p class="text-[11px] text-secondary font-mono">UID: ASL-00133-A</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-secondary">DOCX/Dev</td>
+<td class="px-6 py-4 text-xs text-on-surface">Oct 27, 2023 · 11:10</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Ready</span>
+</td>
+<td class="px-6 py-4">
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-surface-container-low border-t border-outline/10 flex items-center justify-between">
+<p class="text-xs text-secondary font-mono">Showing 1-5 of 1,284 entries</p>
+<div class="flex gap-2">
+<button class="p-1 border border-outline/30 rounded-sm hover:bg-surface-variant transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-3 py-1 text-xs font-bold bg-emerald-600 text-white rounded-sm">1</button>
+<button class="px-3 py-1 text-xs font-bold text-secondary hover:bg-surface-variant rounded-sm transition-colors">2</button>
+<button class="px-3 py-1 text-xs font-bold text-secondary hover:bg-surface-variant rounded-sm transition-colors">3</button>
+<button class="p-1 border border-outline/30 rounded-sm hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- System Alerts / Activity Feed -->
+<div class="mt-12 grid grid-cols-3 gap-8">
+<div class="col-span-2 space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-secondary mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    Recent System Activity
+                </h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-surface-container/50 border-l-2 border-emerald-500 rounded-sm">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-600 text-sm" data-icon="cloud_done">cloud_done</span>
+<span class="text-xs text-on-surface">Auto-backup successful: <span class="font-mono">DB_SNAPSHOT_882</span></span>
+</div>
+<span class="text-[10px] text-secondary font-mono">12m ago</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container/50 border-l-2 border-outline/30 rounded-sm">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="person">person</span>
+<span class="text-xs text-on-surface">Administrator added 3 new user roles to <span class="font-bold">Tenant Group B</span></span>
+</div>
+<span class="text-[10px] text-secondary font-mono">45m ago</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container/50 border-l-2 border-error rounded-sm">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-error text-sm" data-icon="report_problem">report_problem</span>
+<span class="text-xs text-on-surface">Integrity check failed for <span class="font-mono">uid: ASL-00131-M</span></span>
+</div>
+<span class="text-[10px] text-secondary font-mono">2h ago</span>
+</div>
+</div>
+</div>
+<div class="bg-emerald-600 p-6 rounded-sm text-white relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-2">Pro Feature</p>
+<h4 class="text-xl font-bold mb-4 leading-tight">AI Semantic Indexing</h4>
+<p class="text-sm opacity-90 mb-6 leading-relaxed">Unlock deep search capabilities across all document formats using our proprietary LLM cluster.</p>
+<button class="w-full py-2 border border-white/50 bg-white/10 hover:bg-white/20 transition-all rounded-sm font-bold text-xs uppercase tracking-widest">
+                        Initialize Engine
+                    </button>
+</div>
+<!-- Abstract Technical Texture -->
+<div class="absolute -right-12 -bottom-12 opacity-10">
+<span class="material-symbols-outlined text-[160px]" data-icon="psychology" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Background Layering Pattern -->
+<div class="fixed inset-0 pointer-events-none -z-10 bg-slate-50 opacity-50"></div>
+</body></html>

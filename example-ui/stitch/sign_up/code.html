@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aasila | Secure System Enrollment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#102219",
+                    "outline-variant": "#EAEAEB",
+                    "surface-container": "#EAEAEB",
+                    "on-surface": "#27272A",
+                    "surface-container-low": "#F4F4F5",
+                    "surface-tint": "#13ec83",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#00210d",
+                    "on-secondary-fixed-variant": "#005229",
+                    "outline": "#D4D4D8",
+                    "on-secondary-container": "#27272A",
+                    "surface-container-high": "#E2E2E4",
+                    "on-secondary-fixed": "#00210d",
+                    "secondary-fixed": "#a4f4b8",
+                    "tertiary-fixed": "#ffddb3",
+                    "on-tertiary-fixed": "#291800",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#102219",
+                    "secondary": "#71717A",
+                    "on-background": "#27272A",
+                    "secondary-fixed-dim": "#89d89e",
+                    "tertiary-container": "#ffc471",
+                    "on-primary-container": "#00210d",
+                    "background": "#F4F4F5",
+                    "on-tertiary": "#ffffff",
+                    "primary": "#13ec83",
+                    "primary-container": "#13ec83",
+                    "inverse-primary": "#00e37d",
+                    "tertiary-fixed-dim": "#f6bc6a",
+                    "surface-container-lowest": "#FFFFFF",
+                    "surface": "#F4F4F5",
+                    "tertiary": "#815609",
+                    "primary-fixed": "#5eff9c",
+                    "on-tertiary-container": "#794f01",
+                    "surface-variant": "#EAEAEB",
+                    "on-tertiary-fixed-variant": "#633f00",
+                    "surface-bright": "#FFFFFF",
+                    "on-primary-fixed-variant": "#005229",
+                    "primary-fixed-dim": "#00e37d",
+                    "surface-container-highest": "#D4D4D8",
+                    "inverse-on-surface": "#F4F4F5",
+                    "on-secondary": "#FFFFFF",
+                    "on-surface-variant": "#71717A",
+                    "secondary-container": "#E2E2E4",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#EAEAEB"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["IBM Plex Sans"],
+                    "label": ["IBM Plex Sans"],
+                    "mono": ["IBM Plex Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar suppressed for Transactional View per "The Destination Rule" -->
+<main class="flex-grow flex items-center justify-center p-6 bg-surface-container">
+<!-- AuthLayout Card -->
+<div class="w-full max-w-md bg-surface-bright border border-outline/30 rounded-lg p-8 shadow-none">
+<!-- Branding Anchor -->
+<div class="mb-10 text-center">
+<div class="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-lg mb-4">
+<span class="material-symbols-outlined text-on-primary" data-icon="lock_open">lock_open</span>
+</div>
+<h1 class="text-[20px] font-bold tracking-tighter text-on-surface uppercase mb-1">Aasila</h1>
+<p class="mono text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">Secure Enrollment Protocol</p>
+</div>
+<!-- SignUpForm -->
+<form class="space-y-6">
+<!-- Name Input -->
+<div class="space-y-1.5">
+<label class="mono text-[10px] uppercase font-semibold tracking-wider text-secondary" for="full_name">Legal Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline px-4 py-3 text-[14px] rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" id="full_name" placeholder="Johnathan Doe" type="text"/>
+</div>
+</div>
+<!-- Username Input -->
+<div class="space-y-1.5">
+<label class="mono text-[10px] uppercase font-semibold tracking-wider text-secondary" for="username">System Alias</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline px-4 py-3 text-[14px] rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" id="username" placeholder="j.doe_terminal" type="text"/>
+</div>
+</div>
+<!-- Password Input Group -->
+<div class="space-y-1.5">
+<label class="mono text-[10px] uppercase font-semibold tracking-wider text-secondary" for="password">Access Key</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline px-4 py-3 text-[14px] rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant" id="password" placeholder="••••••••••••" type="password"/>
+</div>
+<!-- PasswordStrengthMeter -->
+<div class="pt-2">
+<div class="flex gap-1 mb-1">
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="mono text-[9px] uppercase text-on-surface-variant tracking-tighter">Strength: High</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+</div>
+<!-- SubmitButton -->
+<button class="w-full bg-primary text-on-primary font-bold py-4 px-6 rounded-lg text-[14px] uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer" type="submit">
+                    Initialize Account
+                </button>
+</form>
+<!-- Navigation Redirect -->
+<div class="mt-8 pt-6 border-t border-outline/20 text-center">
+<p class="text-[13px] text-on-surface-variant">
+                    Existing operative? 
+                    <a class="text-on-surface font-semibold hover:text-primary transition-colors underline decoration-primary/30 underline-offset-4" href="/login">Sign In</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Shared Footer -->
+<footer class="bg-surface-container border-t border-outline/30 w-full py-6">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-4">
+<span class="mono text-[10px] tracking-widest text-secondary uppercase">© 2024 AASILA SECURE SYSTEMS. CLASSIFIED CONTENT.</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="mono text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors uppercase" href="#">Privacy Policy</a>
+<a class="mono text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors uppercase" href="#">Terms of Service</a>
+<a class="mono text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface transition-colors uppercase" href="#">Security Disclosure</a>
+</div>
+</div>
+</footer>
+<!-- Structural Background Elements -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-[0.03]">
+<div class="absolute inset-0" style="background-image: radial-gradient(#27272a 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+</div>
+</body></html>
