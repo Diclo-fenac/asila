@@ -19,7 +19,7 @@ export function ChatWindow() {
   return (
     <div className="flex h-full flex-col">
       {/* Sticky header */}
-      <header className="absolute right-0 top-0 z-10 flex h-[48px] w-full items-center justify-center border-b border-aasila-border/50 bg-aasila-bg-main/90 px-4 backdrop-blur-sm">
+      <header className="absolute right-0 top-0 z-10 flex h-[48px] w-full items-center justify-center border-b border-aasila-border glass-panel px-4">
         <div className="flex w-full items-center justify-between px-4 sm:max-w-[768px] sm:px-0 sm:mx-auto">
           <div className="flex items-center gap-2 text-aasila-text">
             <h2 className="text-sm font-semibold leading-tight">Conversation</h2>
@@ -76,8 +76,8 @@ export function ChatWindow() {
       </div>
 
       {/* Sticky input */}
-      <div className="absolute bottom-0 right-0 left-0 bg-gradient-to-t from-aasila-bg-main via-aasila-bg-main to-transparent px-4 pb-6 pt-10">
-        <div className="mx-auto w-full sm:max-w-[768px]">
+      <div className="fixed bottom-6 left-4 right-4 lg:left-72 lg:right-8 z-50 flex justify-center pointer-events-none">
+        <div className="w-full sm:max-w-[768px] rounded-2xl glass-panel-floating border border-aasila-border shadow-2xl p-2 pointer-events-auto transition-all duration-300">
           <MessageInput
             onSend={sendMessage}
             isLoading={isSending || isStreaming}

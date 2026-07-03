@@ -30,9 +30,10 @@ export const MetricCard = memo(function MetricCard({
     return (
       <div
         className={cn(
-          'flex flex-col justify-between rounded-sm border p-6',
+          'flex flex-col justify-between rounded-xl border p-6 transition-all duration-300',
+          'hover:-translate-y-1 hover:shadow-2xl hover:border-brand-accent',
           isDark
-            ? 'border-emerald-500/20 bg-gray-900 text-emerald-400'
+            ? 'border-brand-accent/20 bg-[#0B0C10] text-brand-accent'
             : 'border-aasila-border/50 bg-aasila-surface-ai',
           className,
         )}
@@ -57,10 +58,11 @@ export const MetricCard = memo(function MetricCard({
   return (
     <div
       className={cn(
-        'flex flex-col justify-between rounded-sm border p-6',
+        'flex flex-col justify-between rounded-xl border p-6 transition-all duration-300 group glass-panel',
+        'hover:-translate-y-1 hover:shadow-2xl hover:border-brand-accent',
         isDark
-          ? 'border-emerald-500/20 bg-gray-900 text-emerald-400'
-          : 'border-aasila-border/50 bg-aasila-surface-ai',
+          ? 'border-brand-accent/20 bg-[#0B0C10]/80 text-brand-accent'
+          : 'border-aasila-border/50 bg-aasila-surface-ai/80',
         className,
       )}
     >
@@ -69,18 +71,18 @@ export const MetricCard = memo(function MetricCard({
           <span
             className={cn(
               'text-[11px] font-mono uppercase tracking-widest',
-              isDark ? 'text-emerald-400/70' : 'text-aasila-muted',
+              isDark ? 'text-brand-accent/70' : 'text-aasila-muted',
             )}
           >
             {label}
           </span>
           {icon && (
-            <span className={cn('text-sm', isDark ? 'text-emerald-400' : 'text-emerald-500')}>
+            <span className={cn('text-sm', isDark ? 'text-brand-accent' : 'text-brand-accent')}>
               {icon}
             </span>
           )}
         </div>
-        <div className={cn('text-3xl font-mono font-bold', isDark ? 'text-emerald-400' : 'text-aasila-text')}>
+        <div className={cn('text-3xl font-mono font-bold', isDark ? 'text-brand-accent' : 'text-aasila-text')}>
           {value}
         </div>
         {deltaPercent !== undefined && (

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Message } from '../types/chat'
 import { streamResponse, getConversationHistory, sendFeedback } from '../api/chat'
@@ -32,9 +32,11 @@ export function useChat(): UseChatReturn {
   })
 
   // Initialize messages from history
-  if (history && history.length > 0 && messages.length === 0) {
-    setMessages(history)
-  }
+  useEffect(() => {
+    if (history && history.length > 0 && messages.length === 0) {
+      setMessages(history)
+    }
+  }, [history, messages.length])
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isStreaming) return

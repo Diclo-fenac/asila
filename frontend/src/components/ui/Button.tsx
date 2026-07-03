@@ -14,11 +14,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-50',
-          'active:scale-[0.98]',
-          variant === 'primary' && 'bg-emerald-500 text-white hover:bg-emerald-600',
-          variant === 'secondary' && 'border border-aasila-border bg-aasila-surface-user text-aasila-text hover:bg-aasila-bg-main',
+          'active:scale-95',
+          variant === 'primary' && 'bg-[#1E201F] text-[#FAF7F5] hover:bg-[#1E201F]/90 dark:bg-[#FAF7F5] dark:text-[#1E201F] dark:hover:bg-[#FAF7F5]/90',
+          variant === 'secondary' && 'border border-aasila-border bg-transparent text-aasila-text hover:bg-aasila-muted/10',
           variant === 'ghost' && 'text-aasila-muted hover:bg-aasila-border/30 hover:text-aasila-text',
           variant === 'danger' && 'bg-red-500 text-white hover:bg-red-600',
           className,

@@ -45,9 +45,9 @@ export function SignUpForm() {
     return (
       <div className="flex min-h-screen flex-col bg-aasila-bg-main text-aasila-text">
         <main className="flex flex-grow items-center justify-center p-6">
-          <div className="w-full max-w-md rounded-lg border border-aasila-border/30 bg-aasila-surface-ai p-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
-              <svg className="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-full max-w-md rounded-2xl border border-aasila-border glass-panel shadow-2xl bg-aasila-surface-ai/80 p-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent/10">
+              <svg className="h-6 w-6 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -80,11 +80,11 @@ export function SignUpForm() {
         </div>
 
         {/* Auth Card */}
-        <div className="relative z-10 w-full max-w-md rounded-lg border border-aasila-border/30 bg-aasila-surface-ai p-8">
+        <div className="relative z-10 w-full max-w-md rounded-2xl border border-aasila-border glass-panel shadow-2xl bg-aasila-surface-ai/80 p-8">
           {/* Branding */}
           <div className="mb-10 text-center">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500">
-              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-accent">
+              <svg className="h-6 w-6 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </div>
@@ -152,7 +152,7 @@ export function SignUpForm() {
                       Strength: {strength.label}
                     </span>
                     {strength.score >= 5 && (
-                      <svg className="h-[14px] w-[14px] text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-[14px] w-[14px] text-brand-accent" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                       </svg>
                     )}
@@ -173,7 +173,7 @@ export function SignUpForm() {
               Existing operative?{' '}
               <Link
                 to="/login"
-                className="font-semibold text-aasila-text underline decoration-emerald-500/30 underline-offset-4 transition-colors hover:text-emerald-500"
+                className="font-semibold text-aasila-text underline decoration-brand-accent/30 underline-offset-4 transition-colors hover:text-brand-accent"
               >
                 Sign In
               </Link>

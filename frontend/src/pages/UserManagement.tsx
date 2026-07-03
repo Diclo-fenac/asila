@@ -15,7 +15,7 @@ function formatInitials(name: string): string {
 
 function getAvatarColor(role: UserRole): string {
   switch (role) {
-    case 'admin': return 'bg-emerald-500/20 text-emerald-500'
+    case 'admin': return 'bg-brand-accent/20 text-brand-accent border-brand-accent/30'
     case 'analyst': return 'bg-amber-500/20 text-amber-500'
     case 'viewer': return 'bg-slate-500/20 text-slate-500'
     default: return 'bg-slate-500/20 text-slate-500'
@@ -77,7 +77,7 @@ export function UserManagement() {
       {/* Header */}
       <div className="mb-10 flex items-end justify-between border-b border-aasila-border/50 pb-6">
         <div>
-          <h2 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-emerald-500">Internal Management</h2>
+          <h2 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-brand-accent">Internal Management</h2>
           <h1 className="text-3xl font-black tracking-tight text-aasila-text">System User Directory</h1>
           <p className="mt-2 max-w-lg text-[15px] text-aasila-muted">
             Manage access levels, security clearance, and audit authentication vectors for all tenant administrators.
@@ -86,7 +86,7 @@ export function UserManagement() {
         <button
           type="button"
           onClick={() => setShowInviteModal(true)}
-          className="flex items-center gap-2 rounded-sm bg-emerald-500 px-6 py-2.5 text-sm font-bold tracking-tight text-white hover:bg-emerald-600 active:opacity-80"
+          className="flex items-center gap-2 rounded-md bg-[#1E201F] text-[#FAF7F5] dark:bg-[#FAF7F5] dark:text-[#1E201F] px-6 py-2.5 text-sm font-bold tracking-tight hover:opacity-90 shadow-sm active:scale-95 transition-all"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -97,7 +97,7 @@ export function UserManagement() {
 
       {/* Stats */}
       <div className="mb-8 grid grid-cols-12 gap-4">
-        <div className="col-span-12 flex h-40 flex-col justify-between rounded-sm border border-aasila-border/50 bg-aasila-surface-user p-6 md:col-span-4">
+        <div className="col-span-12 flex h-40 flex-col justify-between rounded-xl border border-aasila-border glass-panel p-6 md:col-span-4 transition-all hover:shadow-lg">
           <svg className="h-5 w-5 text-aasila-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
@@ -107,7 +107,7 @@ export function UserManagement() {
           </div>
         </div>
 
-        <div className="col-span-12 flex h-40 items-center justify-between rounded-sm border border-aasila-border/50 bg-aasila-surface-ai p-6 md:col-span-8">
+        <div className="col-span-12 flex h-40 items-center justify-between rounded-xl border border-aasila-border glass-panel p-6 md:col-span-8 transition-all hover:shadow-lg">
           <div className="space-y-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-aasila-muted">Role Distribution</p>
             <div className="flex gap-8">
@@ -115,7 +115,7 @@ export function UserManagement() {
                 <div key={role}>
                   <p className="mb-1 text-xs text-aasila-muted capitalize">{role}s</p>
                   <div className="flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${role === 'admin' ? 'bg-emerald-500' : role === 'analyst' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                    <span className={`h-2 w-2 rounded-full ${role === 'admin' ? 'bg-brand-accent' : role === 'analyst' ? 'bg-amber-500' : 'bg-slate-400'}`} />
                     <span className="font-mono font-bold text-aasila-text">{roleCounts[role] ?? 0}</span>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export function UserManagement() {
       </div>
 
       {/* User Table */}
-      <div className="overflow-hidden rounded-sm border border-aasila-border/50 bg-aasila-surface-ai">
+      <div className="overflow-hidden rounded-xl border border-aasila-border glass-panel shadow-sm">
         <div className="flex items-center justify-between border-b border-aasila-border/50 bg-aasila-surface-user px-6 py-4">
           <span className="text-[11px] font-mono text-aasila-muted">
             Total Users: {users.length}
@@ -179,7 +179,7 @@ export function UserManagement() {
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
-                          <span className={`h-1.5 w-1.5 rounded-full ${user.mfa_enabled ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-slate-400'}`} />
+                          <span className={`h-1.5 w-1.5 rounded-full ${user.mfa_enabled ? 'bg-brand-accent shadow-[0_0_8px_var(--color-brand-accent)]' : 'bg-slate-400'}`} />
                           <span className="text-xs font-medium text-aasila-text">
                             {user.mfa_enabled ? 'Verified MFA' : 'MFA Pending'}
                           </span>
@@ -210,7 +210,7 @@ export function UserManagement() {
             {/* Mobile card layout */}
             <div className="space-y-3 p-4 md:hidden">
               {users.map((user) => (
-                <div key={user.id} className="rounded-sm border border-aasila-border bg-aasila-surface-user p-4">
+                <div key={user.id} className="rounded-xl border border-aasila-border glass-panel p-4">
                   <div className="mb-3 flex items-center gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-aasila-border/50 text-sm font-bold ${getAvatarColor(user.role)}`}>
                       {formatInitials(user.name)}
@@ -228,7 +228,7 @@ export function UserManagement() {
                         onConfirm={(id, role) => updateRoleMutation.mutate({ userId: id, role })}
                         isLoading={updateRoleMutation.isPending}
                       />
-                      <span className={`h-1.5 w-1.5 rounded-full ${user.mfa_enabled ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                      <span className={`h-1.5 w-1.5 rounded-full ${user.mfa_enabled ? 'bg-brand-accent' : 'bg-slate-400'}`} />
                       <span className="text-xs text-aasila-muted">
                         {user.mfa_enabled ? 'MFA' : 'No MFA'}
                       </span>

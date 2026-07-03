@@ -51,12 +51,12 @@ export function LoginForm() {
         </div>
 
         {/* Auth Card */}
-        <div className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-lg border border-aasila-border/30 bg-aasila-surface-ai">
+        <div className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-2xl border border-aasila-border glass-panel shadow-2xl bg-aasila-surface-ai/80">
           {/* Branding Header */}
           <div className="p-8 pb-4">
             <div className="mb-8 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-emerald-500">
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-accent">
+                <svg className="h-5 w-5 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -100,7 +100,7 @@ export function LoginForm() {
                   >
                     Security Key
                   </label>
-                  <a href="#" className="text-[10px] uppercase text-emerald-500 hover:underline">
+                  <a href="#" className="text-[10px] uppercase text-brand-accent hover:underline">
                     Recovery
                   </a>
                 </div>
@@ -135,7 +135,7 @@ export function LoginForm() {
                 New operative?{' '}
                 <Link
                   to="/signup"
-                  className="font-semibold text-aasila-text underline decoration-emerald-500/30 underline-offset-4 transition-colors hover:text-emerald-500"
+                  className="font-semibold text-aasila-text underline decoration-brand-accent/30 underline-offset-4 transition-colors hover:text-brand-accent"
                 >
                   Sign Up
                 </Link>

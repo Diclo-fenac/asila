@@ -52,7 +52,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       {/* Panel */}
       <div
         className={cn(
-          'relative z-10 w-full max-w-md rounded-lg border border-aasila-border bg-aasila-surface-ai p-6 shadow-xl',
+          'relative z-10 w-full max-w-md rounded-xl border border-aasila-border glass-panel p-6 shadow-xl',
           size === 'sm' && 'max-w-sm',
           size === 'lg' && 'max-w-lg',
         )}

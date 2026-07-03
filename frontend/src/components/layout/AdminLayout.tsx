@@ -18,12 +18,14 @@ export function AdminLayout() {
   const dark = useThemeStore((state) => state.dark)
   const toggleTheme = useThemeStore((state) => state.toggle)
   const location = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)')
-    mq.addEventListener('change', (e) => { if (e.matches) setMobileOpen(false) })
-    return () => mq.removeEventListener('change', () => {})
+    const handler = (e: MediaQueryListEvent) => { if (e.matches) setSidebarOpen(false) }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   const isActive = (path: string) => {
@@ -32,125 +34,128 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-aasila-bg-main font-display text-aasila-text selection:bg-emerald-500/20">
-      {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-aasila-border bg-aasila-bg-sidebar py-6 lg:flex">
-        <div className="mb-8 px-6">
-          <div className="mb-1 flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-aasila-border bg-emerald-500/20">
-              <span className="text-sm font-bold text-emerald-500">{user?.name[0] || 'A'}</span>
-            </div>
-            <div className="flex w-32 flex-col">
-              <span className="truncate text-sm font-bold font-mono text-aasila-text">
-                {tenant?.name || 'Aasila'} Tenant
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-aasila-muted">Admin Console</span>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-1 px-3" aria-label="Admin navigation">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                'flex items-center gap-3 rounded-sm px-3 py-2 transition-colors duration-150',
-                isActive(item.path)
-                  ? 'border-r-2 border-emerald-500 bg-aasila-border/50 font-semibold text-emerald-500'
-                  : 'text-aasila-muted hover:bg-aasila-border/30 hover:text-aasila-text',
-              )}
-              aria-current={isActive(item.path) ? 'page' : undefined}
-            >
-              <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-              </svg>
-              <span className="text-[14px] tracking-tight">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="mt-auto space-y-4 px-3">
-          <button
-            type="button"
-            className="w-full rounded-sm bg-background-dark py-2.5 text-xs font-bold uppercase tracking-wider text-emerald-500 transition-opacity hover:opacity-90"
-          >
-            New System Report
-          </button>
-        </div>
-      </aside>
-
+    <div className="flex min-h-screen bg-aasila-bg-main font-display text-aasila-text selection:bg-brand-accent/20 relative">
+      
       {/* Mobile drawer */}
-      <MobileSidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)}>
-        <nav className="flex-1 space-y-1 px-3" aria-label="Admin navigation">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                'flex items-center gap-3 rounded-sm px-3 py-2 transition-colors duration-150',
-                isActive(item.path)
-                  ? 'border-r-2 border-emerald-500 bg-aasila-border/50 font-semibold text-emerald-500'
-                  : 'text-aasila-muted hover:bg-aasila-border/30 hover:text-aasila-text',
-              )}
-            >
-              <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-              </svg>
-              <span className="text-[14px] tracking-tight">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+      <MobileSidebar isOpen={sidebarOpen && window.innerWidth < 1024} onClose={() => setSidebarOpen(false)}>
+        <AdminSidebarContent user={user} tenant={tenant} isActive={isActive} onClose={() => setSidebarOpen(false)} />
       </MobileSidebar>
 
-      {/* Top bar */}
-      <header className="fixed right-0 top-0 z-40 flex h-16 w-full items-center justify-between border-b border-aasila-border bg-aasila-bg-main/90 px-4 backdrop-blur-md lg:left-64 lg:w-[calc(100%-16rem)] lg:px-8">
-        <div className="flex items-center gap-4 lg:gap-6">
-          {/* Hamburger for mobile */}
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="rounded-sm p-1 text-aasila-muted transition-colors hover:text-aasila-text lg:hidden"
-            aria-label="Open navigation"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <span className="font-mono text-lg font-black tracking-tighter text-emerald-500">AASILA</span>
-        </div>
+      {/* Desktop Floating Sidebar */}
+      <aside 
+        className={cn(
+          "fixed left-4 top-4 bottom-4 w-64 rounded-xl border border-aasila-border glass-panel-floating z-50 transition-transform duration-300 hidden lg:flex flex-col",
+          sidebarOpen ? "translate-x-0" : "-translate-x-[120%]"
+        )}
+      >
+        <AdminSidebarContent user={user} tenant={tenant} isActive={isActive} onClose={() => setSidebarOpen(false)} />
+      </aside>
 
-        <div className="flex items-center gap-5">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="rounded-sm p-1 text-aasila-muted transition-colors hover:text-aasila-text"
-            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {dark ? (
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col overflow-hidden w-full relative">
+        {/* Top bar (Glassmorphic) */}
+        <header className="absolute top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-aasila-border glass-panel px-4 lg:px-8">
+          <div className="flex items-center gap-4 lg:gap-6">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="rounded-md p-1.5 text-aasila-muted transition-colors hover:text-aasila-text hover:bg-aasila-surface-user"
+              aria-label="Toggle navigation"
+            >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            ) : (
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-sm border border-aasila-border bg-emerald-500/10 text-sm font-bold text-emerald-500"
-            title={user?.name}
-          >
-            {user?.name[0] || 'U'}
+            </button>
+            <span className="font-mono text-lg font-black tracking-tighter text-brand-accent">AASILA</span>
+          </div>
+
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="rounded-md p-1.5 text-aasila-muted transition-colors hover:text-aasila-text hover:bg-aasila-surface-user"
+              aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {dark ? (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-aasila-border bg-brand-accent/10 text-sm font-bold text-brand-accent"
+              title={user?.name}
+            >
+              {user?.name[0] || 'U'}
+            </div>
+          </div>
+        </header>
+
+        {/* Main */}
+        <main className="min-h-screen pt-16 flex-1 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function AdminSidebarContent({ user, tenant, isActive, onClose }: any) {
+  return (
+    <>
+      <div className="flex items-center justify-between px-6 pt-6 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-brand-accent/20 bg-brand-accent/10 shadow-sm">
+            <span className="text-sm font-bold text-brand-accent">{user?.name[0] || 'A'}</span>
+          </div>
+          <div className="flex w-32 flex-col">
+            <span className="truncate text-sm font-bold font-mono text-aasila-text">
+              {tenant?.name || 'Aasila'} Tenant
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-brand-accent">Admin Console</span>
           </div>
         </div>
-      </header>
+        <button onClick={onClose} className="p-1 rounded-md text-aasila-muted hover:bg-aasila-surface-user lg:hidden">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-      {/* Main */}
-      <main className="min-h-screen pt-16 lg:ml-64">
-        <Outlet />
-      </main>
-    </div>
+      <nav className="flex-1 space-y-1 px-3" aria-label="Admin navigation">
+        {navItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 transition-all duration-150',
+              isActive(item.path)
+                ? 'bg-brand-accent/10 font-semibold text-brand-accent shadow-sm border border-brand-accent/20'
+                : 'text-aasila-muted hover:bg-aasila-surface-user hover:text-aasila-text border border-transparent',
+            )}
+            aria-current={isActive(item.path) ? 'page' : undefined}
+          >
+            <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+            </svg>
+            <span className="text-[14px] tracking-tight">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      <div className="mt-auto space-y-4 px-3 pb-6">
+        <button
+          type="button"
+          className="w-full rounded-md bg-[#1E201F] text-[#FAF7F5] dark:bg-[#FAF7F5] dark:text-[#1E201F] py-2.5 text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-90 shadow-sm"
+        >
+          New System Report
+        </button>
+      </div>
+    </>
   )
 }
