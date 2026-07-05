@@ -5,6 +5,7 @@ interface TenantCardProps {
   tenant: Tenant
   onManage?: (id: string) => void
   onCancel?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; border: string; pulse: boolean }> = {
@@ -14,7 +15,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; b
   suspended: { label: 'Suspended', color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30', pulse: false },
 }
 
-export function TenantCard({ tenant, onManage, onCancel }: TenantCardProps) {
+export function TenantCard({ tenant, onManage, onCancel, onDelete }: TenantCardProps) {
   const status = statusConfig[tenant.status ?? 'offline'] ?? statusConfig.offline
 
   return (
@@ -108,6 +109,18 @@ export function TenantCard({ tenant, onManage, onCancel }: TenantCardProps) {
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </button>
+          )}
+          {onDelete && tenant.status !== 'provisioning' && (
+            <button
+              type="button"
+              onClick={() => onDelete(tenant.id)}
+              className="text-aasila-muted transition-colors hover:text-red-500"
+              aria-label={`Delete ${tenant.name}`}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
           )}

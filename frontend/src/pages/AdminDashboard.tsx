@@ -1,3 +1,4 @@
+import { Button } from "../components/ui/Button"
 import { useState } from 'react'
 import { useAnalytics } from '../hooks/useAnalytics'
 import { MetricCard } from '../components/data/MetricCard'
@@ -168,7 +169,7 @@ export function AdminDashboard() {
               Quick Diagnostic Actions
             </h4>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <button
+              <Button
                 type="button"
                 className="group flex flex-col items-center justify-center rounded-xl border border-aasila-border p-6 text-aasila-text transition-all duration-300 hover:border-brand-accent hover:text-brand-accent hover:shadow-lg bg-aasila-surface-ai"
               >
@@ -176,8 +177,8 @@ export function AdminDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 <span className="text-[10px] font-mono font-bold tracking-wider">REBOOT_NODE</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="group flex flex-col items-center justify-center rounded-xl border border-aasila-border p-6 text-aasila-text transition-all duration-300 hover:border-brand-accent hover:text-brand-accent hover:shadow-lg bg-aasila-surface-ai"
               >
@@ -185,8 +186,8 @@ export function AdminDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 <span className="text-[10px] font-mono font-bold tracking-wider">PURGE_CACHE</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="group flex flex-col items-center justify-center rounded-xl border border-aasila-border p-6 text-aasila-text transition-all duration-300 hover:border-brand-accent hover:text-brand-accent hover:shadow-lg bg-aasila-surface-ai"
               >
@@ -194,8 +195,8 @@ export function AdminDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 <span className="text-[10px] font-mono font-bold tracking-wider">SYNC_TENANTS</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="group flex flex-col items-center justify-center rounded-xl border border-aasila-border p-6 text-aasila-text transition-all duration-300 hover:border-brand-accent hover:text-brand-accent hover:shadow-lg bg-aasila-surface-ai"
               >
@@ -203,7 +204,7 @@ export function AdminDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <span className="text-[10px] font-mono font-bold tracking-wider">SCAN_VULN</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -230,7 +231,7 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
   if (!expanded) {
     return (
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <button 
+        <Button 
           onClick={() => setExpanded(true)}
           className="flex items-center gap-3 rounded-full border border-aasila-border glass-panel-floating px-5 py-2.5 text-xs font-mono font-bold text-brand-accent hover:bg-aasila-surface-user transition-all shadow-xl hover:scale-105"
         >
@@ -239,7 +240,7 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-accent"></span>
           </span>
           CLOUD_OS_4.2 / TELEMETRY
-        </button>
+        </Button>
       </div>
     )
   }
@@ -250,7 +251,7 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
       <div className="flex items-center justify-between border-b border-aasila-border/50 bg-aasila-surface/80 px-6 py-3">
         <div className="flex gap-6">
            {['SYSTEM_LOGS', 'RAW_TELEMETRY', 'NODE_METRICS'].map(tab => (
-             <button 
+             <Button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)} 
                 className={cn(
@@ -259,12 +260,12 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
                 )}
              >
                {tab}
-             </button>
+             </Button>
            ))}
         </div>
-        <button onClick={() => setExpanded(false)} className="text-aasila-muted hover:text-aasila-text p-1 rounded hover:bg-aasila-surface-user">
+        <Button onClick={() => setExpanded(false)} className="text-aasila-muted hover:text-aasila-text p-1 rounded hover:bg-aasila-surface-user">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-        </button>
+        </Button>
       </div>
       
       {/* Content */}

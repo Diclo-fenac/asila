@@ -1,3 +1,6 @@
+import { EmptyState } from "../components/ui/EmptyState"
+import { FileText } from "lucide-react"
+import { Button } from "../components/ui/Button"
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { Document } from '../types/document'
@@ -50,7 +53,7 @@ export function DocumentKnowledgeBase() {
             Manage access levels, security clearance, and audit authentication vectors for all tenant administrators.
           </p>
         </div>
-        <button
+        <Button
           type="button"
           className="flex shrink-0 items-center gap-2 rounded-md bg-aasila-text text-aasila-bg-main px-5 py-2.5 text-sm font-semibold hover:opacity-90 shadow-sm"
         >
@@ -58,7 +61,7 @@ export function DocumentKnowledgeBase() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           + Upload Document
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -86,7 +89,7 @@ export function DocumentKnowledgeBase() {
         <div className="flex items-center justify-between border-b border-aasila-border/50 bg-aasila-surface-user px-4 py-4 sm:px-6">
           <div className="flex gap-4">
             {(['all', 'archived', 'trash'] as const).map((tab) => (
-              <button
+              <Button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
@@ -99,10 +102,10 @@ export function DocumentKnowledgeBase() {
                 role="tab"
               >
                 {tab === 'all' ? 'All Files' : tab === 'archived' ? 'Archived' : 'Trash'}
-              </button>
+              </Button>
             ))}
           </div>
-          <button
+          <Button
             type="button"
             className="rounded p-1 transition-colors hover:bg-aasila-bg-main"
             aria-label="Filter documents"
@@ -110,7 +113,7 @@ export function DocumentKnowledgeBase() {
             <svg className="h-5 w-5 text-aasila-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         {isLoading ? (
@@ -122,14 +125,12 @@ export function DocumentKnowledgeBase() {
             <p className="text-sm text-red-500">Unable to load documents.</p>
           </div>
         ) : !documents || documents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-accent/10">
-              <svg className="h-8 w-8 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="text-sm font-medium text-aasila-text">No documents yet</p>
-            <p className="text-xs text-aasila-muted">Upload your first document to get started.</p>
+          <div className="p-6 border-t border-aasila-border/50">
+            <EmptyState 
+              icon={<FileText className="h-8 w-8" />} 
+              title="No documents yet" 
+              description="Upload your first document to get started." 
+            />
           </div>
         ) : (
           <>
@@ -176,7 +177,7 @@ export function DocumentKnowledgeBase() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button
+                          <Button
                             type="button"
                             className="opacity-0 transition-opacity group-hover:opacity-100 p-1"
                             aria-label={`Actions for ${doc.filename}`}
@@ -184,7 +185,7 @@ export function DocumentKnowledgeBase() {
                             <svg className="h-5 w-5 text-aasila-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     )

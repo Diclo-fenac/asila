@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { TenantCard } from './TenantCard'
 import { TenantProvisioningModal } from './TenantProvisioningModal'
-import { useTenantsList, useCancelProvisioning } from '../../hooks/useTenants'
+import { useTenantsList, useCancelProvisioning, useDeleteTenant } from '../../hooks/useTenants'
 
 export function TenantGrid() {
   const [showProvisionModal, setShowProvisionModal] = useState(false)
   const { data, isLoading, isError } = useTenantsList()
   const cancelMutation = useCancelProvisioning()
+  const deleteMutation = useDeleteTenant()
 
   if (isLoading) {
     return (
@@ -38,6 +39,12 @@ export function TenantGrid() {
 
   const tenants = data?.items ?? []
 
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this tenant? This action cannot be undone.')) {
+      deleteMutation.mutate(id)
+    }
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -46,6 +53,7 @@ export function TenantGrid() {
             key={tenant.id}
             tenant={tenant}
             onCancel={(id) => cancelMutation.mutate(id)}
+            onDelete={handleDelete}
           />
         ))}
 

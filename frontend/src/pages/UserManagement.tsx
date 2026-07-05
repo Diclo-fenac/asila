@@ -1,3 +1,6 @@
+import { EmptyState } from "../components/ui/EmptyState"
+import { Users } from "lucide-react"
+import { Button } from "../components/ui/Button"
 import { useState } from 'react'
 import { UserInviteModal } from '../features/users/UserInviteModal'
 import { RoleChangeDropdown } from '../features/users/RoleChangeDropdown'
@@ -83,7 +86,7 @@ export function UserManagement() {
             Manage access levels, security clearance, and audit authentication vectors for all tenant administrators.
           </p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => setShowInviteModal(true)}
           className="flex items-center gap-2 rounded-md bg-aasila-text text-aasila-bg-main px-6 py-2.5 text-sm font-bold tracking-tight hover:opacity-90 shadow-sm active:scale-95 transition-all"
@@ -92,7 +95,7 @@ export function UserManagement() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
           Invite User
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -134,12 +137,12 @@ export function UserManagement() {
         </div>
 
         {users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <svg className="mb-3 h-8 w-8 text-aasila-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <p className="text-sm font-medium text-aasila-text">No users yet</p>
-            <p className="text-xs text-aasila-muted">Invite your first user to get started.</p>
+          <div className="p-6">
+            <EmptyState 
+              icon={<Users className="h-8 w-8" />} 
+              title="No users yet" 
+              description="Invite your first user to get started." 
+            />
           </div>
         ) : (
           <>
@@ -191,7 +194,7 @@ export function UserManagement() {
                         </p>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <button
+                        <Button
                           type="button"
                           className="text-aasila-muted transition-colors hover:text-aasila-text"
                           aria-label={`Edit ${user.name}`}
@@ -199,7 +202,7 @@ export function UserManagement() {
                           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}

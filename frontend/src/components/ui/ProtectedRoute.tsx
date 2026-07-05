@@ -41,3 +41,19 @@ export function PublicOnlyRoute({ children }: { children: ReactNode }) {
 
   return <>{children}</>
 }
+
+// For routes that should only be accessible to Admins
+export function AdminRoute({ children }: { children: ReactNode }) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const user = useAuthStore((state) => state.user)
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/chat" replace />
+  }
+
+  return <>{children}</>
+}

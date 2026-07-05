@@ -12,6 +12,7 @@ import { Footer } from '../../components/Footer'
 export function LoginForm() {
   const { login, isLoading } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -106,13 +107,25 @@ export function LoginForm() {
                 </div>
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   label=""
                   placeholder="••••••••••••"
                   autoComplete="current-password"
                   aria-required="true"
                   {...register('password')}
                   error={errors.password?.message}
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-aasila-muted hover:text-aasila-text transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {showPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  }
                 />
               </div>
 

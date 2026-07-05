@@ -14,6 +14,7 @@ export function SignUpForm() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [tenantId, setTenantId] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -29,6 +30,7 @@ export function SignUpForm() {
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const password = watch('password', '')
   const strength = getPasswordStrength(password)
 
@@ -133,10 +135,22 @@ export function SignUpForm() {
                 id="password"
                 label="Access Key"
                 placeholder="••••••••••••"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 {...register('password')}
                 error={errors.password?.message}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-aasila-muted hover:text-aasila-text transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                }
               />
 
               {/* Password Strength Meter */}

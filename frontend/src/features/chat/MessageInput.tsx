@@ -2,6 +2,7 @@ import {
   useRef,
   useEffect,
   forwardRef,
+  useState,
   type TextareaHTMLAttributes,
 } from 'react'
 import { cn } from '../../utils/cn'
@@ -15,6 +16,8 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
   ({ onSend, isLoading, className, disabled, ...props }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
+    const [text, setText] = useState('')
+
     // Auto-resize
     useEffect(() => {
       const el = textareaRef.current
@@ -27,11 +30,11 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        const content = textareaRef.current?.value.trim()
+        const content = text.trim()
         if (content && !isLoading) {
           onSend(content)
+          setText('')
           if (textareaRef.current) {
-            textareaRef.current.value = ''
             textareaRef.current.style.height = 'auto'
           }
         }
@@ -68,6 +71,7 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
           </div>
 
           <textarea
+            id="chat-input"
             ref={(node) => {
               textareaRef.current = node
               if (typeof ref === 'function') ref(node)
@@ -78,6 +82,8 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
               className,
             )}
             placeholder="Type your message here..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled || isLoading}
             rows={1}
@@ -89,16 +95,16 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
             <button
               type="button"
               onClick={() => {
-                const el = textareaRef.current
-                if (!el) return
-                const content = el.value.trim()
+                const content = text.trim()
                 if (content && !isLoading) {
                   onSend(content)
-                  el.value = ''
-                  el.style.height = 'auto'
+                  setText('')
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = 'auto'
+                  }
                 }
               }}
-              disabled={isLoading || disabled}
+              disabled={isLoading || disabled || !text.trim()}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-accent text-white hover:bg-brand-accent/90 transition-colors disabled:opacity-50"
               aria-label="Send message"
             >
