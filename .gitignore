@@ -3,3 +3,13 @@ __pycache__/
 *.pyc
 .env
 migrations/tenant/
+
+# User Requested Ignores
+design/
+docs/superpowers/
+.qwen/
+
+# Secrets
+.env
+.env.*
+!.env.example
