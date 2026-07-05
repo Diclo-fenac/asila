@@ -30,7 +30,7 @@ async def test_create_tenant_logic(mock_session_local, mock_engine):
     # Note: connect() returns a context manager that yields the connection
     assert mock_conn.execute.called
     create_db_call = mock_conn.execute.call_args_list[1]
-    assert "CREATE DATABASE asila_tenant_test_org" in create_db_call[0][0].text
+    assert 'CREATE DATABASE "asila_tenant_test_org"' in create_db_call[0][0].text
     
     # Verify tenant was added to platform DB
     assert mock_session.add.called

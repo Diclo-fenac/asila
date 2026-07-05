@@ -7,4 +7,4 @@ class LocationAlias(TenantBase):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     alias: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    ward_id: Mapped[str] = mapped_column(String, ForeignKey("location_boundaries.id"))
+    ward_id: Mapped[str] = mapped_column(String, ForeignKey("location_boundaries.id", ondelete="CASCADE"))

@@ -19,10 +19,13 @@ from domain.tenant.chunks.models import Chunk
 from domain.tenant.embeddings.models import Embedding
 from domain.tenant.users.models import User
 from domain.tenant.queries.models import Query
+from domain.tenant.conversations.models import Conversation
 from domain.tenant.location_boundaries.models import LocationBoundary
 from domain.tenant.broadcasts.models import Broadcast
 from domain.tenant.unanswered_queries.models import UnansweredQuery
 from domain.tenant.location_aliases.models import LocationAlias
+from domain.tenant.graph.models import Entity, Relationship, Community, DocumentSummary
+from domain.tenant.audit_logs.models import TenantAuditLog
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

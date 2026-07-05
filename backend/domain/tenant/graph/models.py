@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey, JSON
+from sqlalchemy import String, Integer, ForeignKey, JSON, Index
 from pgvector.sqlalchemy import Vector
-from core.database.base import TenantBase
+from core.database.base import TenantBase, TimestampMixin
 from typing import Optional
 
-class Entity(TenantBase):
+class Entity(TenantBase, TimestampMixin):
     __tablename__ = "entities"
     
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -20,7 +20,11 @@ class Entity(TenantBase):
     source_edges = relationship("Relationship", foreign_keys="Relationship.source_id", cascade="all, delete-orphan")
     target_edges = relationship("Relationship", foreign_keys="Relationship.target_id", cascade="all, delete-orphan")
 
-class Relationship(TenantBase):
+    __table_args__ = (
+        Index('ix_entity_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
+    )
+
+class Relationship(TenantBase, TimestampMixin):
     __tablename__ = "relationships"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -30,7 +34,11 @@ class Relationship(TenantBase):
     weight: Mapped[float] = mapped_column(default=1.0)
     embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=True)
 
-class Community(TenantBase):
+    __table_args__ = (
+        Index('ix_rel_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
+    )
+
+class Community(TenantBase, TimestampMixin):
     __tablename__ = "communities"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -39,10 +47,18 @@ class Community(TenantBase):
     contains_node_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=True)
 
-class DocumentSummary(TenantBase):
+    __table_args__ = (
+        Index('ix_community_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
+    )
+
+class DocumentSummary(TenantBase, TimestampMixin):
     __tablename__ = "document_summaries"
     
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    document_id: Mapped[str] = mapped_column(String, index=True)
+    document_id: Mapped[str] = mapped_column(String, ForeignKey("documents.id", ondelete="CASCADE"), index=True)
     summary: Mapped[str] = mapped_column(String)
     embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=True)
+
+    __table_args__ = (
+        Index('ix_docsum_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
+    )

@@ -10,7 +10,7 @@ async def test_resolve_tenant_cached(mock_session, mock_redis):
     """
     Test that the resolver uses Redis cache if available (performance optimization).
     """
-    mock_redis.get = AsyncMock(return_value=b"postgresql+asyncpg://cached_db")
+    mock_redis.get = AsyncMock(return_value="postgresql+asyncpg://cached_db")
     
     db_url = await resolve_tenant("test_org")
     

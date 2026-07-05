@@ -4,8 +4,11 @@ from core.config.settings import settings
 # In production, we'd likely use a pool size suitable for the platform DB.
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=False,  # Set to True for debugging SQL queries
-    future=True
+    echo=False,
+    future=True,
+    pool_pre_ping=True,
+    pool_size=20,
+    max_overflow=10
 )
 
 PlatformSessionLocal = async_sessionmaker(

@@ -15,8 +15,10 @@ async def create_tenant(tenant_id: str, tenant_name: str):
     
     async with platform_engine.connect() as conn:
         await conn.execution_options(isolation_level="AUTOCOMMIT")
-        await conn.execute(text(f"DROP DATABASE IF EXISTS {db_name}"))
-        await conn.execute(text(f"CREATE DATABASE {db_name} TEMPLATE asila_schema_template"))
+        # Secure the identifier against SQL injection even with the regex guard
+        quoted_db = f'"{db_name}"'
+        await conn.execute(text(f"DROP DATABASE IF EXISTS {quoted_db}"))
+        await conn.execute(text(f"CREATE DATABASE {quoted_db} TEMPLATE asila_schema_template"))
     
     async with PlatformSessionLocal() as session:
         tenant = Tenant(id=tenant_id, name=tenant_name, db_connection_string=db_url)

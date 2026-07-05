@@ -1,9 +1,15 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, DateTime, JSON, Integer
-from datetime import datetime
-from core.database.base import TenantBase
+from sqlalchemy import String, JSON, Integer
+import enum
+from core.database.base import TenantBase, TimestampMixin
 
-class Document(TenantBase):
+class DocStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+class Document(TenantBase, TimestampMixin):
     __tablename__ = "documents"
     
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -13,4 +19,5 @@ class Document(TenantBase):
     file_size: Mapped[int | None] = mapped_column(Integer) # In bytes
     mime_type: Mapped[str | None] = mapped_column(String)
     doc_metadata: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    status: Mapped[DocStatus] = mapped_column(default=DocStatus.PENDING, nullable=False)
+    uploaded_by: Mapped[str | None] = mapped_column(String)

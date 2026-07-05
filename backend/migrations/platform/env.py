@@ -15,6 +15,7 @@ sys.path.append(os.getcwd())
 from core.config.settings import settings
 from core.database.base import PlatformBase
 from domain.platform.tenants.models import Tenant
+from domain.platform.audit_logs.models import PlatformAuditLog
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
