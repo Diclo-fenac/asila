@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui/Button"
 import { useState, useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -5,6 +6,7 @@ import { MobileSidebar } from '../ui/MobileSidebar'
 import { cn } from '../../utils/cn'
 import { useConversations } from '../../hooks/useConversations'
 import { logout } from '../../api/auth'
+import { useTheme } from '../ThemeProvider'
 
 const adminNavItems = [
   { path: '/admin', label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
@@ -46,7 +48,7 @@ export function UnifiedShell() {
         {/* Top bar */}
         <header className="absolute top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-aasila-border glass-panel px-4 lg:px-8">
           <div className="flex items-center gap-4 lg:gap-6">
-            <button
+            <Button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="rounded-md p-1.5 text-aasila-muted transition-colors hover:text-aasila-text hover:bg-aasila-surface-user lg:hidden"
@@ -55,7 +57,7 @@ export function UnifiedShell() {
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            </button>
+            </Button>
             <span className="font-mono text-lg font-black tracking-tighter text-brand-accent">AASILA</span>
             {isAdmin && <span className="hidden lg:inline-block ml-2 text-xs font-mono font-semibold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 tracking-wider">ADMIN CONSOLE</span>}
           </div>
@@ -79,6 +81,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
   const navigate = useNavigate()
   const { conversationId } = useParams()
   const { conversations, createConversation, deleteConversation, renameConversation } = useConversations()
+  const { theme, setTheme } = useTheme()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
 
@@ -104,11 +107,11 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
             </span>
           </div>
         </div>
-        <button onClick={onClose} className="p-1 rounded-md text-aasila-muted hover:bg-aasila-surface-user lg:hidden shrink-0" aria-label="Close Sidebar">
+        <Button onClick={onClose} className="p-1 rounded-md text-aasila-muted hover:bg-aasila-surface-user lg:hidden shrink-0" aria-label="Close Sidebar">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </button>
+        </Button>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 overflow-y-auto" aria-label="Main navigation">
@@ -147,7 +150,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
           </>
         ) : (
           <>
-            <button
+            <Button
               onClick={async () => {
                 const newConv = await createConversation()
                 navigate(`/chat/${newConv.id}`)
@@ -156,7 +159,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
               className="flex w-full items-center justify-center rounded-md bg-aasila-text text-aasila-bg-main px-4 py-2 text-sm font-bold tracking-wide transition-all hover:opacity-90 shadow-sm mb-6"
             >
               + New Workspace
-            </button>
+            </Button>
             
             <p className="px-3 text-xs font-semibold uppercase tracking-wider text-aasila-muted mb-2">Recent</p>
             {conversations.length === 0 && (
@@ -205,7 +208,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
                   </Link>
                 )}
                 <div className="flex shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
+                  <Button
                     onClick={() => {
                       setEditTitle(conv.title)
                       setEditingId(conv.id)
@@ -216,8 +219,8 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={async () => {
                       if (confirm('Delete this conversation?')) {
                         await deleteConversation(conv.id)
@@ -230,7 +233,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -284,8 +287,36 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
                   <p className="text-xs font-bold text-aasila-text truncate">{user?.name}</p>
                   <p className="text-[10px] text-aasila-muted truncate font-mono mt-0.5">{user?.email}</p>
                 </div>
+                <div className="p-1 border-b border-aasila-border/50">
+                  <div className="flex items-center justify-between px-2 py-1.5 text-xs text-aasila-muted">
+                    <span>Theme</span>
+                    <div className="flex items-center gap-1 bg-aasila-surface-low rounded-md border border-aasila-border/50 p-0.5">
+                      <button
+                        onClick={() => setTheme('light')}
+                        className={`p-1 rounded-sm transition-colors ${theme === 'light' ? 'bg-brand-accent/20 text-brand-accent' : 'hover:bg-aasila-surface-user'}`}
+                        title="Light Mode"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      </button>
+                      <button
+                        onClick={() => setTheme('dark')}
+                        className={`p-1 rounded-sm transition-colors ${theme === 'dark' ? 'bg-brand-accent/20 text-brand-accent' : 'hover:bg-aasila-surface-user'}`}
+                        title="Dark Mode"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                      </button>
+                      <button
+                        onClick={() => setTheme('system')}
+                        className={`p-1 rounded-sm transition-colors ${theme === 'system' ? 'bg-brand-accent/20 text-brand-accent' : 'hover:bg-aasila-surface-user'}`}
+                        title="System Theme"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <div className="p-1">
-                  <button
+                  <Button
                     onClick={async () => {
                       setDropdownOpen(false)
                       await logout()
@@ -296,7 +327,7 @@ function SidebarContent({ user, tenant, isAdmin, onClose }: any) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Sign Out
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>
