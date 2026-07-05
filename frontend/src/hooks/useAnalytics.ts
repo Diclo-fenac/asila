@@ -10,10 +10,10 @@ interface AnalyticsData {
   isError: boolean
 }
 
-export function useAnalytics(): AnalyticsData {
+export function useAnalytics(days: number = 30): AnalyticsData {
   const { data: metrics, isLoading: metricsLoading, isError: metricsError } = useQuery<MetricPoint[], Error>({
-    queryKey: ['analytics-metrics'],
-    queryFn: fetchMetrics,
+    queryKey: ['analytics-metrics', days],
+    queryFn: () => fetchMetrics(days),
     staleTime: 30 * 1000,
     retry: 1,
   })

@@ -46,7 +46,8 @@ export function streamResponse(
           await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true })
           // Retry the stream request once
           return executeStream(true)
-        } catch (refreshError) {
+        } catch {
+          window.location.href = '/login'
           useAuthStore.getState().clearAuth()
           throw new Error('Session expired. Please log in again.')
         }

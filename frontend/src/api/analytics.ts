@@ -1,8 +1,8 @@
 import { apiClient } from './client'
 import type { MetricPoint, ActivityLogEntry, SystemStatus } from '../types/analytics'
 
-export async function fetchMetrics(): Promise<MetricPoint[]> {
-  const response = await apiClient.get<MetricPoint[]>('/analytics/metrics')
+export async function fetchMetrics(days: number = 30): Promise<MetricPoint[]> {
+  const response = await apiClient.get<MetricPoint[]>(`/analytics/metrics?days=${days}`)
   return response.data
 }
 

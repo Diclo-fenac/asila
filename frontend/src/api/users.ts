@@ -13,9 +13,9 @@ export async function fetchUsers(params?: PaginationParams): Promise<PaginatedRe
   return response.data
 }
 
-export async function inviteUser(email: string, role: UserRole, name: string): Promise<{ message: string }> {
-  const response = await apiClient.post<{ message: string }>('/users/invite', { email, role, name })
-  return response.data
+export async function inviteUser(email: string, role: UserRole, name: string): Promise<{ message: string; temporary_password?: string }> {
+  const response = await apiClient.post<{ msg: string; temporary_password?: string }>('/users/invite', { email, role, name })
+  return { message: response.data.msg, temporary_password: response.data.temporary_password }
 }
 
 export async function updateUserRole(userId: string, role: UserRole): Promise<User> {
@@ -25,5 +25,10 @@ export async function updateUserRole(userId: string, role: UserRole): Promise<Us
 
 export async function deleteUser(userId: string): Promise<{ message: string }> {
   const response = await apiClient.delete<{ message: string }>(`/users/${userId}`)
+  return response.data
+}
+
+export async function reactivateUser(userId: string): Promise<{ message: string }> {
+  const response = await apiClient.post<{ message: string }>(`/users/${userId}/reactivate`)
   return response.data
 }

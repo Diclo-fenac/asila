@@ -26,12 +26,16 @@ export function createApiClient(): AxiosInstance {
     },
   })
 
-  // Request interceptor: inject tenant ID
+  // Request interceptor: inject tenant ID and strip trailing slashes
   client.interceptors.request.use((config) => {
     const tenantId = getStoredTenantId()
 
     if (tenantId) {
       config.headers['X-Tenant-Id'] = tenantId
+    }
+
+    if (config.url && config.url.endsWith('/')) {
+      config.url = config.url.slice(0, -1)
     }
 
     return config
@@ -54,7 +58,7 @@ export function createApiClient(): AxiosInstance {
           if (originalRequest.url.includes('/auth/refresh')) {
             useAuthStore.getState().clearAuth()
           }
-          return Promise.reject(error)
+          return Promise.reject(error instanceof Error ? error : new Error(String(error)))
         }
 
         originalRequest._retry = true
@@ -67,6 +71,13 @@ export function createApiClient(): AxiosInstance {
           return client(originalRequest)
         } catch (refreshError) {
           // Refresh failed, logout user
+          
+          // Emergency save chat draft to prevent data loss
+          const chatInput = document.getElementById('chat-input') as HTMLTextAreaElement | null
+          if (chatInput && chatInput.value.trim()) {
+            localStorage.setItem('chat_draft_backup', chatInput.value)
+          }
+
           useAuthStore.getState().clearAuth()
           return Promise.reject(refreshError)
         }
@@ -81,7 +92,7 @@ export function createApiClient(): AxiosInstance {
         globalToast('Access denied: You do not have permission.', 'warning')
       }
 
-      return Promise.reject(error)
+      return Promise.reject(error instanceof Error ? error : new Error(String(error)))
     }
   )
 

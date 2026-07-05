@@ -20,4 +20,5 @@ export interface SystemStatus {
   storage_percent: number
   api_load: 'stable' | 'elevated' | 'critical'
   uptime_percent: number
+  message?: string
 }
