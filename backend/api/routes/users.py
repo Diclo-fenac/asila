@@ -79,8 +79,8 @@ async def invite_user(invite: UserInvite, db: AsyncSession = Depends(get_tenant_
     )
     db.add(new_user)
     await db.commit()
-    # In a real app, send email with random_password here
-    return {"msg": "Invited"}
+    # Return the password so the admin can copy it
+    return {"msg": "Invited", "temporary_password": random_password}
 
 @router.patch("/{id}/role")
 async def update_role(id: str, data: UserUpdate, db: AsyncSession = Depends(get_tenant_db), current_user: dict = Depends(require_role(["admin"]))):
@@ -108,3 +108,14 @@ async def delete_user(id: str, db: AsyncSession = Depends(get_tenant_db), curren
         user.token_version += 1 # Instantly revoke access
         await db.commit()
     return {"msg": "Deleted (Deactivated)"}
+
+@router.post("/{id}/reactivate")
+async def reactivate_user(id: str, db: AsyncSession = Depends(get_tenant_db), current_user: dict = Depends(require_role(["admin"]))):
+    result = await db.execute(select(User).where(User.id == id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    user.is_active = True
+    await db.commit()
+    return {"msg": "User reactivated"}

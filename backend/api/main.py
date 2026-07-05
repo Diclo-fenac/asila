@@ -66,10 +66,19 @@ class TenancyMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
+import os
+
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+if allowed_origins_str:
+    allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
+else:
+    logger.warning("ALLOWED_ORIGINS not set. Falling back to localhost for CORS.")
+    allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
 app = FastAPI(title="Asila API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
