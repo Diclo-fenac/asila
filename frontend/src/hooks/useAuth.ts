@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
-import { login as apiLogin, signUp as apiSignUp } from '../api/auth'
+import { login as apiLogin, signUp as apiSignUp, logout as apiLogout } from '../api/auth'
 import type { LoginFormData, SignUpFormData } from '../utils/validators'
 import { useToast } from './useToast'
 
 export function useAuth() {
-  const { setAuth, clearAuth, setLoading, isLoading } = useAuthStore()
+  const { setAuth, setLoading, isLoading } = useAuthStore()
   const { addToast } = useToast()
 
   const login = useCallback(async (data: LoginFormData & { tenant_id: string }) => {
@@ -20,8 +20,6 @@ export function useAuth() {
       setAuth({
         user: result.user,
         tenant: { id: data.tenant_id, name: 'Tenant' },
-        access_token: result.access_token,
-        refresh_token: result.refresh_token,
       })
 
       return { success: true as const }
@@ -60,9 +58,13 @@ export function useAuth() {
     }
   }, [setLoading])
 
-  const logout = useCallback(() => {
-    clearAuth()
-  }, [clearAuth])
+  const logout = useCallback(async () => {
+    try {
+      await apiLogout()
+    } catch (e) {
+      // Ignored
+    }
+  }, [])
 
   return { login, signUp, logout, isLoading }
 }

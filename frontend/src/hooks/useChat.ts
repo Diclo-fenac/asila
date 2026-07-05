@@ -8,13 +8,13 @@ interface UseChatReturn {
   isStreaming: boolean
   currentText: string
   isSending: boolean
-  sendMessage: (content: string) => Promise<void>
+  sendMessage: (content: string, overrideConvId?: string) => Promise<void>
   sendFeedback: (messageId: string, feedback: 'positive' | 'negative') => Promise<void>
   abortStream: () => void
   error: string | null
 }
 
-export function useChat(): UseChatReturn {
+export function useChat(conversationId: string | null): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [currentText, setCurrentText] = useState('')
@@ -23,26 +23,35 @@ export function useChat(): UseChatReturn {
   const streamControllerRef = useRef<AbortController | null>(null)
   const queryClient = useQueryClient()
 
+  // Reset messages when conversation changes
+  useEffect(() => {
+    setMessages([])
+    setError(null)
+  }, [conversationId])
+
   // Load conversation history
   const { data: history } = useQuery<Message[], Error>({
-    queryKey: ['chat-history'],
-    queryFn: () => getConversationHistory(),
+    queryKey: ['chat-history', conversationId],
+    queryFn: () => getConversationHistory(conversationId || undefined),
     staleTime: Infinity,
     retry: 1,
+    enabled: !!conversationId, // Only fetch if we have a conversationId selected
   })
 
   // Initialize messages from history
   useEffect(() => {
-    if (history && history.length > 0 && messages.length === 0) {
+    if (history && messages.length === 0) {
       setMessages(history)
     }
   }, [history, messages.length])
 
-  const handleSendMessage = useCallback(async (content: string) => {
+  const handleSendMessage = useCallback(async (content: string, overrideConvId?: string) => {
     if (!content.trim() || isStreaming) return
 
     setError(null)
     setIsSending(true)
+    
+    const targetConvId = overrideConvId || conversationId
 
     // Optimistic: add user message immediately
     const userMessage: Message = {
@@ -72,6 +81,7 @@ export function useChat(): UseChatReturn {
     try {
       const controller = streamResponse(
         content.trim(),
+        targetConvId,
         // onChunk
         (chunk) => {
           setCurrentText((prev) => prev + chunk)
@@ -95,7 +105,7 @@ export function useChat(): UseChatReturn {
             ),
           )
           // Invalidate history query so it refetches
-          queryClient.invalidateQueries({ queryKey: ['chat-history'] })
+          queryClient.invalidateQueries({ queryKey: ['chat-history', targetConvId] })
         },
         // onError
         (err) => {
@@ -113,7 +123,7 @@ export function useChat(): UseChatReturn {
       setError('Failed to send message')
       setMessages((prev) => prev.filter((m) => m.id !== assistantMessageId))
     }
-  }, [isStreaming, queryClient])
+  }, [isStreaming, queryClient, conversationId])
 
   const handleSendFeedback = useCallback(async (messageId: string, feedback: 'positive' | 'negative') => {
     try {

@@ -10,7 +10,7 @@ export interface User {
   created_at: string
 }
 
-export type UserRole = 'admin' | 'analyst' | 'viewer'
+export type UserRole = 'admin' | 'user' | 'viewer'
 
 export interface LoginRequest {
   email: string

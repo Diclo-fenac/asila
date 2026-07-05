@@ -3,9 +3,10 @@ export type TenantStatus = 'active' | 'provisioning' | 'offline' | 'suspended'
 export interface Tenant {
   id: string
   name: string
-  status: TenantStatus
-  created_at: string
-  updated_at: string
+  status?: TenantStatus
+  is_active?: boolean
+  created_at?: string
+  updated_at?: string
   health_index?: number
   last_sync?: string
   user_count?: number

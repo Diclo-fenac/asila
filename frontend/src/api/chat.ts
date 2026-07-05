@@ -1,8 +1,11 @@
-import { apiClient } from './client'
+import { apiClient, API_URL, getStoredTenantId } from './client'
 import type { Message, Citation, ChatResponse } from '../types/chat'
+import { useAuthStore } from '../store/useAuthStore'
+import { globalToast } from '../components/ui/Toast'
+import axios from 'axios'
 
 export async function sendMessage(content: string): Promise<ChatResponse> {
-  const response = await apiClient.post<ChatResponse>('/query', {
+  const response = await apiClient.post<ChatResponse>('/chat/query', {
     query: content,
   })
   return response.data
@@ -10,50 +13,51 @@ export async function sendMessage(content: string): Promise<ChatResponse> {
 
 export function streamResponse(
   content: string,
+  conversationId: string | null,
   onChunk: (chunk: string) => void,
   onDone: (fullText: string, citations: Citation[]) => void,
   onError: (error: Error) => void,
 ): AbortController {
   const controller = new AbortController()
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
-  const getStoredAccessToken = (): string | null => {
-    try {
-      const auth = localStorage.getItem('aasila_auth')
-      if (auth) return JSON.parse(auth)?.access_token ?? null
-    } catch {
-      return null
+  const executeStream = async (isRetry = false) => {
+    const tenantId = getStoredTenantId()
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     }
-    return null
-  }
+    if (tenantId) headers['X-Tenant-Id'] = tenantId
+    
+    const body: Record<string, any> = { query: content }
+    if (conversationId) body.conversation_id = conversationId
 
-  const getStoredTenantId = (): string | null => {
     try {
-      const auth = localStorage.getItem('aasila_auth')
-      if (auth) return JSON.parse(auth)?.tenant?.id ?? null
-    } catch {
-      return null
-    }
-    return null
-  }
+      const response = await fetch(`${API_URL}/chat/query/stream`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      })
 
-  const token = getStoredAccessToken()
-  const tenantId = getStoredTenantId()
+      if (response.status === 401 && !isRetry) {
+        // Attempt to refresh the token using HttpOnly cookies
+        try {
+          await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true })
+          // Retry the stream request once
+          return executeStream(true)
+        } catch (refreshError) {
+          useAuthStore.getState().clearAuth()
+          throw new Error('Session expired. Please log in again.')
+        }
+      }
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-  if (token) headers.Authorization = `Bearer ${token}`
-  if (tenantId) headers['X-Tenant-Id'] = tenantId
-
-  fetch(`${API_URL}/query/stream`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ query: content }),
-    signal: controller.signal,
-  })
-    .then(async (response) => {
       if (!response.ok) {
+        if (response.status >= 500) {
+          globalToast('Server error: An unexpected error occurred on our end.', 'error')
+        } else if (response.status === 403) {
+          globalToast('Access denied: You do not have permission.', 'warning')
+        }
         throw new Error(`Stream failed: ${response.statusText}`)
       }
 
@@ -97,24 +101,32 @@ export function streamResponse(
       }
 
       onDone(fullText, citations)
-    })
-    .catch((err) => {
-      if (err.name !== 'AbortError') {
-        onError(err instanceof Error ? err : new Error(String(err)))
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
+        if (err.message.includes('fetch')) {
+          globalToast('Network error: Unable to connect to the server.', 'error')
+        }
+        onError(err)
+      } else if (!(err instanceof Error)) {
+        onError(new Error(String(err)))
       }
-    })
+    }
+  }
+
+  // Start the stream
+  executeStream()
 
   return controller
 }
 
 export async function getConversationHistory(conversationId?: string): Promise<Message[]> {
   const params = conversationId ? `?conversation_id=${conversationId}` : ''
-  const response = await apiClient.get<Message[]>(`/query/history${params}`)
+  const response = await apiClient.get<Message[]>(`/chat/query/history${params}`)
   return response.data
 }
 
 export async function sendFeedback(messageId: string, feedback: 'positive' | 'negative'): Promise<{ success: boolean }> {
-  const response = await apiClient.post<{ success: boolean }>(`/query/feedback`, {
+  const response = await apiClient.post<{ success: boolean }>(`/chat/query/feedback`, {
     message_id: messageId,
     feedback,
   })

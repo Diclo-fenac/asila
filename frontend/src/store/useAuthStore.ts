@@ -4,11 +4,9 @@ import type { User } from '../types/auth'
 interface AuthState {
   user: User | null
   tenant: { id: string; name: string } | null
-  access_token: string | null
-  refresh_token: string | null
   isAuthenticated: boolean
   isLoading: boolean
-  setAuth: (data: { user: User; tenant: { id: string; name: string }; access_token: string; refresh_token: string }) => void
+  setAuth: (data: { user: User; tenant: { id: string; name: string } }) => void
   clearAuth: () => void
   setLoading: (loading: boolean) => void
 }
@@ -19,15 +17,15 @@ export const selectTenant = (state: AuthState) => state.tenant
 export const selectIsAuthenticated = (state: AuthState) => state.isAuthenticated
 export const selectIsLoading = (state: AuthState) => state.isLoading
 
-function persistAuth(state: Pick<AuthState, 'user' | 'tenant' | 'access_token' | 'refresh_token'>) {
-  if (state.access_token) {
+function persistAuth(state: Pick<AuthState, 'user' | 'tenant'>) {
+  if (state.user) {
     localStorage.setItem('aasila_auth', JSON.stringify(state))
   } else {
     localStorage.removeItem('aasila_auth')
   }
 }
 
-function hydrateAuth(): Pick<AuthState, 'user' | 'tenant' | 'access_token' | 'refresh_token'> {
+function hydrateAuth(): Pick<AuthState, 'user' | 'tenant'> {
   try {
     const stored = localStorage.getItem('aasila_auth')
     if (stored) {
@@ -35,14 +33,12 @@ function hydrateAuth(): Pick<AuthState, 'user' | 'tenant' | 'access_token' | 're
       return {
         user: parsed.user ?? null,
         tenant: parsed.tenant ?? null,
-        access_token: parsed.access_token ?? null,
-        refresh_token: parsed.refresh_token ?? null,
       }
     }
   } catch {
     localStorage.removeItem('aasila_auth')
   }
-  return { user: null, tenant: null, access_token: null, refresh_token: null }
+  return { user: null, tenant: null }
 }
 
 const initial = hydrateAuth()
@@ -50,20 +46,22 @@ const initial = hydrateAuth()
 export const useAuthStore = create<AuthState>((set) => ({
   user: initial.user,
   tenant: initial.tenant,
-  access_token: initial.access_token,
-  refresh_token: initial.refresh_token,
-  isAuthenticated: !!initial.access_token,
+  isAuthenticated: !!initial.user,
   isLoading: false,
 
-  setAuth: ({ user, tenant, access_token, refresh_token }) => {
-    const state = { user, tenant, access_token, refresh_token }
+  setAuth: ({ user, tenant }) => {
+    const state = { user, tenant }
     persistAuth(state)
     set({ ...state, isAuthenticated: true, isLoading: false })
   },
 
   clearAuth: () => {
     localStorage.removeItem('aasila_auth')
-    set({ user: null, tenant: null, access_token: null, refresh_token: null, isAuthenticated: false, isLoading: false })
+    set({ user: null, tenant: null, isAuthenticated: false, isLoading: false })
+    // Hard redirect to prevent stale authenticated layouts from rendering
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+      window.location.href = '/login'
+    }
   },
 
   setLoading: (isLoading) => set({ isLoading }),
