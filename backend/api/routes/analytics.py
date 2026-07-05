@@ -6,10 +6,12 @@ from domain.tenant.documents.models import Document
 from domain.tenant.queries.models import Query
 from domain.tenant.users.models import User
 
+from core.security.auth import require_role
+
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 @router.get("/metrics")
-async def get_metrics(db: AsyncSession = Depends(get_tenant_db)):
+async def get_metrics(db: AsyncSession = Depends(get_tenant_db), current_user: dict = Depends(require_role(["admin"]))):
     # Get total queries
     q_result = await db.execute(select(func.count(Query.id)))
     queries_count = q_result.scalar_one()
@@ -22,31 +24,43 @@ async def get_metrics(db: AsyncSession = Depends(get_tenant_db)):
     u_result = await db.execute(select(func.count(User.id)))
     users_count = u_result.scalar_one()
 
-    return {
-        "total_queries": queries_count,
-        "queries_delta": "+5%",
-        "total_documents": docs_count,
-        "documents_delta": "+1",
-        "total_users": users_count,
-        "active_users": users_count
-    }
+    return [
+        {
+            "label": "Total Queries",
+            "value": queries_count,
+            "delta_percent": None,
+            "history": []
+        },
+        {
+            "label": "Total Documents",
+            "value": docs_count,
+            "delta_percent": None,
+            "history": []
+        },
+        {
+            "label": "Active Users",
+            "value": users_count,
+            "delta_percent": None,
+            "history": []
+        }
+    ]
 
 @router.get("/activity")
-async def get_activity(db: AsyncSession = Depends(get_tenant_db)):
+async def get_activity(db: AsyncSession = Depends(get_tenant_db), current_user: dict = Depends(require_role(["admin"]))):
     result = await db.execute(select(Query).order_by(Query.created_at.desc()).limit(10))
     queries = result.scalars().all()
     return [{
         "id": str(q.id),
-        "user_id": q.user_id,
+        "user": q.user_id if q.user_id else "anonymous",
         "action": "queried",
-        "details": q.question,
-        "timestamp": q.created_at.isoformat()
+        "target": q.question[:30] + ("..." if len(q.question) > 30 else ""),
+        "timestamp": q.created_at.isoformat(),
+        "severity": "info"
     } for q in queries]
 
 @router.get("/status")
-async def get_status():
+async def get_status(current_user: dict = Depends(require_role(["admin"]))):
     return {
-        "database": "Operational",
-        "redis": "Operational",
-        "worker": "Operational"
+        "status": "operational",
+        "message": "System is running optimally."
     }

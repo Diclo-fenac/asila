@@ -55,7 +55,8 @@ class GeminiService:
         result = genai.embed_content(
             model=self.embedding_model,
             content=text,
-            task_type="retrieval_document"
+            task_type="retrieval_document",
+            output_dimensionality=768
         )
         return result['embedding']
 
@@ -64,8 +65,24 @@ class GeminiService:
         result = genai.embed_content(
             model=self.embedding_model,
             content=texts,
-            task_type="retrieval_document"
+            task_type="retrieval_document",
+            output_dimensionality=768
         )
         return result['embedding']
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    async def generate_response_stream(self, prompt: str, context: str = ""):
+        import asyncio
+        full_prompt = f"Context: {context}\n\nQuestion: {prompt}" if context else prompt
+        
+        def get_stream():
+            return self.model.generate_content(full_prompt, stream=True)
+            
+        loop = asyncio.get_running_loop()
+        response_stream = await loop.run_in_executor(None, get_stream)
+        
+        for chunk in response_stream:
+            await asyncio.sleep(0)
+            yield chunk.text
 
 gemini_service = GeminiService()

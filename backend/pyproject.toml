@@ -23,6 +23,9 @@ dependencies = [
     "slowapi>=0.1.9",
     "tenacity>=9.1.4",
     "hvac>=2.4.0",
+    "python-multipart>=0.0.32",
+    "bcrypt>=5.0.0",
+    "email-validator>=2.1.0",
 ]
 
 [tool.uv]

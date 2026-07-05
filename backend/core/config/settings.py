@@ -1,23 +1,24 @@
 import os
 import hvac
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from core.logging.config import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     DATABASE_URL: str
     REDIS_URL: str
-    AUTH0_DOMAIN: str = ""
-    AUTH0_AUDIENCE: str = ""
-    
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_PASSWORD: str
     
     GOOGLE_API_KEY: str
-    GEMINI_MODEL: str = "gemini-1.5-pro"
-    EMBEDDING_MODEL: str = "models/text-embedding-004"
-    SECRET_KEY: str = "change-me-in-production"
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+    EMBEDDING_MODEL: str = "models/gemini-embedding-001"
+    SECRET_KEY: str
+    PLATFORM_API_KEY: str
+    LOG_LEVEL: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

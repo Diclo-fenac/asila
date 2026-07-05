@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends, APIRouter
+from fastapi import FastAPI, Request, Depends, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -6,12 +6,9 @@ from core.security.auth import auth_manager, get_current_user
 from core.tenant.resolver import resolve_tenant
 from core.database.tenant_session import get_tenant_db
 
-from api.routes import auth, tenants, documents, chat, users, analytics
+from api.routes import auth, tenants, documents, chat, users, analytics, conversations
 from core.exceptions.handlers import global_exception_handler
 from core.logging.config import logger
-from core.security.rate_limit import limiter
-from slowapi.errors import RateLimitExceeded
-from slowapi import _rate_limit_exceeded_handler
 import time
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -33,7 +30,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 class TenancyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Paths that don't need tenant resolution
-        if any(request.url.path.startswith(p) for p in ["/api/v1/health", "/docs", "/openapi.json", "/api/v1/tenants"]):
+        if request.method == "OPTIONS" or any(request.url.path.startswith(p) for p in ["/api/v1/health", "/docs", "/openapi.json", "/api/v1/tenants"]):
             return await call_next(request)
             
         # Try to get tenant from header X-Tenant-Id or from JWT org_id
@@ -41,12 +38,16 @@ class TenancyMiddleware(BaseHTTPMiddleware):
         
         if not tenant_id:
             auth_header = request.headers.get("Authorization")
+            token = None
             if auth_header and auth_header.startswith("Bearer "):
                 token = auth_header.split(" ")[1]
+            elif "access_token" in request.cookies:
+                token = request.cookies.get("access_token")
+                
+            if token:
                 try:
-                    from jose import jwt
-                    # Peek at the token without full verification just for routing
-                    payload = jwt.get_unverified_claims(token)
+                    # Securely verify the token signature before extracting tenant routing info
+                    payload = await auth_manager.verify_jwt(token)
                     tenant_id = payload.get("org_id")
                 except:
                     pass
@@ -58,8 +59,10 @@ class TenancyMiddleware(BaseHTTPMiddleware):
             try:
                 request.state.tenant_id = tenant_id
                 request.state.tenant_db_url = await resolve_tenant(tenant_id)
+            except HTTPException as e:
+                return JSONResponse(status_code=e.status_code, content={"detail": e.detail})
             except Exception as e:
-                return JSONResponse(status_code=404, content={"detail": f"Tenant not found: {str(e)}"})
+                return JSONResponse(status_code=500, content={"detail": f"Tenant resolution error: {str(e)}"})
 
         return await call_next(request)
 
@@ -71,8 +74,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(TenancyMiddleware)
 app.add_exception_handler(Exception, global_exception_handler)
@@ -85,6 +86,7 @@ api_router.include_router(documents.router)
 api_router.include_router(chat.router)
 api_router.include_router(users.router)
 api_router.include_router(analytics.router)
+api_router.include_router(conversations.router)
 
 @api_router.get("/health")
 async def health_check():
