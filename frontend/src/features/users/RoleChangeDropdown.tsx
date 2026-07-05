@@ -11,14 +11,14 @@ interface RoleChangeDropdownProps {
 
 const roleConfig: Record<UserRole, { color: string; bg: string; border: string; label: string }> = {
   admin: { color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', label: 'ADMIN' },
-  analyst: { color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30', label: 'ANALYST' },
+  user: { color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30', label: 'USER' },
   viewer: { color: 'text-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/30', label: 'VIEWER' },
 }
 
 export function RoleChangeDropdown({ userId, currentRole, onConfirm, isLoading }: RoleChangeDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState<UserRole | null>(null)
-  const config = roleConfig[currentRole]
+  const config = roleConfig[currentRole] ?? roleConfig.viewer
 
   const handleConfirm = () => {
     if (selected && selected !== currentRole) {

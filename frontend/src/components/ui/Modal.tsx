@@ -1,4 +1,4 @@
-import { useEffect, useCallback, type ReactNode } from 'react'
+import { useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { cn } from '../../utils/cn'
 
 interface ModalProps {
@@ -10,9 +10,43 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null)
+
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
+
+  // Focus trap
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return
+
+    const focusableElements = panelRef.current.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0] as HTMLElement
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+    firstElement?.focus()
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus()
+          e.preventDefault()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus()
+          e.preventDefault()
+        }
+      }
+    }
+
+    panelRef.current.addEventListener('keydown', handleTab)
+    return () => panelRef.current?.removeEventListener('keydown', handleTab)
+  }, [isOpen])
 
   // Escape key closes modal
   useEffect(() => {
@@ -51,6 +85,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
       {/* Panel */}
       <div
+        ref={panelRef}
         className={cn(
           'relative z-10 w-full max-w-md rounded-xl border border-aasila-border glass-panel p-6 shadow-xl',
           size === 'sm' && 'max-w-sm',

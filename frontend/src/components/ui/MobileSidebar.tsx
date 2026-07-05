@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { cn } from '../../utils/cn'
 
 interface MobileSidebarProps {
@@ -8,6 +8,59 @@ interface MobileSidebarProps {
 }
 
 export function MobileSidebar({ isOpen, onClose, children }: MobileSidebarProps) {
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Escape key closes sidebar
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  // Lock body scroll
+  useEffect(() => {
+    if (!isOpen) return
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
+  // Focus trap
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return
+
+    const focusableElements = panelRef.current.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0] as HTMLElement
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+    firstElement?.focus()
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus()
+          e.preventDefault()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus()
+          e.preventDefault()
+        }
+      }
+    }
+
+    panelRef.current.addEventListener('keydown', handleTab)
+    return () => panelRef.current?.removeEventListener('keydown', handleTab)
+  }, [isOpen])
+
   return (
     <>
       {/* Backdrop */}
@@ -21,6 +74,10 @@ export function MobileSidebar({ isOpen, onClose, children }: MobileSidebarProps)
 
       {/* Drawer */}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Navigation"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out lg:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full',

@@ -268,9 +268,9 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
       </div>
       
       {/* Content */}
-      <div className="flex-1 overflow-auto bg-[#0B0C10] p-6 text-[#FAF7F5] dark:bg-black/50">
+      <div className="flex-1 overflow-auto bg-aasila-text p-6 text-aasila-bg-main">
         {activeTab === 'SYSTEM_LOGS' && (
-          <div className="h-full invert dark:invert-0 filter-none">
+          <div className="h-full invert filter-none">
             {/* If ActivityLog uses standard colors, we might need to force dark mode styles inside this container or let it inherit. */}
             <ActivityLog entries={activityLog} isLoading={isLoading} />
           </div>

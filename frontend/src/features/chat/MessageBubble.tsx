@@ -1,6 +1,10 @@
 import { memo } from 'react'
 import { type Message } from '../../types/chat'
 import { cn } from '../../utils/cn'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 interface MessageBubbleProps {
   message: Message
@@ -23,17 +27,61 @@ export const MessageBubble = memo(function MessageBubble({ message, onFeedback }
       <div className="relative group max-w-[85%] sm:max-w-[80%]">
         {/* User bubble */}
         {isUser ? (
-          <div className="rounded-md bg-aasila-surface-user px-4 py-3 text-[15px] leading-relaxed text-aasila-text">
+          <div className="rounded-2xl rounded-tr-sm bg-aasila-text px-4 py-3 text-[15px] leading-relaxed text-aasila-bg-main shadow-sm">
             {message.content}
           </div>
         ) : (
-          /* AI bubble */
-          <div className="rounded-md border border-aasila-border/30 bg-aasila-surface-ai p-5 text-[15px] leading-relaxed text-aasila-text shadow-sm">
+          /* AI bubble (Clean & Professional Apple/Stripe Style) */
+          <div className="rounded-2xl rounded-tl-sm border border-aasila-border/50 bg-aasila-surface p-5 text-[15px] leading-relaxed text-aasila-text shadow-sm ring-1 ring-black/5">
             {/* Content */}
             {message.content ? (
-              <div className="markdown-body whitespace-pre-wrap">{message.content}</div>
+              <div className="prose prose-sm prose-neutral max-w-none break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    code(props) {
+                      const { children, className, node, ref, ...rest } = props
+                      const match = /language-(\w+)/.exec(className || '')
+                      return match ? (
+                        <div className="relative group/code mt-4 mb-4 rounded-md overflow-hidden border border-aasila-border/50">
+                          <div className="flex items-center justify-between bg-neutral-900 px-3 py-1.5 text-xs font-mono text-neutral-400">
+                            <span>{match[1]}</span>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ''))}
+                              className="text-neutral-500 hover:text-white transition-colors"
+                              title="Copy code"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <SyntaxHighlighter
+                            {...rest}
+                            PreTag="div"
+                            children={String(children).replace(/\n$/, '')}
+                            language={match[1]}
+                            style={vscDarkPlus}
+                            customStyle={{ margin: 0, borderRadius: 0, fontSize: '0.85rem' }}
+                          />
+                        </div>
+                      ) : (
+                        <code {...rest} className="rounded bg-aasila-surface-user px-1.5 py-0.5 text-sm font-mono text-brand-accent">
+                          {children}
+                        </code>
+                      )
+                    }
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
             ) : (
-              <span className="animate-pulse text-lg font-bold text-emerald-500">&gt; _</span>
+              <div className="flex items-center gap-1.5 py-2">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-brand-accent/60" style={{ animationDelay: '0ms' }} />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-brand-accent/60" style={{ animationDelay: '150ms' }} />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-brand-accent/60" style={{ animationDelay: '300ms' }} />
+              </div>
             )}
 
             {/* Citations */}
@@ -73,7 +121,7 @@ export const MessageBubble = memo(function MessageBubble({ message, onFeedback }
                 </button>
                 <button
                   type="button"
-                  onClick={() => onFeedback?.(message.id, 'positive')}
+                  onClick={() => { if (onFeedback) void onFeedback(message.id, 'positive') }}
                   className={cn(
                     'rounded-sm p-1 transition-colors hover:bg-aasila-bg-main',
                     message.feedback === 'positive'
@@ -89,7 +137,7 @@ export const MessageBubble = memo(function MessageBubble({ message, onFeedback }
                 </button>
                 <button
                   type="button"
-                  onClick={() => onFeedback?.(message.id, 'negative')}
+                  onClick={() => { if (onFeedback) void onFeedback(message.id, 'negative') }}
                   className={cn(
                     'rounded-sm p-1 transition-colors hover:bg-aasila-bg-main',
                     message.feedback === 'negative'

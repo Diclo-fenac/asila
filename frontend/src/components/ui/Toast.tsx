@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -28,6 +28,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 4000)
   }, [])
 
+  useEffect(() => {
+    const handleGlobalToast = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message: string; type: ToastType }>
+      addToast(customEvent.detail.message, customEvent.detail.type)
+    }
+    window.addEventListener('global-toast', handleGlobalToast)
+    return () => window.removeEventListener('global-toast', handleGlobalToast)
+  }, [addToast])
+
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
@@ -46,11 +55,15 @@ export function useToast() {
   return { addToast: ctx.addToast }
 }
 
+export function globalToast(message: string, type: ToastType = 'info') {
+  window.dispatchEvent(new CustomEvent('global-toast', { detail: { message, type } }))
+}
+
 const typeConfig: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', border: 'border-emerald-500/30', icon: 'text-emerald-500' },
-  error: { bg: 'bg-red-50 dark:bg-red-500/10', border: 'border-red-500/30', icon: 'text-red-500' },
-  warning: { bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-500/30', icon: 'text-amber-500' },
-  info: { bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-500/30', icon: 'text-blue-500' },
+  success: { bg: 'bg-emerald-50', border: 'border-emerald-500/30', icon: 'text-emerald-500' },
+  error: { bg: 'bg-red-50', border: 'border-red-500/30', icon: 'text-red-500' },
+  warning: { bg: 'bg-amber-50', border: 'border-amber-500/30', icon: 'text-amber-500' },
+  info: { bg: 'bg-blue-50', border: 'border-blue-500/30', icon: 'text-blue-500' },
 }
 
 function ToastContainer() {

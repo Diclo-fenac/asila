@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Select } from '../../components/ui/Select'
 import { useTenantsList } from '../../hooks/useTenants'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
@@ -11,6 +12,15 @@ interface TenantSelectorProps {
 export function TenantSelector({ value, onChange, error }: TenantSelectorProps) {
   const { data, isLoading, isError } = useTenantsList()
   const tenants = data?.items ?? []
+
+  useEffect(() => {
+    if (tenants.length > 0) {
+      const hasValue = tenants.some((t) => t.id === value)
+      if (!hasValue) {
+        onChange(tenants[0].id)
+      }
+    }
+  }, [tenants, value, onChange])
 
   if (isLoading) {
     return (
@@ -66,7 +76,7 @@ export function TenantSelector({ value, onChange, error }: TenantSelectorProps) 
     >
       {tenants.map((tenant) => (
         <option key={tenant.id} value={tenant.id}>
-          {tenant.name} ({tenant.status})
+          {tenant.name} {tenant.is_active ? '(Active)' : '(Inactive)'}
         </option>
       ))}
     </Select>

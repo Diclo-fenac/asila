@@ -11,7 +11,7 @@ import { useInviteUser } from '../../hooks/useUsers'
 const inviteSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  role: z.enum(['admin', 'analyst', 'viewer']),
+  role: z.enum(['admin', 'user', 'viewer']),
 })
 
 type InviteFormData = z.infer<typeof inviteSchema>
@@ -86,7 +86,7 @@ export function UserInviteModal({ isOpen, onClose }: UserInviteModalProps) {
             {...register('role')}
           >
             <option value="viewer">Viewer — Read-only access</option>
-            <option value="analyst">Analyst — Query and document access</option>
+            <option value="user">User — Standard platform access</option>
             <option value="admin">Admin — Full access</option>
           </Select>
 

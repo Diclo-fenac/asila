@@ -15,7 +15,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; b
 }
 
 export function TenantCard({ tenant, onManage, onCancel }: TenantCardProps) {
-  const status = statusConfig[tenant.status] ?? statusConfig.offline
+  const status = statusConfig[tenant.status ?? 'offline'] ?? statusConfig.offline
 
   return (
     <div

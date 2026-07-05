@@ -7,11 +7,13 @@ import { signUpSchema, getPasswordStrength, type SignUpFormData } from '../../ut
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
 import { Footer } from '../../components/Footer'
+import { TenantSelector } from './TenantSelector'
 
 export function SignUpForm() {
   const { signUp, isLoading } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [tenantId, setTenantId] = useState('')
 
   const {
     register,
@@ -32,7 +34,7 @@ export function SignUpForm() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setServerError(null)
-    const result = await signUp({ ...data, tenant_id: 'default' })
+    const result = await signUp({ ...data, tenant_id: tenantId })
 
     if (result.success) {
       setSuccess(true)
@@ -84,7 +86,7 @@ export function SignUpForm() {
           {/* Branding */}
           <div className="mb-10 text-center">
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-accent">
-              <svg className="h-6 w-6 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </div>
@@ -101,6 +103,9 @@ export function SignUpForm() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
+            {/* Tenant Selector */}
+            <TenantSelector value={tenantId} onChange={setTenantId} />
+
             {/* Name */}
             <Input
               id="full_name"

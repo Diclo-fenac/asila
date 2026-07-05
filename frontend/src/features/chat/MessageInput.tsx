@@ -39,8 +39,34 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
     }
 
     return (
-      <div className="flex w-full flex-col gap-2">
-        <div className="relative flex items-end rounded-sm border border-aasila-border bg-aasila-surface-ai shadow-sm transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+        <div className="relative flex items-end rounded-3xl bg-aasila-surface shadow-sm border border-aasila-border transition-all focus-within:ring-2 focus-within:ring-brand-accent p-2">
+          {/* Left Functional Icons */}
+          <div className="flex mb-1 items-center gap-1 pl-2 text-[var(--color-neutral-800)]">
+            <button type="button" title="Upload files" className="p-1.5 hover:bg-[var(--color-neutral-100)] active:bg-[var(--color-neutral-200)] rounded-full transition-colors" disabled={isLoading}>
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm3.65 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z" />
+              </svg>
+            </button>
+            <button type="button" title="Web Search" className="p-1.5 hover:bg-[var(--color-brand-blue-50)] active:bg-[var(--color-brand-blue-100)] rounded-full transition-colors" disabled={isLoading}>
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+              </svg>
+            </button>
+            <div className="h-5 w-[1px] bg-[var(--color-neutral-200)] mx-0.5" />
+            <button type="button" title="Reasoning Mode" className="p-1.5 hover:bg-[var(--color-brand-mint-50)] active:bg-[var(--color-brand-mint-100)] rounded-full transition-colors" disabled={isLoading}>
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L4.2 15.3m15.6 0v1.47a2.25 2.25 0 01-1.13 1.954l-5.36 3.1a2.25 2.25 0 01-2.34 0l-5.36-3.1a2.25 2.25 0 01-1.13-1.954V15.3c0-1.42 1.138-2.617 2.582-2.923l1.23-.263a11.208 11.208 0 014.376 0l1.23.263c1.444.306 2.582 1.503 2.582 2.923v1.47z" />
+              </svg>
+            </button>
+            <div className="h-5 w-[1px] bg-[var(--color-neutral-200)] mx-0.5" />
+            <button type="button" title="Workspace Context" className="p-1.5 hover:bg-[var(--color-neutral-100)] active:bg-[var(--color-neutral-200)] rounded-full transition-colors" disabled={isLoading}>
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+              </svg>
+            </button>
+          </div>
+
           <textarea
             ref={(node) => {
               textareaRef.current = node
@@ -48,44 +74,48 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
               else if (ref) ref.current = node
             }}
             className={cn(
-              'max-h-[200px] min-h-[56px] w-full rounded-sm bg-transparent py-4 pl-4 pr-12 text-[15px] leading-normal placeholder:text-aasila-muted text-aasila-text outline-none transition-all resize-none',
+              'flex-1 max-h-[200px] min-h-[40px] w-full bg-transparent py-2.5 px-3 text-[15px] leading-relaxed placeholder:text-aasila-muted text-aasila-text outline-none border-none focus:ring-0 resize-none overflow-hidden',
               className,
             )}
-            placeholder="Message Aasila..."
+            placeholder="Type your message here..."
             onKeyDown={handleKeyDown}
             disabled={disabled || isLoading}
             rows={1}
             {...props}
           />
-          <button
-            type="button"
-            onClick={() => {
-              const el = textareaRef.current
-              if (!el) return
-              const content = el.value.trim()
-              if (content && !isLoading) {
-                onSend(content)
-                el.value = ''
-                el.style.height = 'auto'
-              }
-            }}
-            disabled={isLoading || disabled}
-            className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-sm bg-emerald-500 text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
-            aria-label="Send message"
-          >
-            {isLoading ? (
-              <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-              </svg>
-            )}
-          </button>
+
+          {/* Right Action Button (Send / Mic) */}
+          <div className="pr-1 mb-1">
+            <button
+              type="button"
+              onClick={() => {
+                const el = textareaRef.current
+                if (!el) return
+                const content = el.value.trim()
+                if (content && !isLoading) {
+                  onSend(content)
+                  el.value = ''
+                  el.style.height = 'auto'
+                }
+              }}
+              disabled={isLoading || disabled}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-accent text-white hover:bg-brand-accent/90 transition-colors disabled:opacity-50"
+              aria-label="Send message"
+            >
+              {isLoading ? (
+                <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
-        <p className="text-center text-xs font-medium text-aasila-muted">
+        <p className="text-center text-xs font-medium text-aasila-muted opacity-70 mt-1">
           Press Enter to send, Shift + Enter for new line.
         </p>
       </div>

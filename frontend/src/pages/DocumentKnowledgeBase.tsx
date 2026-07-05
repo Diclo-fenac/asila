@@ -52,7 +52,7 @@ export function DocumentKnowledgeBase() {
         </div>
         <button
           type="button"
-          className="flex shrink-0 items-center gap-2 rounded-md bg-[#1E201F] text-[#FAF7F5] dark:bg-[#FAF7F5] dark:text-[#1E201F] px-5 py-2.5 text-sm font-semibold hover:opacity-90 shadow-sm"
+          className="flex shrink-0 items-center gap-2 rounded-md bg-aasila-text text-aasila-bg-main px-5 py-2.5 text-sm font-semibold hover:opacity-90 shadow-sm"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
