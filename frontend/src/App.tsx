@@ -113,6 +113,9 @@ function App() {
                 <Route path="/chat" element={<SuspensedPage><LazyChat /></SuspensedPage>} />
                 <Route path="/chat/:conversationId" element={<SuspensedPage><LazyChat /></SuspensedPage>} />
 
+                {/* Knowledge Base - accessible by all roles */}
+                <Route path="/documents" element={<SuspensedPage><LazyDocumentKnowledgeBase /></SuspensedPage>} />
+
                 {/* Admin Routes */}
                 <Route path="/admin" element={
                   <AdminRoute>
@@ -121,7 +124,6 @@ function App() {
                 }>
                   <Route index element={<SuspensedPage><LazyAdminDashboard /></SuspensedPage>} />
                   <Route path="tenants" element={<SuspensedPage><LazyPlatformTenantManagement /></SuspensedPage>} />
-                  <Route path="documents" element={<SuspensedPage><LazyDocumentKnowledgeBase /></SuspensedPage>} />
                   <Route path="users" element={<SuspensedPage><LazyUserManagement /></SuspensedPage>} />
                 </Route>
               </Route>

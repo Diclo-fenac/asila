@@ -3,6 +3,8 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from core.tenant.resolver import resolve_tenant
 from fastapi import HTTPException
 
+from domain.platform.tenants.models import TenantStatus
+
 @pytest.mark.asyncio
 @patch("core.tenant.resolver.redis_client")
 @patch("core.tenant.resolver.PlatformSessionLocal")
@@ -30,7 +32,7 @@ async def test_resolve_tenant_db_fallback(mock_session_local, mock_redis):
     mock_result = MagicMock()
     mock_tenant = MagicMock()
     mock_tenant.db_connection_string = "postgresql+asyncpg://db_from_sql"
-    mock_tenant.is_active = True
+    mock_tenant.status = TenantStatus.ACTIVE
     
     mock_result.scalar_one_or_none.return_value = mock_tenant
     mock_session.execute.return_value = mock_result
@@ -47,7 +49,7 @@ async def test_resolve_tenant_db_fallback(mock_session_local, mock_redis):
 @patch("core.tenant.resolver.PlatformSessionLocal")
 async def test_resolve_tenant_invalid(mock_session_local, mock_redis):
     """
-    Test that the resolver raises 403 for non-existent or inactive tenants.
+    Test that the resolver raises 403 for non-existent tenants.
     """
     mock_redis.get = AsyncMock(return_value=None)
     
@@ -60,5 +62,28 @@ async def test_resolve_tenant_invalid(mock_session_local, mock_redis):
     
     with pytest.raises(HTTPException) as excinfo:
         await resolve_tenant("fake_org")
+    
+    assert excinfo.value.status_code == 403
+
+@pytest.mark.asyncio
+@patch("core.tenant.resolver.redis_client")
+@patch("core.tenant.resolver.PlatformSessionLocal")
+async def test_resolve_tenant_inactive(mock_session_local, mock_redis):
+    """
+    Test that the resolver raises 403 for inactive (suspended) tenants.
+    """
+    mock_redis.get = AsyncMock(return_value=None)
+    
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_tenant = MagicMock()
+    mock_tenant.status = TenantStatus.SUSPENDED
+    
+    mock_result.scalar_one_or_none.return_value = mock_tenant
+    mock_session.execute.return_value = mock_result
+    mock_session_local.return_value.__aenter__.return_value = mock_session
+    
+    with pytest.raises(HTTPException) as excinfo:
+        await resolve_tenant("suspended_org")
     
     assert excinfo.value.status_code == 403

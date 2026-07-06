@@ -51,6 +51,13 @@ class TenancyMiddleware(BaseHTTPMiddleware):
                     tenant_id = payload.get("org_id")
                 except:
                     pass
+                    
+            if not tenant_id and "refresh_token" in request.cookies:
+                try:
+                    payload = await auth_manager.verify_jwt(request.cookies.get("refresh_token"), token_type="refresh")
+                    tenant_id = payload.get("org_id")
+                except:
+                    pass
 
         if not tenant_id and request.url.path.startswith(("/api/v1/documents", "/api/v1/chat")):
             return JSONResponse(status_code=401, content={"detail": "Tenant context required (X-Tenant-Id header or token org_id)"})

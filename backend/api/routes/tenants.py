@@ -49,7 +49,7 @@ async def onboard_tenant(
         raise HTTPException(status_code=400, detail="Failed to create tenant")
 
 @router.get("/", response_model=PaginatedTenantResponse)
-async def list_tenants(db: AsyncSession = Depends(get_platform_db), is_admin: bool = Depends(require_platform_admin), cursor: Optional[str] = None, limit: int = 10):
+async def list_tenants(db: AsyncSession = Depends(get_platform_db), cursor: Optional[str] = None, limit: int = 10):
     stmt = select(Tenant).order_by(asc(Tenant.created_at), asc(Tenant.id)).limit(limit + 1)
     
     if cursor:

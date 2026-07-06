@@ -6,8 +6,9 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner'
 function lazyImport(factory: () => Promise<any>) {
   return lazy(async () => {
     try {
-      const component = await factory()
-      return component
+      const module = await factory()
+      if (module.default) return module
+      return { default: Object.values(module)[0] }
     } catch (error) {
       const isChunkLoadError = error instanceof Error && 
         (error.message.includes('Failed to fetch dynamically imported module') ||

@@ -41,7 +41,7 @@ manager = TenantConnectionManager()
 async def get_tenant_db(request: Request):
     db_url = getattr(request.state, "tenant_db_url", None)
     if not db_url:
-        raise HTTPException(status_code=500, detail="Tenant context missing")
+        raise HTTPException(status_code=401, detail="Tenant context missing or token expired")
     
     SessionMaker = await manager.get_sessionmaker(db_url)
     async with SessionMaker() as session:

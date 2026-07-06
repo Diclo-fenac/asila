@@ -90,6 +90,23 @@ async def bootstrap():
     # Provision Test Tenant
     await create_tenant("org_test_123", "Test Council")
 
+    # Seed default user for org_test_123
+    from domain.tenant.users.models import User, Role
+    from core.security.auth import get_password_hash
+    from core.database.tenant_session import manager as tenant_manager
+    
+    tenant_sessionmaker = await tenant_manager.get_tenant_sessionmaker("org_test_123")
+    async with tenant_sessionmaker() as session:
+        default_user = User(
+            id="operator@aasila.systems",
+            name="Default Operator",
+            password_hash=get_password_hash("Password123"),
+            role=Role.admin,
+        )
+        session.add(default_user)
+        await session.commit()
+    print("Seeded default operator user (operator@aasila.systems / Password123)!")
+
     print("Bootstrap success!")
 
 if __name__ == "__main__":

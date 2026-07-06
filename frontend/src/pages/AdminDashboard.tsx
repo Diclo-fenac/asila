@@ -37,10 +37,7 @@ export function AdminDashboard() {
       <div className="mx-auto flex max-w-7xl flex-col gap-8 p-8">
         <div className="flex items-end justify-between border-b border-aasila-border/50 pb-6">
           <div>
-            <div className="mb-1 text-[10px] font-mono uppercase tracking-[0.2em] text-aasila-muted">
-              System Overview / Main
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-aasila-text">Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-aasila-text">Dashboard</h1>
           </div>
         </div>
 
@@ -60,24 +57,8 @@ export function AdminDashboard() {
       {/* Page Header */}
       <div className="flex items-end justify-between border-b border-aasila-border pb-6">
         <div>
-          <div className="mb-1 text-[10px] font-mono uppercase tracking-[0.2em] text-brand-accent">
-            System Overview / Main
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-aasila-text">Admin Dashboard</h1>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-aasila-muted">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              systemStatus?.status === 'operational'
-                ? 'bg-brand-accent animate-pulse'
-                : systemStatus?.status === 'degraded'
-                  ? 'bg-amber-500'
-                  : 'bg-red-500'
-            }`}
-          />
-          {systemStatus
-            ? `${systemStatus.uptime_percent.toFixed(2)}% UPTIME`
-            : 'CONNECTING...'}
+          <h1 className="text-3xl font-bold tracking-tight text-aasila-text">Dashboard</h1>
+          <p className="mt-1 text-sm text-aasila-muted">Overview of your system metrics and recent activity.</p>
         </div>
       </div>
 
@@ -106,22 +87,20 @@ export function AdminDashboard() {
         />
 
         {/* System Status Bento Card */}
-        <div className="col-span-12 flex flex-col justify-between rounded-xl border border-brand-accent/20 bg-gray-900 p-6 text-brand-accent transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-brand-accent lg:col-span-4 group relative overflow-hidden">
-          {/* subtle glow bg */}
-          <div className="absolute inset-0 bg-brand-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="col-span-12 flex flex-col justify-between rounded-xl border border-aasila-border glass-panel p-6 transition-all duration-300 hover:shadow-lg lg:col-span-4 group relative overflow-hidden">
           
           {isLoading ? (
             <div className="space-y-3 relative z-10">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="mb-2 h-3 w-24 animate-pulse rounded bg-brand-accent/20" />
-                  <div className="h-6 w-40 animate-pulse rounded bg-brand-accent/20" />
+                  <div className="mb-2 h-3 w-24 animate-pulse rounded bg-aasila-border" />
+                  <div className="h-6 w-40 animate-pulse rounded bg-aasila-border" />
                 </div>
-                <div className="h-4 w-4 animate-pulse rounded bg-brand-accent/20" />
+                <div className="h-4 w-4 animate-pulse rounded bg-aasila-border" />
               </div>
               <div className="mt-6 space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-3 w-full animate-pulse rounded border-b border-brand-accent/20 pb-1" />
+                  <div key={i} className="h-3 w-full animate-pulse rounded border-b border-aasila-border pb-1" />
                 ))}
               </div>
             </div>
@@ -129,10 +108,10 @@ export function AdminDashboard() {
             <div className="relative z-10">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-[11px] font-mono uppercase tracking-widest opacity-70">
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-aasila-muted">
                     System Status
                   </div>
-                  <div className="mt-2 text-2xl font-bold">
+                  <div className="mt-2 text-2xl font-bold text-aasila-text">
                     {systemStatus?.status === 'operational'
                       ? 'Operational'
                       : systemStatus?.status === 'degraded'
@@ -144,17 +123,17 @@ export function AdminDashboard() {
               </div>
               {systemStatus && (
                 <div className="mt-8 space-y-4">
-                  <div className="flex justify-between border-b border-brand-accent/20 pb-2 text-[10px] font-mono">
-                    <span>LATENCY</span>
-                    <span>{systemStatus.latency_ms}ms</span>
+                  <div className="flex justify-between border-b border-aasila-border pb-2 text-sm text-aasila-muted">
+                    <span>Latency</span>
+                    <span className="font-semibold text-aasila-text">{systemStatus.latency_ms ?? '—'}ms</span>
                   </div>
-                  <div className="flex justify-between border-b border-brand-accent/20 pb-2 text-[10px] font-mono">
-                    <span>STORAGE</span>
-                    <span>{systemStatus.storage_percent}% CAPACITY</span>
+                  <div className="flex justify-between border-b border-aasila-border pb-2 text-sm text-aasila-muted">
+                    <span>Storage Capacity</span>
+                    <span className="font-semibold text-aasila-text">{systemStatus.storage_percent ?? '—'}%</span>
                   </div>
-                  <div className="flex justify-between border-b border-brand-accent/20 pb-2 text-[10px] font-mono">
-                    <span>API_LOAD</span>
-                    <span className="uppercase">{systemStatus.api_load}</span>
+                  <div className="flex justify-between border-b border-aasila-border pb-2 text-sm text-aasila-muted">
+                    <span>API Load</span>
+                    <span className="font-semibold uppercase text-aasila-text">{systemStatus.api_load ?? '—'}</span>
                   </div>
                 </div>
               )}
@@ -176,7 +155,7 @@ export function AdminDashboard() {
                 <svg className="mb-3 h-6 w-6 opacity-50 transition-opacity group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="text-[10px] font-mono font-bold tracking-wider">REBOOT_NODE</span>
+                <span className="text-xs font-semibold tracking-wide">Restart</span>
               </Button>
               <Button
                 type="button"
@@ -185,7 +164,7 @@ export function AdminDashboard() {
                 <svg className="mb-3 h-6 w-6 opacity-50 transition-opacity group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                <span className="text-[10px] font-mono font-bold tracking-wider">PURGE_CACHE</span>
+                <span className="text-xs font-semibold tracking-wide">Clear Cache</span>
               </Button>
               <Button
                 type="button"
@@ -194,7 +173,7 @@ export function AdminDashboard() {
                 <svg className="mb-3 h-6 w-6 opacity-50 transition-opacity group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <span className="text-[10px] font-mono font-bold tracking-wider">SYNC_TENANTS</span>
+                <span className="text-xs font-semibold tracking-wide">Sync</span>
               </Button>
               <Button
                 type="button"
@@ -203,20 +182,15 @@ export function AdminDashboard() {
                 <svg className="mb-3 h-6 w-6 opacity-50 transition-opacity group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="text-[10px] font-mono font-bold tracking-wider">SCAN_VULN</span>
+                <span className="text-xs font-semibold tracking-wide">Scan</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer Meta */}
-      <div className="flex flex-col items-center justify-between gap-4 pt-8 text-[10px] font-mono text-aasila-muted md:flex-row">
-        <div className="flex gap-6">
-          <span>BUILD_VERSION: 1.0.4-STABLE</span>
-          <span>KERNEL: CLOUD_OS_4.2</span>
-        </div>
-        <div>© 2026 AASILA DATA SYSTEMS. SECURED PROTOCOL.</div>
+      <div className="flex flex-col items-center justify-between gap-4 pt-8 text-xs text-aasila-muted md:flex-row">
+        <div>© 2026 AASILA DATA SYSTEMS.</div>
       </div>
 
       <TelemetryConsole activityLog={activityLog} systemStatus={systemStatus} isLoading={isLoading} />
@@ -239,7 +213,7 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-accent"></span>
           </span>
-          CLOUD_OS_4.2 / TELEMETRY
+          System Logs
         </Button>
       </div>
     )
@@ -269,31 +243,30 @@ function TelemetryConsole({ activityLog, systemStatus, isLoading }: any) {
       </div>
       
       {/* Content */}
-      <div className="flex-1 overflow-auto bg-aasila-text p-6 text-aasila-bg-main">
+      <div className="flex-1 overflow-auto bg-aasila-bg-main p-6 text-aasila-text">
         {activeTab === 'SYSTEM_LOGS' && (
-          <div className="h-full invert filter-none">
-            {/* If ActivityLog uses standard colors, we might need to force dark mode styles inside this container or let it inherit. */}
+          <div className="h-full">
             <ActivityLog entries={activityLog} isLoading={isLoading} />
           </div>
         )}
         {activeTab === 'RAW_TELEMETRY' && (
-          <pre className="font-mono text-xs text-brand-accent overflow-auto p-4 bg-black/20 rounded-md border border-brand-accent/20">
+          <pre className="font-mono text-xs text-brand-accent overflow-auto p-4 bg-aasila-surface-ai rounded-md border border-aasila-border">
             {JSON.stringify(systemStatus, null, 2)}
           </pre>
         )}
         {activeTab === 'NODE_METRICS' && (
-          <div className="font-mono text-xs space-y-4 max-w-md">
-            <div className="flex justify-between border-b border-brand-accent/20 pb-2">
-              <span className="text-brand-accent/70">LATENCY</span>
-              <span className="text-brand-accent font-bold">{systemStatus?.latency_ms}ms</span>
+          <div className="font-mono text-xs space-y-4 max-w-md text-aasila-text">
+            <div className="flex justify-between border-b border-aasila-border pb-2">
+              <span className="text-aasila-muted">LATENCY</span>
+              <span className="font-bold">{systemStatus?.latency_ms ?? '—'}ms</span>
             </div>
-            <div className="flex justify-between border-b border-brand-accent/20 pb-2">
-              <span className="text-brand-accent/70">STORAGE</span>
-              <span className="text-brand-accent font-bold">{systemStatus?.storage_percent}%</span>
+            <div className="flex justify-between border-b border-aasila-border pb-2">
+              <span className="text-aasila-muted">STORAGE</span>
+              <span className="font-bold">{systemStatus?.storage_percent ?? '—'}%</span>
             </div>
-            <div className="flex justify-between border-b border-brand-accent/20 pb-2">
-              <span className="text-brand-accent/70">API LOAD</span>
-              <span className="text-brand-accent font-bold">{systemStatus?.api_load}</span>
+            <div className="flex justify-between border-b border-aasila-border pb-2">
+              <span className="text-aasila-muted">API LOAD</span>
+              <span className="font-bold">{systemStatus?.api_load ?? '—'}</span>
             </div>
           </div>
         )}

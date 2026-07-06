@@ -44,7 +44,7 @@ export const MetricCard = memo(function MetricCard({
             {icon && <div className="h-4 w-4 animate-pulse rounded bg-aasila-border" />}
           </div>
           <div className={cn('h-8 w-20 animate-pulse rounded', isDark ? 'bg-emerald-500/20' : 'bg-aasila-border')} />
-          {deltaPercent !== undefined && (
+          {deltaPercent != null && (
             <div className={cn('h-2 w-32 animate-pulse rounded', isDark ? 'bg-emerald-500/20' : 'bg-aasila-border')} />
           )}
         </div>
@@ -85,7 +85,7 @@ export const MetricCard = memo(function MetricCard({
         <div className={cn('text-3xl font-mono font-bold', isDark ? 'text-brand-accent' : 'text-aasila-text')}>
           {value}
         </div>
-        {deltaPercent !== undefined && (
+        {deltaPercent != null && (
           <div
             className={cn(
               'mt-1 text-[10px] font-mono',
@@ -101,7 +101,7 @@ export const MetricCard = memo(function MetricCard({
 
       {history && history.length > 0 && (
         <div className="mt-8 flex h-12 w-full items-end gap-[2px]">
-          <Sparkline data={history} height={48} color={deltaPercent !== undefined && deltaPercent >= 0 ? '#10b981' : '#ef4444'} />
+          <Sparkline data={history} height={48} color={deltaPercent != null && deltaPercent >= 0 ? '#10b981' : '#ef4444'} />
         </div>
       )}
     </div>

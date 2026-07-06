@@ -14,13 +14,25 @@ export function TenantSelector({ value, onChange, error }: TenantSelectorProps) 
   const tenants = data?.items ?? []
 
   useEffect(() => {
-    if (tenants.length > 0) {
-      const hasValue = tenants.some((t) => t.id === value)
-      if (!hasValue) {
+    if (!value) {
+      if (tenants.length > 0) {
         onChange(tenants[0].id)
+      } else if (isError) {
+        onChange('global')
+      } else if (!isLoading && tenants.length === 0) {
+        onChange('default')
+      }
+    } else {
+      if (tenants.length > 0) {
+        const hasValue = tenants.some((t) => t.id === value)
+        if (!hasValue) {
+          onChange(tenants[0].id)
+        }
+      } else if (isError && !['global', 'eu-west', 'ap-east'].includes(value)) {
+        onChange('global')
       }
     }
-  }, [tenants, value, onChange])
+  }, [tenants, value, onChange, isError, isLoading])
 
   if (isLoading) {
     return (
@@ -76,7 +88,7 @@ export function TenantSelector({ value, onChange, error }: TenantSelectorProps) 
     >
       {tenants.map((tenant) => (
         <option key={tenant.id} value={tenant.id}>
-          {tenant.name} {tenant.is_active ? '(Active)' : '(Inactive)'}
+          {tenant.name} {tenant.status === 'active' ? '(Active)' : '(Inactive)'}
         </option>
       ))}
     </Select>

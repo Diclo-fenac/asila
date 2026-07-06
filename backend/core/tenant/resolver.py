@@ -2,7 +2,7 @@ from core.database.redis_client import redis_client
 from fastapi import Request, HTTPException
 from sqlalchemy import select
 from core.database.platform_session import PlatformSessionLocal
-from domain.platform.tenants.models import Tenant
+from domain.platform.tenants.models import Tenant, TenantStatus
 from core.config.settings import settings
 
 
@@ -19,7 +19,7 @@ async def resolve_tenant(org_id: str) -> str:
     async with PlatformSessionLocal() as session:
         result = await session.execute(select(Tenant).where(Tenant.id == org_id))
         tenant = result.scalar_one_or_none()
-        if not tenant or not tenant.is_active:
+        if not tenant or tenant.status != TenantStatus.ACTIVE:
             raise HTTPException(status_code=403, detail="Tenant access denied")
         
         try:

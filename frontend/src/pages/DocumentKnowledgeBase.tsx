@@ -7,6 +7,7 @@ import type { Document } from '../types/document'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { fetchDocuments } from '../api/documents'
 import { useAnalytics } from '../hooks/useAnalytics'
+import { useAuthStore } from '../store/useAuthStore'
 
 const fileIcons: Record<string, string> = {
   pdf: 'article',
@@ -44,29 +45,34 @@ export function DocumentKnowledgeBase() {
   })
   
   const { metrics } = useAnalytics()
+  const user = useAuthStore((state) => state.user)
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN'
 
   return (
     <div className="mx-auto max-w-6xl p-4 sm:p-8">
-      <DocumentUploadModal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} />
+      {isAdmin && <DocumentUploadModal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} />}
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between border-b border-aasila-border/50 pb-6">
         <div>
-          <h2 className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-brand-accent">Internal Management</h2>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-aasila-text">Document Knowledge Base</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-aasila-text">Knowledge Base</h1>
           <p className="mt-2 max-w-lg text-[15px] text-aasila-muted">
-            Manage access levels, security clearance, and audit authentication vectors for all tenant administrators.
+            {isAdmin
+              ? 'Manage documents, upload new files, and monitor processing status.'
+              : 'Browse documents that have been shared with you as references.'}
           </p>
         </div>
-        <Button
-          type="button"
-          onClick={() => setShowUploadModal(true)}
-          className="flex shrink-0 items-center gap-2 rounded-md bg-aasila-text text-aasila-bg-main px-5 py-2.5 text-sm font-semibold hover:opacity-90 shadow-sm"
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          + Upload Document
-        </Button>
+        {isAdmin && (
+          <Button
+            type="button"
+            onClick={() => setShowUploadModal(true)}
+            className="flex shrink-0 items-center gap-2 rounded-md bg-aasila-text text-aasila-bg-main px-5 py-2.5 text-sm font-semibold hover:opacity-90 shadow-sm"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            + Upload Document
+          </Button>
+        )}
       </div>
 
       {/* Stats */}

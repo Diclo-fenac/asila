@@ -5,167 +5,73 @@
 
 @theme {
   /* ======================================================
-     SERENE MODERNITY — Material Design 3 Color System
+     AASILA CORE — Strict Neutral & Professional Palette
      ====================================================== */
 
-  /* Primary: Baby Blue — intelligence & stability */
-  --color-primary: #42617d;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #a7c7e7;
-  --color-on-primary-container: #34536f;
-  --color-primary-fixed: #cde5ff;
-  --color-primary-fixed-dim: #aacaea;
-  --color-on-primary-fixed: #001d32;
-  --color-on-primary-fixed-variant: #294964;
-  --color-inverse-primary: #aacaea;
+  /* Neutral Surfaces */
+  --color-app-bg: #F6F7F9;
+  --color-sidebar-bg: #F2F4F7;
+  --color-surface-primary: #FFFFFF;
+  --color-surface-secondary: #FAFBFC;
+  
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #667085;
+  
+  /* Borders */
+  --color-border-subtle: #E5E7EB;
+  
+  /* Brand */
+  --color-brand-accent: #5B6CFF;
+  --color-brand-accent-hover: #4958E8;
+  --color-brand-accent-tint: #EEF2FF;
+  
+  /* Feedback */
+  --color-success: #137A5B;
+  --color-warning: #B7791F;
+  --color-danger: #B42318;
 
-  /* Secondary: Lavender — creativity & premium */
-  --color-secondary: #725477;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #fad3fd;
-  --color-on-secondary-container: #77587c;
-  --color-secondary-fixed: #fcd7ff;
-  --color-secondary-fixed-dim: #dfbbe4;
-  --color-on-secondary-fixed: #2a1131;
-  --color-on-secondary-fixed-variant: #593d5f;
+  /* Legacy aliases (Mapped to new system for compatibility) */
+  --color-aasila-bg-main: var(--color-app-bg);
+  --color-aasila-bg-sidebar: var(--color-sidebar-bg);
+  --color-aasila-surface: var(--color-surface-primary);
+  --color-aasila-surface-user: var(--color-surface-secondary);
+  --color-aasila-surface-ai: var(--color-surface-primary);
 
-  /* Tertiary: Mint — success & growth */
-  --color-tertiary: #326940;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #96d19e;
-  --color-on-tertiary-container: #235b33;
-  --color-tertiary-fixed: #b5f1bc;
-  --color-tertiary-fixed-dim: #99d4a1;
-  --color-on-tertiary-fixed: #00210b;
-  --color-on-tertiary-fixed-variant: #18512a;
+  --color-aasila-text: var(--color-text-primary);
+  --color-aasila-muted: var(--color-text-secondary);
+  --color-aasila-border: var(--color-border-subtle);
 
-  /* Error */
-  --color-error: #ba1a1a;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffdad6;
-  --color-on-error-container: #93000a;
+  /* Typography */
+  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Surface Hierarchy (Cool Neutrals) */
-  --color-surface: #f7f9fb;
-  --color-surface-dim: #d8dadc;
-  --color-surface-bright: #f7f9fb;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2f4f6;
-  --color-surface-container: #eceef0;
-  --color-surface-container-high: #e6e8ea;
-  --color-surface-container-highest: #e0e3e5;
-  --color-surface-variant: #e0e3e5;
-  --color-surface-tint: #42617d;
-  --color-on-surface: #191c1e;
-  --color-on-surface-variant: #42474d;
-
-  /* Inverse */
-  --color-inverse-surface: #2d3133;
-  --color-inverse-on-surface: #eff1f3;
-
-  /* Outline */
-  --color-outline: #73777e;
-  --color-outline-variant: #c2c7ce;
-
-  /* Background */
-  --color-background: #f7f9fb;
-  --color-on-background: #191c1e;
-
-  /* Semantic Aliases (backward compat for existing components) */
-  --color-brand-accent: var(--color-primary);
-  --color-danger: #ba1a1a;
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
-
-  /* App Specific Mappings (Strict Light Schema) */
-  --color-aasila-bg-main: var(--color-surface);
-  --color-aasila-bg-sidebar: var(--color-surface-container-low);
-  --color-aasila-surface: var(--color-surface-container-lowest);
-  --color-aasila-surface-user: var(--color-primary-container);
-  --color-aasila-surface-ai: var(--color-surface-container-lowest);
-  --color-aasila-text: var(--color-on-surface);
-  --color-aasila-muted: var(--color-on-surface-variant);
-  --color-aasila-border: var(--color-outline-variant);
-
-  /* ======================================================
-     TYPOGRAPHY
-     ====================================================== */
-  --font-heading: "Hanken Grotesk", sans-serif;
-  --font-body: "Inter", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
-
-  /* ======================================================
-     BORDER RADIUS
-     ====================================================== */
-  --radius-sm: 0.25rem;
-  --radius-DEFAULT: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  /* Standardized Radii (crisper software feel) */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
   --radius-full: 9999px;
-
-  /* ======================================================
-     SPACING (8px base grid)
-     ====================================================== */
-  --spacing-base: 8px;
-  --spacing-gutter: 24px;
-  --spacing-container-padding: 40px;
-  --spacing-margin-mobile: 16px;
-  --spacing-margin-desktop: 64px;
 }
-
-  .dark {
-    /* Surface Hierarchy (Dark) */
-    --color-surface: #111418;
-    --color-surface-dim: #111418;
-    --color-surface-bright: #37393e;
-    --color-surface-container-lowest: #0c0f13;
-    --color-surface-container-low: #191c20;
-    --color-surface-container: #1d2024;
-    --color-surface-container-high: #282a2f;
-    --color-surface-container-highest: #33353a;
-    --color-surface-variant: #42474d;
-    --color-surface-tint: #cde5ff;
-    --color-on-surface: #e1e2e8;
-    --color-on-surface-variant: #c2c7ce;
-    
-    /* Background */
-    --color-background: #111418;
-    --color-on-background: #e1e2e8;
-    
-    /* Inverse */
-    --color-inverse-surface: #e1e2e8;
-    --color-inverse-on-surface: #2d3133;
-    
-    /* Outline */
-    --color-outline: #8c9198;
-    --color-outline-variant: #42474d;
-    
-    /* App Specific Mappings */
-    --color-aasila-bg-main: var(--color-surface);
-    --color-aasila-bg-sidebar: var(--color-surface-container-low);
-    --color-aasila-surface: var(--color-surface-container);
-    --color-aasila-surface-user: var(--color-primary-fixed-variant);
-    --color-aasila-surface-ai: var(--color-surface-container-high);
-    --color-aasila-text: var(--color-on-surface);
-    --color-aasila-muted: var(--color-on-surface-variant);
-    --color-aasila-border: var(--color-outline-variant);
-  }
-
 
 /* ======================================================
    GLOBAL STYLES
    ====================================================== */
 body {
   font-family: var(--font-body);
-  color: var(--color-on-surface);
-  background-color: var(--color-surface);
+  color: var(--color-text-secondary); /* Softer body text */
+  background-color: var(--color-app-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  color: var(--color-text-primary);
+  font-weight: 700; /* Heavier headings */
+  letter-spacing: -0.02em; /* Tighter tracking for premium feel */
 }
 
 /* Focus-visible for keyboard navigation */
@@ -174,50 +80,40 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-brand-blue-400);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-/* ======================================================
-   GLASSMORPHISM & ELEVATION
-   ====================================================== */
-
-/* Level 1: Glass panel for sticky headers */
+/* Layer 3: Design Flexibility (Transparency & Glassmorphism) */
 .glass-panel {
-  background: rgba(247, 249, 251, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(194, 199, 206, 0.3);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(229, 231, 235, 0.5); /* Neutral-200 transparent */
 }
 
-/* Level 2: Floating glass (chat input bar, modals) */
 .glass-panel-floating {
-  background: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 20px 40px -10px rgba(25, 28, 30, 0.08), 0 10px 15px -5px rgba(25, 28, 30, 0.03);
+  box-shadow: 0 20px 40px -10px rgba(45, 50, 64, 0.08), 0 10px 15px -5px rgba(45, 50, 64, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Card ambient shadow */
-.ambient-shadow {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+/* Strategic Brand Shapes (Folder-Tab) */
+.folder-tab-btn {
+  border-top-left-radius: 4px;
+  border-top-right-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  border-bottom-left-radius: var(--radius-xl);
 }
 
-/* Card hover shadow */
-.ambient-shadow-hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-}
-
-/* ======================================================
-   COMPONENT UTILITIES
-   ====================================================== */
-
-/* Shimmer animation for progress bars */
-@keyframes shimmer {
-  0% { transform: translateX(-100%) skewX(-12deg); }
-  100% { transform: translateX(400%) skewX(-12deg); }
+.folder-tab-container {
+  border-top-left-radius: 8px;
+  border-top-right-radius: var(--radius-3xl);
+  border-bottom-right-radius: var(--radius-3xl);
+  border-bottom-left-radius: var(--radius-3xl);
 }
 
 /* Markdown rendering in chat */
@@ -225,21 +121,21 @@ h1, h2, h3, h4, h5, h6 {
 .markdown-body p:last-child { margin-bottom: 0; }
 .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; opacity: 0.9; }
 .markdown-body code {
-  font-family: var(--font-mono);
-  background-color: var(--color-surface-container);
-  color: var(--color-on-surface);
+  font-family: monospace;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
   font-size: 0.85em;
-  border: 1px solid var(--color-outline-variant);
+  border: 1px solid var(--color-neutral-200);
 }
 .markdown-body pre {
-  background-color: var(--color-surface-container-low);
+  background-color: var(--color-neutral-50);
   padding: 1em;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-outline-variant);
+  border: 1px solid var(--color-neutral-200);
   overflow-x: auto;
-  font-family: var(--font-mono);
+  font-family: monospace;
   font-size: 0.85em;
   margin-bottom: 1em;
 }
@@ -247,3 +143,44 @@ h1, h2, h3, h4, h5, h6 {
 /* Hide scrollbar but keep functionality */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ======================================================
+   APPLE-ADJACENT PREMIUM UTILITIES
+   ====================================================== */
+.apple-glass {
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.apple-glass-input {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 4px 24px -6px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.btn-skeuo {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transform: translateY(0);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-skeuo:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    0 4px 8px -2px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.btn-skeuo:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+    0 0 0 0 rgba(0, 0, 0, 0.1);
+}
+
