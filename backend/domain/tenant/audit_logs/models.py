@@ -1,9 +1,9 @@
 from sqlalchemy import String, JSON
 from sqlalchemy.orm import Mapped, mapped_column
-from core.database.base import TenantBase, TimestampMixin
+from core.database.base import TenantBase, TenantIsolationMixin, TimestampMixin
 import uuid
 
-class TenantAuditLog(TenantBase, TimestampMixin):
+class TenantAuditLog(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "tenant_audit_logs"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))

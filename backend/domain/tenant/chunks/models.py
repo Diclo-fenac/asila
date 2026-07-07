@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, Text, ForeignKey, Computed, Index
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from core.database.base import TenantBase, TimestampMixin
+from core.database.base import TenantBase, TenantIsolationMixin, TimestampMixin
 
-class Chunk(TenantBase, TimestampMixin):
+class Chunk(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "chunks"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

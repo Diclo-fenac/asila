@@ -11,12 +11,16 @@ COPY pyproject.toml uv.lock ./
 
 # Create virtual environment and install dependencies
 RUN uv venv /opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN uv sync --frozen --no-dev
 
 # Stage 2: Final Production Image
 FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y libmagic1 && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for security
 RUN useradd -m asila
@@ -35,4 +39,4 @@ COPY --chown=asila:asila . .
 EXPOSE 8000
 
 # Command to run the application using uvicorn in production mode (no reload)
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -30,11 +30,10 @@ class PaginatedTenantResponse(BaseModel):
     next_cursor: Optional[str]
     has_more: bool
 
-@router.post("/", response_model=TenantResponse)
+@router.post("/", response_model=TenantResponse, dependencies=[Depends(require_platform_admin)])
 async def onboard_tenant(
     data: TenantCreate,
     db: AsyncSession = Depends(get_platform_db),
-    is_admin: bool = Depends(require_platform_admin)
 ):
     import re
     tenant_id = re.sub(r'[^a-z0-9]', '', data.name.lower())
@@ -47,6 +46,48 @@ async def onboard_tenant(
         return TenantResponse(id=tenant_id, name=data.name, status=TenantStatus.ACTIVE.value)
     except Exception as e:
         raise HTTPException(status_code=400, detail="Failed to create tenant")
+
+class RegisterTenantRequest(BaseModel):
+    name: str
+    email: str
+
+@router.post("/register", status_code=201)
+async def register_tenant(
+    data: RegisterTenantRequest,
+    db: AsyncSession = Depends(get_platform_db)
+):
+    """
+    **BOOTSTRAP / ADMIN USE ONLY**
+    This endpoint is used for self-service initial tenant bootstrapping.
+    It returns the raw API key for the newly created tenant.
+    It is not invoked by standard UI workflows.
+    """
+    import re
+    import secrets
+    
+    tenant_id = re.sub(r'[^a-z0-9]', '', data.name.lower())
+    if not tenant_id:
+        tenant_id = "tenant"
+        
+    try:
+        db_url = await create_tenant_service(tenant_id, data.name)
+        import hashlib
+        raw_api_key = f"sk-asila-{secrets.token_urlsafe(32)}"
+        api_key_hash = hashlib.sha256(raw_api_key.encode()).hexdigest()
+        
+        # update the tenant with the api_key
+        stmt = select(Tenant).where(Tenant.id == tenant_id)
+        result = await db.execute(stmt)
+        tenant = result.scalar_one_or_none()
+        if tenant:
+            tenant.api_key_hash = api_key_hash
+            await db.commit()
+            
+        return {"tenant_id": tenant_id, "api_key": raw_api_key}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Failed to create tenant: {str(e)}")
 
 @router.get("/", response_model=PaginatedTenantResponse)
 async def list_tenants(db: AsyncSession = Depends(get_platform_db), cursor: Optional[str] = None, limit: int = 10):
@@ -87,8 +128,8 @@ async def list_tenants(db: AsyncSession = Depends(get_platform_db), cursor: Opti
         has_more=has_more
     )
 
-@router.delete("/{id}")
-async def deactivate_tenant(id: str, db: AsyncSession = Depends(get_platform_db), is_admin: bool = Depends(require_platform_admin)):
+@router.delete("/{id}", dependencies=[Depends(require_platform_admin)])
+async def deactivate_tenant(id: str, db: AsyncSession = Depends(get_platform_db)):
     result = await db.execute(select(Tenant).where(Tenant.id == id))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -98,8 +139,8 @@ async def deactivate_tenant(id: str, db: AsyncSession = Depends(get_platform_db)
     await db.commit()
     return {"msg": "Tenant suspended (deactivated)"}
 
-@router.post("/{id}/cancel")
-async def cancel_tenant(id: str, db: AsyncSession = Depends(get_platform_db), is_admin: bool = Depends(require_platform_admin)):
+@router.post("/{id}/cancel", dependencies=[Depends(require_platform_admin)])
+async def cancel_tenant(id: str, db: AsyncSession = Depends(get_platform_db)):
     result = await db.execute(select(Tenant).where(Tenant.id == id))
     tenant = result.scalar_one_or_none()
     if not tenant:
@@ -109,3 +150,19 @@ async def cancel_tenant(id: str, db: AsyncSession = Depends(get_platform_db), is
     tenant.deletion_scheduled_at = datetime.now(timezone.utc) + timedelta(days=30)
     await db.commit()
     return {"msg": f"Tenant cancelled. Scheduled for deletion on {tenant.deletion_scheduled_at.isoformat()}"}
+
+@router.post("/{id}/rotate-key", dependencies=[Depends(require_platform_admin)])
+async def rotate_tenant_key(id: str, db: AsyncSession = Depends(get_platform_db)):
+    result = await db.execute(select(Tenant).where(Tenant.id == id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+        
+    import secrets
+    import hashlib
+    
+    new_raw_key = f"sk-asila-{secrets.token_urlsafe(32)}"
+    tenant.api_key_hash = hashlib.sha256(new_raw_key.encode()).hexdigest()
+    
+    await db.commit()
+    return {"msg": "Key rotated successfully", "new_api_key": new_raw_key}

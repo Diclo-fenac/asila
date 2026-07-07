@@ -38,14 +38,47 @@ async def upload_document(
         except (json.JSONDecodeError, TypeError):
             raise HTTPException(status_code=400, detail="Invalid metadata JSON")
 
-    file_bytes = None
+    file_path = None
     file_name = None
     mime_type = None
     
     if file:
-        file_bytes = await file.read()
+        import os
+        import uuid
+        import magic
+        import shutil
+
+        MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit
+        
+        upload_dir = os.path.join("/app/uploads", tenant_id)
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        ext = os.path.splitext(file.filename)[1].lower()
+        file_path = os.path.join(upload_dir, f"{uuid.uuid4().hex}{ext}")
+        
+        total_size = 0
+        with open(file_path, "wb") as out_file:
+            while True:
+                chunk = await file.read(8192)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > MAX_FILE_SIZE:
+                    out_file.close()
+                    os.remove(file_path)
+                    raise HTTPException(status_code=413, detail="File too large. Maximum size is 10MB.")
+                out_file.write(chunk)
+        
+        # True Content Validation via magic numbers
+        sniffed_mime = magic.from_file(file_path, mime=True)
+        # Whitelist
+        allowed_mimes = ['application/pdf', 'image/png', 'application/json']
+        if not sniffed_mime.startswith('text/') and sniffed_mime not in allowed_mimes:
+            os.remove(file_path)
+            raise HTTPException(status_code=400, detail=f"Invalid file content. Sniffed MIME type: {sniffed_mime}")
+
         file_name = file.filename
-        mime_type = file.content_type
+        mime_type = sniffed_mime
 
     # Enqueue background task
     redis = await get_background_pool()
@@ -54,7 +87,7 @@ async def upload_document(
         tenant_id=tenant_id,
         title=title,
         content=content,
-        file_bytes=file_bytes,
+        file_path=file_path,
         file_name=file_name,
         mime_type=mime_type,
         source_url=source_url,

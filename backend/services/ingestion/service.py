@@ -9,69 +9,33 @@ from services.embeddings.service import generate_embeddings
 from infra.llm.gemini import gemini_service
 from infra.storage.local import storage_service
 from sqlalchemy.ext.asyncio import AsyncSession
+from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
-class RecursiveChunker:
+def get_chunker(file_name: Optional[str] = None):
     """
-    Splits text by trying separators in order: Paragraphs, Newlines, Sentences, then Spaces.
-    Ensures chunks are semantically meaningful and don't break in the middle of words.
+    Returns a text splitter based on the file extension using LangChain's Language splitters.
     """
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 150):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-        self.separators = ["\n\n", "\n", ". ", " ", ""]
+    if file_name:
+        ext = file_name.split('.')[-1].lower() if '.' in file_name else ''
+        if ext in ['py']:
+            return RecursiveCharacterTextSplitter.from_language(language=Language.PYTHON, chunk_size=1000, chunk_overlap=150)
+        elif ext in ['js', 'jsx', 'ts', 'tsx']:
+            return RecursiveCharacterTextSplitter.from_language(language=Language.JS, chunk_size=1000, chunk_overlap=150)
+        elif ext in ['go']:
+            return RecursiveCharacterTextSplitter.from_language(language=Language.GO, chunk_size=1000, chunk_overlap=150)
+        elif ext in ['md', 'mdx']:
+            return RecursiveCharacterTextSplitter.from_language(language=Language.MARKDOWN, chunk_size=1000, chunk_overlap=150)
+        elif ext in ['html', 'htm']:
+            return RecursiveCharacterTextSplitter.from_language(language=Language.HTML, chunk_size=1000, chunk_overlap=150)
+    
+    return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 
-    def split_text(self, text: str) -> List[str]:
-        final_chunks = []
-        
-        # Start recursive split
-        temp_chunks = self._recursive_split(text, self.separators)
-        
-        # Merge small chunks that are below the size limit to save on API calls/storage
-        current_chunk = ""
-        for chunk in temp_chunks:
-            if len(current_chunk) + len(chunk) <= self.chunk_size:
-                current_chunk += chunk
-            else:
-                if current_chunk:
-                    final_chunks.append(current_chunk.strip())
-                current_chunk = chunk
-        
-        if current_chunk:
-            final_chunks.append(current_chunk.strip())
-            
-        return final_chunks
-
-    def _recursive_split(self, text: str, separators: List[str]) -> List[str]:
-        if len(text) <= self.chunk_size or not separators:
-            return [text]
-
-        separator = separators[0]
-        if not separator: # Handle empty string separator for character-level splitting
-            return list(text)
-            
-        splits = text.split(separator)
-        
-        result = []
-        for i, s in enumerate(splits):
-            if not s and i < len(splits) - 1: # Skip empty splits unless it's the last one
-                continue
-            
-            # Re-attach the separator except for the last element
-            chunk_with_sep = s + separator if i < len(splits) - 1 else s
-            
-            if len(chunk_with_sep) <= self.chunk_size:
-                result.append(chunk_with_sep)
-            else:
-                # If this piece is still too big, move to the next separator
-                result.extend(self._recursive_split(s, separators[1:]))
-        return result
-
-async def process_document(
+async def _process_document_internal(
     db: AsyncSession,
     tenant_id: str,
     title: str,
     content: Optional[str] = None,
-    file_data: Optional[BinaryIO] = None,
+    file_path: Optional[str] = None,
     file_name: Optional[str] = None,
     mime_type: Optional[str] = None,
     source_url: str = None,
@@ -89,13 +53,18 @@ async def process_document(
     final_file_path = None
     file_size = 0
 
-    if file_data:
+    if file_path and os.path.exists(file_path):
+        import shutil
         if not file_name:
             file_name = f"{uuid.uuid4()}_{title.replace(' ', '_')[:20]}"
         
         # Save to local storage: storage/tenants/{tenant_id}/documents/{file_name}
-        saved_relative_path = storage_service.save_file(tenant_id, file_name, file_data)
-        final_file_path = storage_service.get_file_path(saved_relative_path)
+        storage_dir = os.path.join("storage", "tenants", tenant_id, "documents")
+        os.makedirs(storage_dir, exist_ok=True)
+        final_file_path = os.path.join(storage_dir, file_name)
+        
+        shutil.move(file_path, final_file_path)
+        saved_relative_path = os.path.join(tenant_id, "documents", file_name)
         file_size = os.path.getsize(final_file_path)
 
     # 2. Multimodal Extraction (if file is provided)
@@ -121,8 +90,8 @@ async def process_document(
     db.add(document)
     await db.flush()
 
-    # 4. Advanced Chunking
-    chunker = RecursiveChunker()
+    # 4. Advanced Chunking using LangChain
+    chunker = get_chunker(file_name)
     raw_chunks = chunker.split_text(content)
     
     # 5. Context Enrichment: Prepend Title to every chunk for better vector search
@@ -152,3 +121,30 @@ async def process_document(
 
     await db.commit()
     return doc_id
+
+import asyncio
+async def process_document(
+    db: AsyncSession,
+    tenant_id: str,
+    title: str,
+    content: Optional[str] = None,
+    file_path: Optional[str] = None,
+    file_name: Optional[str] = None,
+    mime_type: Optional[str] = None,
+    source_url: str = None,
+    metadata: Dict = None
+) -> str:
+    """
+    Wrapper around _process_document_internal that enforces a 60-second timeout.
+    """
+    try:
+        return await asyncio.wait_for(
+            _process_document_internal(
+                db, tenant_id, title, content, file_path, file_name, mime_type, source_url, metadata
+            ),
+            timeout=60.0
+        )
+    except TimeoutError:
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+        raise Exception("Document processing timed out after 60 seconds.")

@@ -20,10 +20,9 @@ from domain.tenant.embeddings.models import Embedding
 from domain.tenant.users.models import User
 from domain.tenant.queries.models import Query
 from domain.tenant.conversations.models import Conversation
-from domain.tenant.location_boundaries.models import LocationBoundary
-from domain.tenant.broadcasts.models import Broadcast
+
 from domain.tenant.unanswered_queries.models import UnansweredQuery
-from domain.tenant.location_aliases.models import LocationAlias
+
 from domain.tenant.graph.models import Entity, Relationship, Community, DocumentSummary
 from domain.tenant.audit_logs.models import TenantAuditLog
 
@@ -71,7 +70,19 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    from sqlalchemy import text
+    schema_name = os.getenv("TENANT_SCHEMA_NAME")
+    if schema_name:
+        connection.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_name}"'))
+        connection.execute(text(f'SET search_path TO "{schema_name}", public'))
+        context.configure(
+            connection=connection, 
+            target_metadata=target_metadata,
+            version_table_schema=schema_name,
+            include_schemas=True
+        )
+    else:
+        context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -98,6 +109,7 @@ async def run_async_migrations() -> None:
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
+        await connection.commit()
 
     await connectable.dispose()
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 from core.database.tenant_session import get_tenant_db
@@ -15,8 +15,7 @@ class ConversationResponse(BaseModel):
     title: str
     created_at: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ConversationUpdate(BaseModel):
     title: str

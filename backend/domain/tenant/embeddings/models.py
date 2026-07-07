@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, ForeignKey, Index
 from pgvector.sqlalchemy import Vector
-from core.database.base import TenantBase, TimestampMixin
+from core.database.base import TenantBase, TenantIsolationMixin, TimestampMixin
 
-class Embedding(TenantBase, TimestampMixin):
+class Embedding(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "embeddings"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

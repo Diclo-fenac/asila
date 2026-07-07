@@ -2,9 +2,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, DateTime, ForeignKey
 from datetime import datetime
 import uuid
-from core.database.base import TenantBase
+from core.database.base import TenantBase, TenantIsolationMixin
 
-class Conversation(TenantBase):
+class Conversation(TenantBase, TenantIsolationMixin):
     __tablename__ = "conversations"
     
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))

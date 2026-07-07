@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     PLATFORM_API_KEY: str
     LOG_LEVEL: str = "INFO"
+    ASILA_MASTER_KEY: str = ""
+    ALLOWED_ORIGINS: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

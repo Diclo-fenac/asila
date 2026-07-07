@@ -43,6 +43,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - VAULT_URL=http://vault:8200
       - VAULT_TOKEN=root
+      - POSTGRES_HOST=postgres
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,20 +54,7 @@ services:
     env_file:
       - ./backend/.env
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: asila_frontend
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:8000/api/v1
-    depends_on:
-      - backend
+
 
   worker:
     build:
@@ -79,11 +67,14 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - VAULT_URL=http://vault:8200
       - VAULT_TOKEN=root
+      - POSTGRES_HOST=postgres
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - ./backend:/app
     env_file:
       - ./backend/.env
 

@@ -6,7 +6,7 @@ from typing import Optional
 from jose import jwt, JWTError
 import uuid
 from fastapi import HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from core.config.settings import settings
 import structlog
 
@@ -119,7 +119,8 @@ def require_role(roles: list[str]):
 
 from fastapi import Header
 async def require_platform_admin(x_platform_key: str = Header(None)):
+    import secrets
     platform_key = getattr(settings, "PLATFORM_API_KEY", "super-secret-platform-key")
-    if not x_platform_key or x_platform_key != platform_key:
+    if not x_platform_key or not secrets.compare_digest(x_platform_key, platform_key):
         raise HTTPException(status_code=403, detail="Platform admin access required")
     return True

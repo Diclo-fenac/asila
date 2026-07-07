@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, ForeignKey, JSON, Index
 from pgvector.sqlalchemy import Vector
-from core.database.base import TenantBase, TimestampMixin
+from core.database.base import TenantBase, TenantIsolationMixin, TimestampMixin
 from typing import Optional
 
-class Entity(TenantBase, TimestampMixin):
+class Entity(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "entities"
     
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -24,7 +24,7 @@ class Entity(TenantBase, TimestampMixin):
         Index('ix_entity_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
     )
 
-class Relationship(TenantBase, TimestampMixin):
+class Relationship(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "relationships"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -38,7 +38,7 @@ class Relationship(TenantBase, TimestampMixin):
         Index('ix_rel_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
     )
 
-class Community(TenantBase, TimestampMixin):
+class Community(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "communities"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -51,7 +51,7 @@ class Community(TenantBase, TimestampMixin):
         Index('ix_community_embedding', embedding, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'embedding': 'vector_cosine_ops'}),
     )
 
-class DocumentSummary(TenantBase, TimestampMixin):
+class DocumentSummary(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "document_summaries"
     
     id: Mapped[str] = mapped_column(String, primary_key=True)

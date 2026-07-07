@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Text, DateTime, Integer, ForeignKey
 from datetime import datetime
-from core.database.base import TenantBase
+from core.database.base import TenantBase, TenantIsolationMixin
 
-class UnansweredQuery(TenantBase):
+class UnansweredQuery(TenantBase, TenantIsolationMixin):
     __tablename__ = "unanswered_queries"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Text, ForeignKey, Integer
-from core.database.base import TenantBase, TimestampMixin
+from core.database.base import TenantBase, TenantIsolationMixin, TimestampMixin
 
-class Query(TenantBase, TimestampMixin):
+class Query(TenantBase, TenantIsolationMixin, TimestampMixin):
     __tablename__ = "queries"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
