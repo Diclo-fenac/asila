@@ -1,218 +1,360 @@
-# Aasila: Verified Information Hub for Governments
+<div align="center">
+  <h1>🚀 Aasila</h1>
+  <p><b>The Developer-First Enterprise Knowledge Hub.</b></p>
+  <p>
+    <a href="https://github.com/Diclo-fenac/aasila/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+    <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python Version">
+    <img src="https://img.shields.io/badge/FastAPI-0.100+-green.svg" alt="FastAPI">
+    <img src="https://img.shields.io/badge/Protocol-MCP-purple.svg" alt="MCP Protocol">
+  </p>
+</div>
 
-Aasila is a high-performance, secure, and multi-tenant AI platform designed for government-scale verified information management. It leverages **Retrieval-Augmented Generation (RAG)**, **Geospatial Intelligence**, and **Isolated Tenant Architectures** to provide a trusted "Single Source of Truth."
+**Aasila** is a developer-first enterprise knowledge hub designed with the "Connect and Play" philosophy. It completely bypasses traditional web dashboard interfaces in favor of pure, programmatic CLI/API ingestion and native Model Context Protocol (MCP) integration. This allows AI assistants and IDEs to seamlessly index and query your internal knowledge base.
 
-## 🚀 Key Features
+## Table of Contents
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Architecture](#architecture)
+- [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-*   **Secure Multi-Tenancy:** Hard isolation via PostgreSQL schemas (one database per tenant), ensuring strict data privacy and regulatory compliance.
-*   **Advanced RAG Pipeline:** Integration with **Google Gemini 1.5 Pro** and **pgvector** for semantic search and grounded AI responses.
-*   **Geospatial Intelligence:** Built-in **PostGIS** support for location-aware queries and boundary-based data filtering.
-*   **Automated Tenant Provisioning:** One-click tenant onboarding with automated database creation and schema migration.
-*   **Asynchronous Processing:** Decoupled document ingestion and embedding generation using **arq** background workers.
-*   **Modern Frontend:** High-speed dashboard built with **React, TypeScript, and Zustand**, featuring real-time analytics and multi-tenant switching.
+## Key Features
 
----
-
-## 🛠 Tech Stack
-
--   **Language:** Python 3.11+ (Backend), TypeScript (Frontend)
--   **Backend Framework:** FastAPI
--   **Database:** PostgreSQL with `pgvector` and `PostGIS`
--   **ORM:** SQLAlchemy (Async)
--   **Migrations:** Alembic (Dual-migration strategy)
--   **Task Queue:** `arq` (Redis-backed)
--   **Frontend:** React 18, Vite, Tailwind CSS, Zustand
--   **AI Services:** Google Gemini 1.5 Pro, Google Generative AI (SDK)
--   **Infrastructure:** Docker, Docker Compose
-
----
-
-## 🚦 Prerequisites
-
-Before you begin, ensure you have the following installed:
--   **Python 3.11 or 3.12**
--   **Node.js 18+** & **npm**
--   **Docker & Docker Compose**
--   **uv** (recommended for Python dependency management)
--   **Google Gemini API Key** (for RAG and extraction)
+- **Native MCP Integration**: Plug your enterprise knowledge base directly into Claude Desktop or Cursor via Server-Sent Events (SSE).
+- **True Multi-Tenancy**: Tenant data isolation enforced cryptographically at the database level using PostgreSQL Row-Level Security (RLS).
+- **Frictionless Ingestion**: Built-in CLI wrapper (`aasila.sh`) respects `.gitignore` natively to effortlessly sync local repositories and documents.
+- **Robust Background Processing**: Uses `arq` and Redis to handle heavy ingestion jobs asynchronously with exponential backoff and a Dead Letter Queue (DLQ).
+- **Hybrid Search**: Leverages `pgvector` for high-performance semantic search over enterprise documents.
 
 ---
 
-## 🏁 Getting Started
+## Tech Stack
+
+- **Language**: Python 3.11+ / TypeScript
+- **Framework**: FastAPI (Backend) / React 19 + Vite (Frontend)
+- **Database**: PostgreSQL 16 with `pgvector`
+- **Caching & Queues**: Redis
+- **Background Jobs**: Arq
+- **Secrets Management**: HashiCorp Vault
+- **Package Manager**: `uv` (Python) / `npm` or `yarn` (Frontend)
+- **Deployment**: Docker & Docker Compose
+
+---
+
+## Prerequisites
+
+- **Docker & Docker Compose**: Essential for running PostgreSQL, Redis, and Vault.
+- **Python 3.11+**: Required for local backend development.
+- **uv**: The ultra-fast Python package installer (recommended) or `pip`.
+- **Node.js 20+**: Required if developing the React frontend.
+
+---
+
+## Getting Started
 
 ### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/Diclo-fenac/asila.git
-cd asila
+git clone https://github.com/Diclo-fenac/aasila.git
+cd aasila
 ```
 
-### 2. Infrastructure Setup (Docker)
-Start the required infrastructure services (PostgreSQL with Vector/PostGIS and Redis):
+### 2. Environment Setup
+
+Copy the example environment files for both the root and the backend:
+
 ```bash
-docker-compose -f deployments/docker/docker-compose.yml up -d
+cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-### 3. Backend Environment Setup
-Create a `.env` file in the root directory:
-```bash
-cp .env.example .env # Or create manually
-```
+Ensure your root `.env` looks something like this:
 
-**Required Variables:**
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `DATABASE_URL` | Platform DB connection string | `postgresql+asyncpg://postgres:postgres@localhost:5432/asila_platform` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
-| `GOOGLE_API_KEY` | Your Gemini API Key | `AIzaSy...` |
-| `AUTH0_DOMAIN` | Auth0 Tenant Domain | `dev-xxx.auth0.com` |
-| `AUTH0_AUDIENCE` | Auth0 API Audience | `https://api.asila.gov` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://postgres:postgres@localhost:5432/asila_platform` |
+| `REDIS_URL` | Redis connection for caching and Arq | `redis://localhost:6379/0` |
+| `POSTGRES_USER` | PostgreSQL user | `postgres` |
+| `POSTGRES_PASSWORD`| PostgreSQL password | `postgres` |
+| `AUTH0_DOMAIN` | For frontend/backend auth | `your-domain.auth0.com` |
 
-### 4. Install Dependencies
+### 3. Database & Services Setup (Docker)
+
+To run the full stack (Database, Redis, Vault, Backend API, and Worker) seamlessly:
+
 ```bash
-# Backend
-uv sync
+docker compose up -d
+```
 
-# Frontend
+### 4. Local Development (Running without Docker)
+
+If you prefer to run the backend and frontend locally on your host machine for development:
+
+**Start Infrastructure Dependencies:**
+```bash
+docker compose up -d postgres redis vault
+```
+
+**Install Backend Dependencies (using uv):**
+```bash
+cd backend
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+uv pip install -e ".[dev]"
+```
+
+**Run Database Migrations:**
+```bash
+# Run migrations for the platform schema
+alembic -c alembic.platform.ini upgrade head
+
+# Run migrations for the shared tenant schemas
+alembic -c alembic.shared.ini upgrade head
+```
+
+**Start the FastAPI Server:**
+```bash
+uvicorn api.main:app --reload --port 8000
+```
+
+**Start the Background Worker:**
+```bash
+# In a new terminal
+cd backend
+source .venv/bin/activate
+arq workers.main.WorkerSettings
+```
+
+**Start the Frontend (Optional):**
+```bash
 cd frontend
 npm install
-cd ..
-```
-
-### 5. Database Initialization & Migrations
-Aasila uses a dual-migration strategy. You must initialize the platform and the tenant template.
-
-```bash
-# 1. Run the bootstrap script to create databases and enable extensions
-uv run python scripts/bootstrap_tenant.py
-
-# 2. Run Platform Migrations
-uv run alembic -c alembic.platform.ini upgrade head
-
-# 3. Apply the tenant schema to the template database
-# (All new tenants are cloned from this template)
-export DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/asila_schema_template
-uv run alembic -c alembic.tenant.ini upgrade head
-```
-
-### 6. Start the Application
-You need to run three components in separate terminals:
-
-**Terminal 1: API Server**
-```bash
-uv run uvicorn apps.api.main:app --reload
-```
-
-**Terminal 2: Background Worker**
-```bash
-uv run arq workers.main.WorkerSettings
-```
-
-**Terminal 3: Frontend Dev Server**
-```bash
-cd frontend
 npm run dev
 ```
 
+The API will be available at [http://localhost:8000/docs](http://localhost:8000/docs) and the frontend at [http://localhost:5173](http://localhost:5173).
+
 ---
 
-## 🏗 Architecture Overview
+## Architecture
 
 ### Directory Structure
-```
-├── apps/
-│   └── api/                # FastAPI Entry point & Routes
-├── core/
-│   ├── config/             # Pydantic Settings
-│   ├── database/           # Platform & Tenant session engines
-│   ├── security/           # JWT Auth & Rate Limiting
-│   └── tenant/             # Tenant resolver (Redis-backed)
-├── domain/                 # Business Logic & Models
-│   ├── platform/           # Platform-level (Tenants, etc.)
-│   └── tenant/             # Tenant-level (Docs, Chunks, Embeddings)
-├── services/               # Cross-cutting services
-│   ├── ingestion/          # Recursive Chunker & Pipeline
-│   ├── embeddings/         # Vector generation
-│   └── retrieval/          # Hybrid RAG search
-├── infra/                  # External Adapters (Gemini, Storage)
-├── migrations/             # Alembic Migrations (Platform vs Tenant)
-├── tests/                  # Pytest suite
-└── frontend/               # React Dashboard & Chat UI
+
+```text
+aasila/
+├── backend/                 # FastAPI application
+│   ├── api/                 # REST controllers & MCP SSE routes
+│   │   ├── main.py          # FastAPI application entry point
+│   │   └── routes/          # API route definitions
+│   ├── core/                # TenancyMiddleware, security, config
+│   ├── domain/              # Pydantic models & business logic
+│   ├── infra/               # Database schemas and connections
+│   ├── services/            # Core logic (Ingestion, Search)
+│   ├── worker/              # Arq background job tasks
+│   ├── migrations/          # Alembic migrations
+│   └── pyproject.toml       # Python dependencies
+├── frontend/                # React 19 + Vite dashboard
+│   ├── src/                 # React components and hooks
+│   └── package.json         # Frontend dependencies
+├── docs/                    # Architecture diagrams and documentation
+├── storage/                 # Local docker volumes
+├── aasila.sh                # CLI ingestion wrapper
+└── docker-compose.yml       # Docker orchestration
 ```
 
-### The Ingestion Lifecycle
-1.  **Request:** User uploads a document via `POST /documents`.
-2.  **Storage:** The file is saved to local storage (or S3 adapter).
-3.  **Extraction:** `Gemini 1.5 Pro` parses the file (PDF/Image) into structured Markdown.
-4.  **Chunking:** `RecursiveChunker` splits text at semantic boundaries (Paragraph -> Sentence -> Word).
-5.  **Vectorization:** `text-embedding-004` generates high-dimensional vectors for every chunk.
-6.  **Persistence:** Chunks and Vectors are stored in the **Tenant-specific database**.
+### Request Lifecycle
 
-### Multi-Tenancy Resolution
-Aasila uses a **Database-per-Tenant** isolation model:
--   **Resolver:** Middleware identifies the tenant from the request headers/subdomain.
--   **Cache:** Database connection strings are cached in **Redis** for sub-millisecond resolution.
--   **Isolation:** The `get_tenant_db` dependency dynamically switches SQLAlchemy engines per request.
+1. Request hits FastAPI router (`backend/api/main.py`)
+2. `TenancyMiddleware` inspects headers for `asila-api-key`.
+3. Middleware maps the API key to a specific tenant ID and injects it into the request context.
+4. Route handler invokes the appropriate Service layer.
+5. Service queries PostgreSQL (`infra/`), automatically scoping the query to the tenant using Row-Level Security (RLS) via SQLAlchemy.
+6. For heavy ingestion tasks, the Service enqueues a job to Redis.
+7. Arq `worker/` picks up the job and processes documents via LLM/embeddings in the background.
+
+### Key Components
+
+**Native MCP Integration (`backend/api/routes/mcp.py`)**
+- Exposes Model Context Protocol endpoints using Server-Sent Events (SSE).
+- Allows IDEs to send messages to the server and receive semantic context dynamically.
+
+**Multi-Tenancy (`backend/core/`)**
+- API Keys are validated against the `asila_platform` database.
+- Queries are executed against the `asila_shared` database.
+- RLS policies ensure `tenant_a` cannot mathematically read rows belonging to `tenant_b`.
+
+**CLI Ingestion (`aasila.sh`)**
+- Recursively walks a project directory, respecting `.gitignore`.
+- Packages files into a payload and ships them to the FastAPI ingestion route.
 
 ---
 
-## 🧪 Testing
+## Environment Variables
 
-We use `pytest` with `pytest-asyncio` for comprehensive testing of RAG pipelines and isolation logic.
+### Backend Required Variables
 
-```bash
-# Run all tests with dummy environment variables
-GOOGLE_API_KEY=dummy \
-DATABASE_URL=postgresql+asyncpg://u:p@h/d \
-REDIS_URL=redis://h \
-AUTH0_DOMAIN=d \
-AUTH0_AUDIENCE=d \
-uv run pytest tests/
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://user:pass@localhost:5432/db` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
+| `VAULT_URL` | HashiCorp Vault URL | `http://localhost:8200` |
+| `VAULT_TOKEN` | HashiCorp Vault Token | `root` |
+
+### Environment-Specific
+
+**Docker Compose (Development)**
+```env
+DATABASE_URL=postgresql+asyncpg://asila:asila@postgres:5432/asila_platform
+REDIS_URL=redis://redis:6379/0
+POSTGRES_HOST=postgres
 ```
-
-### Key Test Suites:
--   `test_document_ingestion.py`: Verifies the recursive chunking and Gemini integration.
--   `test_tenant_provisioning.py`: Ensures databases are correctly created from templates.
--   `test_tenant_resolver.py`: Tests the Redis-backed tenant switching logic.
 
 ---
 
-## 🚀 Deployment
+## Available Scripts
 
-### Docker Deployment (Recommended)
-The project includes a production-ready `docker-compose` configuration.
-
-```bash
-docker build -t asila-api -f deployments/docker/Dockerfile .
-docker-compose -f deployments/docker/docker-compose.yml up -d
-```
-
-### Production Considerations
--   **Database:** Use a managed PostgreSQL service (e.g., AWS RDS, GCP Cloud SQL) with `pgvector` enabled.
--   **Storage:** Swap `LocalStorageService` for an S3-compatible adapter.
--   **SSL:** Use a reverse proxy like Nginx or Traefik for TLS termination.
-
----
-
-## 🛠 Available Scripts
+### Backend (Run inside `backend/`)
 
 | Command | Description |
 |---------|-------------|
-| `uv run python scripts/bootstrap_tenant.py` | Initializes Platform and Template databases |
-| `uv run alembic -c alembic.platform.ini upgrade head` | Migrates the Platform control plane |
-| `uv run alembic -c alembic.tenant.ini upgrade head` | Migrates the current database (set via env) |
-| `uv run arq workers.main.WorkerSettings` | Starts the background worker |
-| `npm run build` | Builds the frontend for production |
+| `uvicorn api.main:app --reload` | Start FastAPI development server |
+| `arq workers.main.WorkerSettings` | Start Arq background worker |
+| `pytest` | Run the Python test suite |
+| `alembic -c alembic.platform.ini upgrade head` | Run platform database migrations |
+
+### Frontend (Run inside `frontend/`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Build TypeScript and Vite for production |
+| `npm run lint` | Run ESLint |
+
+### Root CLI Wrapper
+
+| Command | Description |
+|---------|-------------|
+| `./aasila.sh ingest` | Ingest current directory into Aasila |
 
 ---
 
-## ❓ Troubleshooting
+## Testing
 
-**PostgreSQL Extension Errors**
--   Ensure your Postgres user has superuser privileges to run `CREATE EXTENSION IF NOT EXISTS vector`.
--   If running locally on macOS, use `brew install pgvector`.
+### Running Tests
 
-**Gemini API Failures**
--   Verify your `GOOGLE_API_KEY` has the "Generative AI API" enabled in the Google Cloud Console.
+We use `pytest` for the backend. Make sure your database and Redis are running.
 
-**Migration Mismatch**
--   If you see "Target database is not at revision...", ensure you are running the correct alembic config file (`.platform.ini` vs `.tenant.ini`).
+```bash
+cd backend
+source .venv/bin/activate
+
+# Run all tests
+pytest
+
+# Run tests with output
+pytest -s -v
+
+# Run specific test file
+pytest tests/test_search.py
+```
+
+### Test Structure
+
+```text
+backend/
+├── tests/
+│   ├── test_search.py        # Semantic search logic tests
+│   ├── test_insert.py        # Database insertion and RLS tests
+│   ├── test_mcp_client.py    # MCP protocol integration tests
+│   └── test_session.py       # Session management tests
+```
+
+---
+
+## Deployment
+
+Aasila is designed to be deployed using Docker. 
+
+### Docker (Production / VPS)
+
+1. Clone the repository on your server.
+2. Update the `.env` variables with strong passwords and production URLs.
+3. Build and launch the containers:
+
+```bash
+# Build images
+docker compose build
+
+# Run detached
+docker compose up -d
+```
+
+This will automatically spin up:
+- The FastAPI Backend on port `8000`
+- The Arq Background Worker
+- The PostgreSQL Database
+- Redis
+- Hashicorp Vault
+
+### Connecting to IDEs (MCP)
+
+To connect an AI assistant to your production server:
+
+**Cursor Configuration**
+1. Open Cursor Settings > **Features** > **MCP**
+2. Add new server (Type: **SSE**)
+3. URL: `https://your-production-url.com/mcp`
+4. Set Header: `asila-api-key: sk-asila-...`
+
+---
+
+## Troubleshooting
+
+### Database Connection Issues
+
+**Error:** `asyncpg.exceptions.CannotConnectNowError`
+
+**Solution:**
+1. Verify PostgreSQL is running: `docker ps`
+2. Ensure you are using `postgresql+asyncpg://` in your `DATABASE_URL`, not just `postgresql://` or `postgres://`.
+3. Check the host name. If running locally, use `localhost`. If running via Docker Compose, use the service name (`postgres`).
+
+### Background Jobs Not Processing
+
+**Error:** Documents are stuck in "pending" status.
+
+**Solution:**
+1. Ensure the Arq worker is running. If using Docker, check `docker compose logs worker`.
+2. Check if Redis is reachable: `redis-cli ping`
+3. Look for errors in the worker output regarding missing API keys for the embedding models.
+
+### Migration Issues
+
+**Error:** `Relation "tenant" does not exist`
+
+**Solution:**
+Ensure you have run both the platform and the shared migrations:
+```bash
+cd backend
+alembic -c alembic.platform.ini upgrade head
+alembic -c alembic.shared.ini upgrade head
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, development process, and how to submit pull requests.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
