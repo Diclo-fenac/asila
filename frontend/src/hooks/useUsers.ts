@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchUsers, inviteUser, updateUserRole, deleteUser, reactivateUser } from '../api/users'
+import { fetchUsers, inviteUser, updateUserRole } from '../api/users'
 import type { UserRole } from '../types/auth'
 import type { PaginationParams } from '../types/api'
 import { useToast } from './useToast'
@@ -46,28 +46,3 @@ export function useUpdateUserRole() {
   })
 }
 
-export function useDeleteUser() {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-
-  return useMutation({
-    mutationFn: deleteUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      addToast('User deleted', 'success')
-    },
-  })
-}
-
-export function useReactivateUser() {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-
-  return useMutation({
-    mutationFn: reactivateUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      addToast('User reactivated', 'success')
-    },
-  })
-}

@@ -1,15 +1,10 @@
 import { apiClient, API_URL, getStoredTenantId } from './client'
-import type { Message, Citation, ChatResponse } from '../types/chat'
+import type { Message, Citation } from '../types/chat'
 import { useAuthStore } from '../store/useAuthStore'
 import { globalToast } from '../components/ui/Toast'
 import axios from 'axios'
 
-export async function sendMessage(content: string): Promise<ChatResponse> {
-  const response = await apiClient.post<ChatResponse>('/chat/query', {
-    query: content,
-  })
-  return response.data
-}
+
 
 export function streamResponse(
   content: string,

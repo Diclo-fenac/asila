@@ -1,6 +1,5 @@
-import { lazy, Suspense } from 'react'
-import React from 'react'
-import { LoadingSpinner } from './components/ui/LoadingSpinner'
+import { lazy } from 'react'
+
 
 // Custom lazy loader that handles ChunkLoadErrors (e.g. when app updates during session)
 function lazyImport(factory: () => Promise<any>) {
@@ -23,14 +22,6 @@ function lazyImport(factory: () => Promise<any>) {
   })
 }
 
-function PageLoader() {
-  return (
-    <div className="flex h-[80vh] items-center justify-center">
-      <LoadingSpinner className="h-8 w-8" />
-    </div>
-  )
-}
-
 // Lazy-loaded pages
 export const LazyAdminDashboard = lazyImport(() => import('./pages/AdminDashboard'))
 export const LazyPlatformTenantManagement = lazyImport(() => import('./pages/PlatformTenantManagement'))
@@ -39,14 +30,3 @@ export const LazyUserManagement = lazyImport(() => import('./pages/UserManagemen
 export const LazyChat = lazyImport(() => import('./pages/Chat'))
 export const LazyLoginPage = lazyImport(() => import('./pages/LoginPage'))
 export const LazySignUpPage = lazyImport(() => import('./pages/SignUpPage'))
-
-// Wrap a lazy component with Suspense
-export function withSuspense<T extends Record<string, unknown>>(Component: React.ComponentType<T>, fallback?: React.ReactNode) {
-  return function SuspendedComponent(props: T) {
-    return (
-      <Suspense fallback={fallback ?? <PageLoader />}>
-        <Component {...props} />
-      </Suspense>
-    )
-  }
-}
