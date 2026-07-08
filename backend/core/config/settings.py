@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     
     GOOGLE_API_KEY: str
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-2.5-flash-lite"
     EMBEDDING_MODEL: str = "models/gemini-embedding-001"
     SECRET_KEY: str
     PLATFORM_API_KEY: str
