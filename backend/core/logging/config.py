@@ -8,7 +8,7 @@ def setup_logging():
     log_level_str = settings.LOG_LEVEL.upper()
     log_level = getattr(logging, log_level_str, logging.INFO)
     
-    env = os.environ.get("ENVIRONMENT", "dev")
+    env = settings.ENVIRONMENT
     renderer = structlog.processors.JSONRenderer() if env == "prod" else structlog.dev.ConsoleRenderer()
 
     structlog.configure(

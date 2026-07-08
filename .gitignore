@@ -13,3 +13,15 @@ docs/superpowers/
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.crt
+*.p12
+credentials.json
+service-account*.json
+google-credentials.json
+*.sqlite3
+secrets/
+.secrets/
+*.log
+.DS_Store

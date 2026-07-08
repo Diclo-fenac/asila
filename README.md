@@ -198,25 +198,21 @@ aasila/
 
 ---
 
-## Environment Variables
+## Required Environment Variables
 
-### Backend Required Variables
+To run the backend, create a `.env` file in the `backend/` directory with the following variables. Do **not** commit this file.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://user:pass@localhost:5432/db` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
-| `VAULT_URL` | HashiCorp Vault URL | `http://localhost:8200` |
-| `VAULT_TOKEN` | HashiCorp Vault Token | `root` |
-
-### Environment-Specific
-
-**Docker Compose (Development)**
-```env
-DATABASE_URL=postgresql+asyncpg://asila:asila@postgres:5432/asila_platform
-REDIS_URL=redis://redis:6379/0
-POSTGRES_HOST=postgres
-```
+| Variable | Description | Required? | Example |
+|----------|-------------|-----------|---------|
+| `ENVIRONMENT` | `development`, `staging`, or `production` | Yes | `development` |
+| `ASILA_MASTER_KEY` | Key for admin tenant provisioning | Yes | `openssl rand -hex 32` |
+| `PLATFORM_API_KEY` | Generic platform API key | Yes | `openssl rand -hex 32` |
+| `DATABASE_URL` | PostgreSQL connection string | Yes | `postgresql+asyncpg://user:pass@localhost:5432/db` |
+| `REDIS_URL` | Redis connection string | Yes | `redis://localhost:6379/0` |
+| `GOOGLE_API_KEY` | Gemini API Key for LLM operations | Yes | `AIzaSy...` |
+| `SECRET_KEY` | Session/JWT signing key | Optional | `openssl rand -hex 32` |
+| `VAULT_URL` | HashiCorp Vault URL | Optional | `http://localhost:8200` |
+| `VAULT_TOKEN` | HashiCorp Vault Token | Optional | `root` |
 
 ---
 

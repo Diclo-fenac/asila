@@ -131,13 +131,18 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if app_settings.GOOGLE_API_KEY:
+        logger.info("✅ GOOGLE_API_KEY loaded")
+    else:
+        logger.error("❌ GOOGLE_API_KEY missing - check .env")
+
     # Startup: ensure default tenant and ingest welcome.md
     from core.database.platform_session import PlatformSessionLocal
     from domain.platform.tenants.models import Tenant
     from sqlalchemy import select
     import secrets
     
-    master_key = os.getenv("ASILA_MASTER_KEY")
+    master_key = app_settings.ASILA_MASTER_KEY
     if master_key:
         async with PlatformSessionLocal() as session:
             result = await session.execute(select(Tenant).where(Tenant.name == "Default Tenant"))

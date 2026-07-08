@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ASILA_MASTER_KEY: str = ""
     ALLOWED_ORIGINS: str = ""
+    ENVIRONMENT: str = "development"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -29,7 +30,8 @@ def load_settings() -> Settings:
     vault_token = os.environ.get("VAULT_TOKEN")
     vault_mount = os.environ.get("VAULT_MOUNT_POINT", "secret")
     vault_path = os.environ.get("VAULT_PATH", "aasila/config")
-    env = os.environ.get("ENVIRONMENT", "dev")
+    # Vault initialization still requires raw os.environ since Settings isn't loaded yet
+    env = os.environ.get("ENVIRONMENT", "development")
 
     if vault_url and vault_token:
         try:
