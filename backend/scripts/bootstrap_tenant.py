@@ -98,14 +98,14 @@ async def bootstrap():
     tenant_sessionmaker = await tenant_manager.get_tenant_sessionmaker("org_test_123")
     async with tenant_sessionmaker() as session:
         default_user = User(
-            id="operator@aasila.systems",
+            id="operator@asila.systems",
             name="Default Operator",
             password_hash=get_password_hash("Password123"),
             role=Role.admin,
         )
         session.add(default_user)
         await session.commit()
-    print("Seeded default operator user (operator@aasila.systems / Password123)!")
+    print("Seeded default operator user (operator@asila.systems / Password123)!")
 
     print("Bootstrap success!")
 

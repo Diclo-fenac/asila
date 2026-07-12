@@ -1,6 +1,6 @@
-# Contributing to Aasila
+# Contributing to Asila
 
-First off, thank you for considering contributing to Aasila! It's people like you that make Aasila such a great tool for government-scale verified information management.
+First off, thank you for considering contributing to Asila! It's people like you that make Asila such a great tool for government-scale verified information management.
 
 ## 1. Where do I go from here?
 
@@ -8,7 +8,7 @@ If you've noticed a bug or have a feature request, make sure to check our [Issue
 
 ## 2. Fork & create a branch
 
-If this is something you think you can fix, then fork Aasila and create a branch with a descriptive name.
+If this is something you think you can fix, then fork Asila and create a branch with a descriptive name.
 
 ## 3. Get the test suite running
 
@@ -29,7 +29,7 @@ At this point, you're ready to make your changes! Feel free to ask for help; eve
 
 ## 5. Make a Pull Request
 
-At this point, you should switch back to your master branch and make sure it's up to date with Aasila's master branch:
+At this point, you should switch back to your master branch and make sure it's up to date with Asila's master branch:
 
 ```bash
 git remote add upstream git@github.com:Diclo-fenac/asila.git

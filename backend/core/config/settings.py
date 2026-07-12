@@ -29,7 +29,7 @@ def load_settings() -> Settings:
     vault_url = os.environ.get("VAULT_URL")
     vault_token = os.environ.get("VAULT_TOKEN")
     vault_mount = os.environ.get("VAULT_MOUNT_POINT", "secret")
-    vault_path = os.environ.get("VAULT_PATH", "aasila/config")
+    vault_path = os.environ.get("VAULT_PATH", "asila/config")
     # Vault initialization still requires raw os.environ since Settings isn't loaded yet
     env = os.environ.get("ENVIRONMENT", "development")
 

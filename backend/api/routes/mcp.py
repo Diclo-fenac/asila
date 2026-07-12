@@ -10,7 +10,7 @@ from core.database.platform_session import PlatformSessionLocal
 from domain.platform.tenants.models import Tenant
 from core.database.tenant_session import manager as tenant_session_manager
 
-mcp_server = FastMCP("Aasila")
+mcp_server = FastMCP("Asila")
 import logging
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def count_tokens(text: str) -> int:
         # Fallback approximation (1 token ≈ 4 characters)
         return len(text) // 4
 
-@mcp_server.tool(name="aasila_search_verified_docs")
+@mcp_server.tool(name="asila_search_verified_docs")
 async def search_verified_docs(query: Optional[str] = None, roles: Optional[list[str]] = None, top_k: int = 5) -> str:
     """
     Search across verified documents in the enterprise knowledge base. Provide roles to filter access.
@@ -129,7 +129,7 @@ async def search_verified_docs(query: Optional[str] = None, roles: Optional[list
         logging.getLogger(__name__).error(f"Search error: {str(e)}", exc_info=True)
         return "### Error during search\nAn internal server error occurred while retrieving documents."
 
-@mcp_server.tool(name="aasila_get_ingestion_status")
+@mcp_server.tool(name="asila_get_ingestion_status")
 async def get_ingestion_status(job_id: str) -> str:
     """
     Get the status of an ingestion job.
@@ -158,7 +158,7 @@ async def get_ingestion_status(job_id: str) -> str:
         logging.getLogger(__name__).error(f"Status check error: {str(e)}", exc_info=True)
         return "An internal server error occurred while checking status."
 
-@mcp_server.tool(name="aasila_admin_create_tenant")
+@mcp_server.tool(name="asila_admin_create_tenant")
 async def admin_create_tenant(name: str) -> str:
     """
     Create a new tenant in the platform (Admin only).
@@ -192,7 +192,7 @@ async def admin_create_tenant(name: str) -> str:
         logging.getLogger(__name__).error(f"Tenant creation error: {str(e)}", exc_info=True)
         return "An internal server error occurred while creating tenant."
 
-@mcp_server.tool(name="aasila_admin_rotate_key")
+@mcp_server.tool(name="asila_admin_rotate_key")
 async def admin_rotate_key(tenant_id: str) -> str:
     """
     Rotate the API key for a given tenant (Admin only).

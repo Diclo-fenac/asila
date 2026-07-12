@@ -183,7 +183,7 @@ async def lifespan(app: FastAPI):
                             await process_document(
                                 db=db,
                                 tenant_id="org_default",
-                                title="Welcome to Aasila",
+                                title="Welcome to Asila",
                                 content=content,
                                 file_name="welcome.md"
                             )

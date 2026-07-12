@@ -75,13 +75,13 @@ async def poll_task_completion(client: httpx.AsyncClient, api_key: str, job_id: 
     raise TimeoutError(f"Task {job_id} did not complete within {timeout} seconds.")
 
 async def run_mcp_search(api_key: str, query: str) -> str:
-    """Connect to FastMCP SSE endpoint and execute aasila_search_verified_docs tool."""
+    """Connect to FastMCP SSE endpoint and execute asila_search_verified_docs tool."""
     async with sse_client(SSE_URL, headers={"asila-api-key": api_key}) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
             # Wait for server initialization
             await asyncio.sleep(0.1)
-            result = await session.call_tool("aasila_search_verified_docs", {"query": query, "top_k": 3})
+            result = await session.call_tool("asila_search_verified_docs", {"query": query, "top_k": 3})
             return result.content[0].text
 
 @pytest.mark.asyncio

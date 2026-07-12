@@ -1,15 +1,15 @@
 <div align="center">
-  <h1>🚀 Aasila</h1>
+  <h1>🚀 Asila</h1>
   <p><b>The Developer-First Enterprise Knowledge Hub.</b></p>
   <p>
-    <a href="https://github.com/Diclo-fenac/aasila/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+    <a href="https://github.com/Diclo-fenac/asila/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
     <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python Version">
     <img src="https://img.shields.io/badge/FastAPI-0.100+-green.svg" alt="FastAPI">
     <img src="https://img.shields.io/badge/Protocol-MCP-purple.svg" alt="MCP Protocol">
   </p>
 </div>
 
-**Aasila** is a developer-first enterprise knowledge hub designed with the "Connect and Play" philosophy. It completely bypasses traditional web dashboard interfaces in favor of pure, programmatic CLI/API ingestion and native Model Context Protocol (MCP) integration. This allows AI assistants and IDEs to seamlessly index and query your internal knowledge base.
+**Asila** is a developer-first enterprise knowledge hub designed with the "Connect and Play" philosophy. It completely bypasses traditional web dashboard interfaces in favor of pure, programmatic CLI/API ingestion and native Model Context Protocol (MCP) integration. This allows AI assistants and IDEs to seamlessly index and query your internal knowledge base.
 
 ## Table of Contents
 - [Key Features](#key-features)
@@ -29,7 +29,7 @@
 
 - **Native MCP Integration**: Plug your enterprise knowledge base directly into Claude Desktop or Cursor via Server-Sent Events (SSE).
 - **True Multi-Tenancy**: Tenant data isolation enforced cryptographically at the database level using PostgreSQL Row-Level Security (RLS).
-- **Frictionless Ingestion**: Built-in CLI wrapper (`aasila.sh`) respects `.gitignore` natively to effortlessly sync local repositories and documents.
+- **Frictionless Ingestion**: Built-in CLI wrapper (`asila.sh`) respects `.gitignore` natively to effortlessly sync local repositories and documents.
 - **Robust Background Processing**: Uses `arq` and Redis to handle heavy ingestion jobs asynchronously with exponential backoff and a Dead Letter Queue (DLQ).
 - **Hybrid Search**: Leverages `pgvector` for high-performance semantic search over enterprise documents.
 
@@ -62,8 +62,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Diclo-fenac/aasila.git
-cd aasila
+git clone https://github.com/Diclo-fenac/asila.git
+cd asila
 ```
 
 ### 2. Environment Setup
@@ -150,7 +150,7 @@ The API will be available at [http://localhost:8000/docs](http://localhost:8000/
 ### Directory Structure
 
 ```text
-aasila/
+asila/
 ├── backend/                 # FastAPI application
 │   ├── api/                 # REST controllers & MCP SSE routes
 │   │   ├── main.py          # FastAPI application entry point
@@ -167,7 +167,7 @@ aasila/
 │   └── package.json         # Frontend dependencies
 ├── docs/                    # Architecture diagrams and documentation
 ├── storage/                 # Local docker volumes
-├── aasila.sh                # CLI ingestion wrapper
+├── asila.sh                # CLI ingestion wrapper
 └── docker-compose.yml       # Docker orchestration
 ```
 
@@ -192,7 +192,7 @@ aasila/
 - Queries are executed against the `asila_shared` database.
 - RLS policies ensure `tenant_a` cannot mathematically read rows belonging to `tenant_b`.
 
-**CLI Ingestion (`aasila.sh`)**
+**CLI Ingestion (`asila.sh`)**
 - Recursively walks a project directory, respecting `.gitignore`.
 - Packages files into a payload and ships them to the FastAPI ingestion route.
 
@@ -239,7 +239,7 @@ To run the backend, create a `.env` file in the `backend/` directory with the fo
 
 | Command | Description |
 |---------|-------------|
-| `./aasila.sh ingest` | Ingest current directory into Aasila |
+| `./asila.sh ingest` | Ingest current directory into Asila |
 
 ---
 
@@ -278,7 +278,7 @@ backend/
 
 ## Deployment
 
-Aasila is designed to be deployed using Docker. 
+Asila is designed to be deployed using Docker. 
 
 ### Docker (Production / VPS)
 
