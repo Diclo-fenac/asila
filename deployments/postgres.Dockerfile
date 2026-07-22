@@ -1,5 +1,4 @@
 FROM pgvector/pgvector:pg16
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-16-postgis-3 postgis \
-    && rm -rf /var/lib/apt/lists/*
+COPY --chmod=0755 docker/init-roles.sh /docker-entrypoint-initdb.d/10-asila-roles.sh
+COPY docker/roles.sql.template /docker-entrypoint-initdb.d/roles.sql.template

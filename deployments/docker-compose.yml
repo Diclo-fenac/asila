@@ -1,93 +1,110 @@
-version: '3.8'
-
 services:
   postgres:
     build:
       context: .
       dockerfile: postgres.Dockerfile
-    container_name: asila_postgres
     environment:
-      - POSTGRES_USER=asila
-      - POSTGRES_PASSWORD=asila
-      - POSTGRES_DB=asila_platform
+      POSTGRES_USER: asila_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD before starting Asila}
+      POSTGRES_DB: asila_platform
+      ASILA_DB_APP_PASSWORD: ${ASILA_DB_APP_PASSWORD:?Set ASILA_DB_APP_PASSWORD before starting Asila}
+      ASILA_DB_MIGRATOR_PASSWORD: ${ASILA_DB_MIGRATOR_PASSWORD:?Set ASILA_DB_MIGRATOR_PASSWORD before starting Asila}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U asila -d asila_platform"]
+      test: ["CMD-SHELL", "pg_isready -U asila_admin -d asila_platform"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
 
   redis:
     image: redis:7-alpine
-    container_name: asila_redis
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
 
-  backend:
+  migrate:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
-    container_name: asila_backend
-    ports:
-      - "8000:8000"
+    command: >-
+      sh -c "alembic -c alembic.platform.ini upgrade head &&
+      alembic -c alembic.app.ini upgrade head"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://asila:asila@postgres:5432/asila_platform
-      - REDIS_URL=redis://redis:6379/0
-      - VAULT_URL=http://vault:8200
-      - VAULT_TOKEN=root
-      - POSTGRES_HOST=postgres
+      DATABASE_URL: postgresql+asyncpg://asila_migrator:${ASILA_DB_MIGRATOR_PASSWORD}@postgres:5432/asila_platform
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: asila_migrator
+      POSTGRES_PASSWORD: ${ASILA_DB_MIGRATOR_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "${ASILA_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: asila_app
+      POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
+      ASILA_SETUP_TOKEN: ${ASILA_SETUP_TOKEN:?Set ASILA_SETUP_TOKEN before starting Asila}
+      ASILA_MASTER_KEY: ${ASILA_MASTER_KEY:?Set ASILA_MASTER_KEY before starting Asila}
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-llama3.2}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend:/app  # Live reload for development
-    env_file:
-      - ./backend/.env
-
-
 
   worker:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
-    container_name: asila_worker
     command: ["arq", "workers.main.WorkerSettings"]
     environment:
-      - DATABASE_URL=postgresql+asyncpg://asila:asila@postgres:5432/asila_platform
-      - REDIS_URL=redis://redis:6379/0
-      - VAULT_URL=http://vault:8200
-      - VAULT_TOKEN=root
-      - POSTGRES_HOST=postgres
+      DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: asila_app
+      POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
+      ASILA_MASTER_KEY: ${ASILA_MASTER_KEY:?Set ASILA_MASTER_KEY before starting Asila}
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-llama3.2}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-    env_file:
-      - ./backend/.env
 
-  vault:
-    image: hashicorp/vault:1.15
-    container_name: asila_vault
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local-ai"]
     ports:
-      - "8200:8200"
-    environment:
-      - VAULT_DEV_ROOT_TOKEN_ID=root
-      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
-    cap_add:
-      - IPC_LOCK
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
 
 volumes:
   postgres_data:
+  redis_data:
+  ollama_data:

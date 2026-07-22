@@ -19,9 +19,6 @@ RUN uv sync --frozen --no-dev
 # Stage 2: Final Production Image
 FROM python:3.11-slim
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y libmagic1 && rm -rf /var/lib/apt/lists/*
-
 # Create a non-root user for security
 RUN useradd -m asila
 USER asila
