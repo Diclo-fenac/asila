@@ -4,43 +4,32 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-INGEST_SCRIPT="$DIR/backend/scripts/ingest.py"
 
-if [ -z "$ASILA_API_KEY" ]; then
+if [ "$1" != "init" ] && [ "$1" != "status" ] && [ -z "$ASILA_API_KEY" ]; then
     echo -e "\033[0;31mError: ASILA_API_KEY environment variable is required.\033[0m"
     exit 1
 fi
 
-if [ "$1" == "ingest" ]; then
-    # Ensure backend venv is ready
-    if [ ! -d "$DIR/backend/.venv" ]; then
-        echo "Initializing backend environment..."
-        cd "$DIR/backend" && uv sync
-    fi
-
-    cd "$DIR"
-    # Use git ls-files if inside a git repo
-    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        echo "Using git ls-files to respect .gitignore..."
-        files=$(git ls-files --cached --others --exclude-standard)
-    else
-        echo "Not a git repository. Finding all files in current directory..."
-        files=$(find . -type f -not -path '*/\.*')
-    fi
-    
-    # Run the ingestion script
+if [ "$1" == "init" ]; then
+    shift
     cd "$DIR/backend"
-    
-    # We pass the absolute paths so the script can find them
-    abs_files=""
-    for file in $files; do
-        if [ -f "$DIR/$file" ]; then
-            abs_files="$abs_files $DIR/$file"
-        fi
-    done
-    
-    uv run python scripts/ingest.py $abs_files
+    uv run python -m cli.main init "$@"
+elif [ "$1" == "search" ]; then
+    shift
+    cd "$DIR/backend"
+    uv run python -m cli.main search "$@"
+elif [ "$1" == "ingest" ]; then
+    shift
+    cd "$DIR/backend"
+    if [ "$#" -eq 0 ]; then
+        set -- .
+    fi
+    uv run python -m cli.main ingest "$@"
+elif [ "$1" == "status" ]; then
+    shift
+    cd "$DIR/backend"
+    uv run python -m cli.main status "$@"
 else
-    echo "Usage: ./asila.sh ingest"
+    echo "Usage: ./asila.sh {init|search|ingest|status}"
     exit 1
 fi

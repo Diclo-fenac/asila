@@ -10,10 +10,6 @@ class AsilaException(Exception):
         self.message = message
         self.status_code = status_code
 
-class TenantNotFoundException(AsilaException):
-    def __init__(self, tenant_id: str):
-        super().__init__(f"Tenant {tenant_id} not found", status.HTTP_404_NOT_FOUND)
-
 async def global_exception_handler(request: Request, exc: Exception):
     if isinstance(exc, AsilaException):
         return JSONResponse(

@@ -13,13 +13,24 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str
     
-    GOOGLE_API_KEY: str
+    GOOGLE_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.5-flash-lite"
     EMBEDDING_MODEL: str = "models/gemini-embedding-001"
-    SECRET_KEY: str
-    PLATFORM_API_KEY: str
     LOG_LEVEL: str = "INFO"
     ASILA_MASTER_KEY: str = ""
+    ASILA_SETUP_TOKEN: str = ""
+    ASILA_MULTI_TENANCY_ENABLED: bool = False
+    OIDC_ISSUER: str = ""
+    OIDC_AUDIENCE: str = ""
+    OIDC_JWKS_URL: str = ""
+    AI_PROVIDER: str = "ollama"
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_GENERATION_MODEL: str = "llama3.2"
+    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"
+    OPENAI_BASE_URL: str = ""
+    OPENAI_API_KEY: str = ""
+    OPENAI_GENERATION_MODEL: str = ""
+    OPENAI_EMBEDDING_MODEL: str = ""
     ALLOWED_ORIGINS: str = ""
     ENVIRONMENT: str = "development"
 

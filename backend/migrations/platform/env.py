@@ -14,8 +14,13 @@ sys.path.append(os.getcwd())
 
 from core.config.settings import settings
 from core.database.base import PlatformBase
-from domain.platform.tenants.models import Tenant
 from domain.platform.audit_logs.models import PlatformAuditLog
+from domain.platform.users.models import User
+from domain.platform.organizations.models import Organization
+from domain.platform.memberships.models import Membership
+from domain.platform.service_accounts.models import ServiceAccount
+from domain.platform.api_keys.models import ApiKey
+from domain.platform.provider_credentials.models import ProviderCredential
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
