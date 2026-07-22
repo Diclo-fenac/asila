@@ -1,55 +1,39 @@
 # Contributing to Asila
 
-First off, thank you for considering contributing to Asila! It's people like you that make Asila such a great tool for government-scale verified information management.
+Asila is an open-source, local-first knowledge platform. Contributions should preserve these boundaries:
 
-## 1. Where do I go from here?
+- APIs and CLI are first-class interfaces.
+- Organization isolation is enforced by PostgreSQL RLS.
+- Local AI must remain usable without cloud credentials.
+- MCP should expose knowledge capabilities, not administration.
+- Government-specific workflows belong in extensions.
 
-If you've noticed a bug or have a feature request, make sure to check our [Issues](../../issues) to see if someone else in the community has already created a ticket. If not, go ahead and make one!
-
-## 2. Fork & create a branch
-
-If this is something you think you can fix, then fork Asila and create a branch with a descriptive name.
-
-## 3. Get the test suite running
-
-Make sure you have the prerequisites installed:
-* Python 3.11+
-* Node.js 18+
-* Docker & Docker Compose
-* `uv` for python dependencies
-
-Run the test suite to ensure your baseline is clean:
-```bash
-uv run pytest tests/
-```
-
-## 4. Implement your fix or feature
-
-At this point, you're ready to make your changes! Feel free to ask for help; everyone is a beginner at first.
-
-## 5. Make a Pull Request
-
-At this point, you should switch back to your master branch and make sure it's up to date with Asila's master branch:
+## Development setup
 
 ```bash
-git remote add upstream git@github.com:Diclo-fenac/asila.git
-git checkout master
-git pull upstream master
+cd backend
+uv sync
+uv run pytest -q
 ```
 
-Then update your feature branch from your local copy of master, and push it!
+For a full local stack:
 
 ```bash
-git checkout <branch-name>
-git rebase master
-git push --set-upstream origin <branch-name>
+export ASILA_SETUP_TOKEN="$(openssl rand -hex 32)"
+export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+export ASILA_DB_APP_PASSWORD="$(openssl rand -hex 24)"
+export ASILA_DB_MIGRATOR_PASSWORD="$(openssl rand -hex 24)"
+docker compose -f deployments/docker-compose.yml up --build -d
 ```
 
-Finally, go to GitHub and make a Pull Request.
+## Before opening a pull request
 
-## Coding Style
+- Add or update tests for behavior changes.
+- Keep migrations compatible with the supported shared-schema migration graph and test them from an empty database.
+- Add organization-isolation coverage for organization-owned data.
+- Update the API, CLI, MCP, or deployment documentation when contracts change.
+- Run `uv run pytest -q` and `python -m compileall -q api core domain services infra`.
 
-*   **Python**: We use `black` and `ruff` for formatting and linting.
-*   **TypeScript**: We use `eslint` and `prettier`. 
+## Architectural changes
 
-Run the formatters before submitting your PR to ensure the CI passes!
+For changes affecting tenancy, authentication, provider interfaces, retrieval, or MCP, add an architecture decision record under `docs/architecture/decisions/` and explain migration impact.
