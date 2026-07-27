@@ -30,6 +30,7 @@ design/
 docs/superpowers/
 test.txt
 asila.sh
+video-demo-script.md
 
 # Secrets & Credentials
 .env
