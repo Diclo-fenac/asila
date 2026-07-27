@@ -19,6 +19,8 @@ RUN uv sync --frozen --no-dev
 # Stage 2: Final Production Image
 FROM python:3.11-slim
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user for security
 RUN useradd -m asila
 USER asila
@@ -34,6 +36,10 @@ COPY --chown=asila:asila . .
 
 # Expose API port
 EXPOSE 8000
+
+# Add HEALTHCHECK
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health || exit 1
 
 # Command to run the application using uvicorn in production mode (no reload)
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -1,13 +1,41 @@
-from cli.main import build_parser, collect_ingest_files
+from typer.testing import CliRunner
+
+from cli.commands.ingest import collect_ingest_files
+from cli.main import app
+
+runner = CliRunner()
 
 
 def test_cli_exposes_day_one_commands():
-    parser = build_parser()
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "init" in result.stdout
+    assert "search" in result.stdout
+    assert "ingest" in result.stdout
+    assert "doctor" in result.stdout
+    assert "org" in result.stdout
+    assert "key" in result.stdout
+    assert "documents" in result.stdout
+    assert "jobs" in result.stdout
+    assert "audit" in result.stdout
 
-    assert parser.parse_args(["init", "--owner-email", "a@example.com"]).command == "init"
-    assert parser.parse_args(["search", "how do I deploy?"]).command == "search"
-    assert parser.parse_args(["ingest", "."]).command == "ingest"
-    assert parser.parse_args(["status"]).command == "status"
+
+def test_cli_exposes_operator_subcommands():
+    for sub, cmd in [
+        ("org", "create"),
+        ("key", "create"),
+        ("key", "rotate"),
+        ("key", "list"),
+        ("key", "revoke"),
+        ("documents", "list"),
+        ("documents", "delete"),
+        ("jobs", "get"),
+        ("audit", "list"),
+        ("audit", "verify"),
+    ]:
+        res = runner.invoke(app, [sub, "--help"])
+        assert res.exit_code == 0
+        assert cmd in res.stdout
 
 
 def test_cli_file_collection_skips_hidden_and_runtime_directories(tmp_path):

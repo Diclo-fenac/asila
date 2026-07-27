@@ -1,179 +1,93 @@
-import argparse
-import json
-import mimetypes
 import os
-import subprocess
-from pathlib import Path
+import typer
+from typing import Optional
+from typing_extensions import Annotated
+from rich.console import Console
 
-import httpx
+# We will import commands as we build them.
+# For now, we set up the structure.
+from cli.utils.formatting import print_error, ExitCode
+from cli.commands.init import init_command
+from cli.commands.doctor import doctor_command
+from cli.commands.mcp import configure_mcp_command
+from cli.commands.ingest import ingest_command, ingest_status_command
+from cli.commands.search import search_command
+from cli.commands.org import create_org_command
+from cli.commands.key import create_key_command, list_keys_command, revoke_key_command, rotate_key_command
+from cli.commands.documents import list_docs_command, delete_doc_command
+from cli.commands.jobs import get_job_command
+from cli.commands.audit import list_audit_command, verify_audit_command
 
+app = typer.Typer(
+    name="asila",
+    help="Asila knowledge platform CLI",
+    no_args_is_help=True,
+    add_completion=False,
+)
 
-def _is_within_directory(candidate: Path, directory: Path) -> bool:
-    try:
-        candidate.relative_to(directory)
-    except ValueError:
-        return False
-    return True
+# Placeholder for sub-apps
+sources_app = typer.Typer(name="sources", help="Manage data sources", no_args_is_help=True)
+mcp_app = typer.Typer(name="mcp", help="Configure MCP clients", no_args_is_help=True)
+config_app = typer.Typer(name="config", help="Manage CLI configuration", no_args_is_help=True)
+org_app = typer.Typer(name="org", help="Manage organizations", no_args_is_help=True)
+key_app = typer.Typer(name="key", help="Manage API keys", no_args_is_help=True)
+docs_app = typer.Typer(name="documents", help="Manage knowledge documents", no_args_is_help=True)
+jobs_app = typer.Typer(name="jobs", help="Inspect ingestion jobs", no_args_is_help=True)
+audit_app = typer.Typer(name="audit", help="Verify and inspect security audit logs", no_args_is_help=True)
 
+app.add_typer(sources_app)
+app.add_typer(config_app)
+app.add_typer(org_app)
+app.add_typer(key_app)
+app.add_typer(docs_app)
+app.add_typer(jobs_app)
+app.add_typer(audit_app)
 
-def collect_ingest_files(path: Path) -> list[Path]:
-    path = path.resolve()
-    if path.is_file():
-        return [path]
-    if not path.is_dir():
-        raise SystemExit(f"Path does not exist: {path}")
+mcp_app.command("configure")(configure_mcp_command)
+app.add_typer(mcp_app)
 
-    git_dir = path / ".git"
-    if git_dir.exists():
-        result = subprocess.run(
-            ["git", "-C", str(path), "ls-files", "--cached", "--others", "--exclude-standard"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        files = []
-        for relative in result.stdout.splitlines():
-            candidate = path / relative
-            if not candidate.is_file():
-                continue
-            resolved = candidate.resolve()
-            if _is_within_directory(resolved, path):
-                files.append(resolved)
-        return sorted(files)
+org_app.command("create")(create_org_command)
 
-    ignored_directory_names = {".git", ".venv", "__pycache__", "node_modules"}
-    files = []
-    for candidate in path.rglob("*"):
-        if not candidate.is_file():
-            continue
-        relative_parts = candidate.relative_to(path).parts
-        if any(part.startswith(".") or part in ignored_directory_names for part in relative_parts):
-            continue
-        resolved = candidate.resolve()
-        if _is_within_directory(resolved, path):
-            files.append(resolved)
-    return sorted(files)
+key_app.command("create")(create_key_command)
+key_app.command("list")(list_keys_command)
+key_app.command("revoke")(revoke_key_command)
+key_app.command("rotate")(rotate_key_command)
 
+docs_app.command("list")(list_docs_command)
+docs_app.command("delete")(delete_doc_command)
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="asila", description="Asila knowledge platform CLI")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+jobs_app.command("get")(get_job_command)
 
-    init = subparsers.add_parser("init", help="Initialize a local Asila deployment")
-    init.add_argument("--url", default=os.getenv("ASILA_URL", "http://localhost:8000"))
-    init.add_argument("--setup-token", default=os.getenv("ASILA_SETUP_TOKEN"))
-    init.add_argument("--owner-email", required=True)
-    init.add_argument("--owner-name", default="Asila Owner")
-    init.add_argument("--organization-name", default="My Asila Organization")
-    init.add_argument("--organization-slug", default="my-asila-organization")
+audit_app.command("list")(list_audit_command)
+audit_app.command("verify")(verify_audit_command)
 
-    ingest = subparsers.add_parser("ingest", help="Ingest a file or directory")
-    ingest.add_argument("path", type=Path)
-    ingest.add_argument("--url", default=os.getenv("ASILA_URL", "http://localhost:8000"))
-    ingest.add_argument("--api-key", default=os.getenv("ASILA_API_KEY"))
+app.command("init")(init_command)
+app.command("doctor")(doctor_command)
+app.command("status")(doctor_command)
+app.command("ingest")(ingest_command)
+app.command("ingest-status")(ingest_status_command)
+app.command("search")(search_command)
 
-    search = subparsers.add_parser("search", help="Search indexed knowledge")
-    search.add_argument("query")
-    search.add_argument("--url", default=os.getenv("ASILA_URL", "http://localhost:8000"))
-    search.add_argument("--api-key", default=os.getenv("ASILA_API_KEY"))
-    search.add_argument("--limit", type=int, default=10)
-    search.add_argument("--mode", choices=["keyword", "hybrid"], default="keyword")
-
-    status = subparsers.add_parser("status", help="Check Asila and ingestion status")
-    status.add_argument("--url", default=os.getenv("ASILA_URL", "http://localhost:8000"))
-    status.add_argument("--api-key", default=os.getenv("ASILA_API_KEY"))
-    status.add_argument("--job-id")
-
-    return parser
-
-
-def run_init(args: argparse.Namespace) -> int:
-    if not args.setup_token:
-        raise SystemExit("ASILA_SETUP_TOKEN or --setup-token is required")
-    response = httpx.post(
-        f"{args.url.rstrip('/')}/api/v1/setup",
-        headers={"X-Asila-Setup-Token": args.setup_token},
-        json={
-            "owner_email": args.owner_email,
-            "owner_name": args.owner_name,
-            "organization_name": args.organization_name,
-            "organization_slug": args.organization_slug,
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    print(json.dumps(response.json(), indent=2))
-    return 0
+@app.callback()
+def main(
+    ctx: typer.Context,
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+):
+    """
+    Asila knowledge platform CLI.
+    """
+    # Store global state if needed
+    ctx.ensure_object(dict)
+    ctx.obj["verbose"] = verbose
+    ctx.obj["json"] = json_output
 
 
-def run_search(args: argparse.Namespace) -> int:
-    if not args.api_key:
-        raise SystemExit("ASILA_API_KEY or --api-key is required")
-    response = httpx.get(
-        f"{args.url.rstrip('/')}/api/v1/knowledge/retrieval/search",
-        headers={"X-Asila-API-Key": args.api_key},
-        params={"query": args.query, "limit": args.limit, "mode": args.mode},
-        timeout=30,
-    )
-    response.raise_for_status()
-    print(json.dumps(response.json(), indent=2))
-    return 0
-
-
-def run_ingest(args: argparse.Namespace) -> int:
-    if not args.api_key:
-        raise SystemExit("ASILA_API_KEY or --api-key is required")
-    files = collect_ingest_files(args.path)
-    if not files:
-        raise SystemExit("No ingestible files found")
-
-    root = args.path.resolve() if args.path.is_dir() else args.path.resolve().parent
-    uploaded = []
-    with httpx.Client(timeout=60) as client:
-        for file_path in files:
-            try:
-                content = file_path.read_text(encoding="utf-8")
-            except UnicodeDecodeError:
-                continue
-            relative_name = str(file_path.relative_to(root))
-            response = client.post(
-                f"{args.url.rstrip('/')}/api/v1/knowledge/documents",
-                headers={"X-Asila-API-Key": args.api_key},
-                json={
-                    "title": relative_name,
-                    "source_uri": f"file://{file_path}",
-                    "content": content,
-                    "mime_type": mimetypes.guess_type(file_path.name)[0],
-                    "metadata": {"path": relative_name},
-                },
-            )
-            response.raise_for_status()
-            uploaded.append(response.json())
-    print(json.dumps({"uploaded": len(uploaded), "documents": uploaded}, indent=2))
-    return 0
-
-
-def run_status(args: argparse.Namespace) -> int:
-    headers = {"X-Asila-API-Key": args.api_key} if args.api_key else {}
-    path = f"/api/v1/knowledge/jobs/{args.job_id}" if args.job_id else "/api/v1/health"
-    response = httpx.get(f"{args.url.rstrip('/')}{path}", headers=headers, timeout=15)
-    response.raise_for_status()
-    print(json.dumps(response.json(), indent=2))
-    return 0
-
-
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    if args.command == "init":
-        return run_init(args)
-    if args.command == "search":
-        return run_search(args)
-    if args.command == "ingest":
-        return run_ingest(args)
-    if args.command == "status":
-        return run_status(args)
-    raise SystemExit(f"Unknown command: {args.command}")
-
+@app.command()
+def version():
+    """Show the CLI version."""
+    # Would typically pull from importlib.metadata or __version__
+    typer.echo("asila CLI version 0.1.0")
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    app()

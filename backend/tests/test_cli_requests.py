@@ -1,26 +1,30 @@
 from unittest.mock import MagicMock, patch
+from typer.testing import CliRunner
 
-from cli.main import build_parser, run_search, run_status
+from cli.main import app
+
+runner = CliRunner()
 
 
 def test_cli_search_uses_canonical_knowledge_endpoint():
-    args = build_parser().parse_args(["search", "deployment", "--api-key", "ask_test"])
     response = MagicMock()
+    response.status_code = 200
     response.json.return_value = {"results": []}
 
-    with patch("cli.main.httpx.get", return_value=response) as get:
-        run_search(args)
+    with patch("cli.commands.search.httpx.get", return_value=response) as get:
+        runner.invoke(app, ["search", "deployment", "--api-key", "ask_test"])
 
     get.assert_called_once()
     assert get.call_args.args[0].endswith("/api/v1/knowledge/retrieval/search")
 
 
 def test_cli_status_uses_health_endpoint_by_default():
-    args = build_parser().parse_args(["status"])
     response = MagicMock()
-    response.json.return_value = {"status": "ok"}
+    response.status_code = 200
+    response.json.return_value = {"status": "ok", "checks": {}}
 
-    with patch("cli.main.httpx.get", return_value=response) as get:
-        run_status(args)
+    with patch("cli.commands.doctor.httpx.get", return_value=response) as get:
+        runner.invoke(app, ["doctor"])
 
-    assert get.call_args.args[0].endswith("/api/v1/health")
+    get.assert_called_once()
+    assert get.call_args.args[0].endswith("/api/v1/health/ready")

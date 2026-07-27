@@ -2,9 +2,10 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+import time
 
 from core.database.app_session import get_app_db
 from core.queue import enqueue_ingestion_job
@@ -26,8 +27,15 @@ router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
 
 def require_scope(principal: Principal, scope: str) -> None:
-    if not principal.has_scope(scope):
-        raise HTTPException(status_code=403, detail=f"Missing scope: {scope}")
+    aliases = {
+        "search:read": ["search:read", "knowledge:read", "knowledge:search", "documents:list", "ingestion:read"],
+        "documents:write": ["documents:write", "documents:ingest", "knowledge:write"],
+        "repositories:read": ["repositories:read", "knowledge:read"],
+        "repositories:write": ["repositories:write", "knowledge:write"],
+    }
+    allowed = aliases.get(scope, [scope])
+    if not any(principal.has_scope(s) for s in allowed):
+        raise HTTPException(status_code=403, detail=f"Missing required scope (one of: {', '.join(allowed)})")
 
 
 class RepositoryCreateRequest(BaseModel):
@@ -40,7 +48,15 @@ class RepositoryCreateRequest(BaseModel):
 class DocumentCreateRequest(BaseModel):
     title: str = Field(min_length=1, max_length=512)
     source_uri: str = Field(min_length=1, max_length=2048)
-    content: str = Field(min_length=1)
+    content: str = Field(min_length=1, max_length=20_000_000)
+    
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Content cannot be whitespace only")
+        return v
+
     mime_type: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     repository_id: str | None = None
@@ -213,6 +229,7 @@ async def search_knowledge(
     repository_id: str | None = Query(default=None, max_length=64),
 ):
     require_scope(principal, "search:read")
+    start = time.perf_counter()
     if mode == "hybrid":
         results = await hybrid_search(
             db,
@@ -223,6 +240,10 @@ async def search_knowledge(
         )
     else:
         results = await keyword_search(db, query, limit=limit, repository_id=repository_id)
+        
+    duration = time.perf_counter() - start
+    logger.info("search_executed", mode=mode, latency_ms=duration * 1000, result_count=len(results))
+    
     return {
         "query": query,
         "results": [result.as_dict() for result in results],
