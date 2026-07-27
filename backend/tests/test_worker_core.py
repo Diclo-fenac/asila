@@ -39,6 +39,7 @@ async def test_worker_embeds_and_completes_job():
     with (
         patch("workers.core.AppSessionLocal", session_factory),
         patch("workers.core.build_organization_embedding_provider", new=AsyncMock(return_value=MagicMock())),
+        patch("workers.core.parse_and_persist_chunks", new=AsyncMock(return_value=None)),
         patch("workers.core.embed_document_chunks", new=AsyncMock(return_value=[])),
     ):
         await process_ingestion_job({"job_try": 1}, "org_1", "job_1")
@@ -69,6 +70,7 @@ async def test_worker_retries_provider_failures_with_backoff():
     with (
         patch("workers.core.AppSessionLocal", session_factory),
         patch("workers.core.build_organization_embedding_provider", new=AsyncMock(side_effect=RuntimeError("offline"))),
+        patch("workers.core.parse_and_persist_chunks", new=AsyncMock(return_value=None)),
     ):
         with pytest.raises(Retry) as exc_info:
             await process_ingestion_job({"job_try": 1}, "org_1", "job_1")
@@ -98,6 +100,7 @@ async def test_worker_does_not_swallow_cancellation():
     with (
         patch("workers.core.AppSessionLocal", session_factory),
         patch("workers.core.build_organization_embedding_provider", new=AsyncMock(return_value=MagicMock())),
+        patch("workers.core.parse_and_persist_chunks", new=AsyncMock(return_value=None)),
         patch("workers.core.embed_document_chunks", new=AsyncMock(side_effect=asyncio.CancelledError)),
     ):
         with pytest.raises(asyncio.CancelledError):

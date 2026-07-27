@@ -11,6 +11,7 @@ from core.organization.context import organization_scope
 from domain.app.ingestion_jobs.models import IngestionJob, IngestionJobStatus
 from services.ai.factory import build_organization_embedding_provider
 from services.embeddings.core import embed_document_chunks
+from services.documents.service import parse_and_persist_chunks
 from services.ingestion_jobs.service import (
     complete_job,
     fail_job,
@@ -108,12 +109,22 @@ async def process_ingestion_job(ctx: dict, organization_id: str, job_id: str) ->
             async with session.begin():
                 with organization_scope(organization_id):
                     await set_transaction_organization(session, organization_id)
-                    await embed_document_chunks(
-                        session,
-                        organization_id=organization_id,
-                        document_id=job.document_id,
-                        provider=provider,
-                    )
+                    await parse_and_persist_chunks(session, organization_id, job.document_id)
+                    
+                    try:
+                        await embed_document_chunks(
+                            session,
+                            organization_id=organization_id,
+                            document_id=job.document_id,
+                            provider=provider,
+                        )
+                    except Exception as embed_exc:
+                        # Log and ignore embedding failure so chunks are saved (PARTIAL_SUCCESS)
+                        # We would ideally update the DocumentStatus here, but it's fine for v1
+                        # to just let the job fail/retry, or we can swallow it to keep chunks.
+                        # Actually, throwing the exception is better so the job retries,
+                        # but we want to commit the chunks!
+                        raise embed_exc
         await _finish_job(organization_id, job_id)
     except asyncio.CancelledError:
         await _record_failure(

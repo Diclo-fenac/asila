@@ -21,7 +21,7 @@ async def test_api_key_authentication_returns_organization_principal():
         expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
     )
     key_result = MagicMock()
-    key_result.scalar_one_or_none.return_value = key
+    key_result.scalars.return_value.all.return_value = [key]
     organization_result = MagicMock()
     organization_result.scalar_one_or_none.return_value = Organization(
         id="org_1",
@@ -54,7 +54,7 @@ async def test_expired_api_key_is_rejected():
         expires_at=datetime.now(timezone.utc) - timedelta(minutes=1),
     )
     key_result = MagicMock()
-    key_result.scalar_one_or_none.return_value = key
+    key_result.scalars.return_value.all.return_value = [key]
     organization_result = MagicMock()
     organization_result.scalar_one_or_none.return_value = MagicMock()
     session = MagicMock()
