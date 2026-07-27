@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 
 import httpx
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class OllamaEmbeddingProvider:
@@ -15,6 +16,7 @@ class OllamaEmbeddingProvider:
         self.model = model
         self._client = client
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def embed(self, texts: Sequence[str]) -> list[list[float]]:
         owns_client = self._client is None
         client = self._client or httpx.AsyncClient(timeout=60)
@@ -45,6 +47,7 @@ class OllamaGenerationProvider:
         self.model = model
         self._client = client
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def generate(self, prompt: str, context: str = "") -> str:
         owns_client = self._client is None
         client = self._client or httpx.AsyncClient(timeout=120)

@@ -1,15 +1,37 @@
+# Python Caches & Environments
 .venv/
 __pycache__/
 *.pyc
-.env
-migrations/tenant/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
 
-# User Requested Ignores
-design/
-docs/superpowers/
+# IDEs & AI Assistants
+.agents/
+.codex/
+.gemini/
+.cursor/
+.vscode/
+.idea/
 .qwen/
 
-# Secrets
+# Database & Migrations
+migrations/tenant/
+*.sqlite3
+
+# Local Test Data, Scripts & Scratch Files
+scripts/
+backend/scripts/
+fixtures/
+archive/
+design/
+docs/superpowers/
+test.txt
+asila.sh
+
+# Secrets & Credentials
 .env
 .env.*
 !.env.example
@@ -20,8 +42,10 @@ docs/superpowers/
 credentials.json
 service-account*.json
 google-credentials.json
-*.sqlite3
 secrets/
 .secrets/
+
+# OS & Logs
 *.log
 .DS_Store
+Thumbs.db

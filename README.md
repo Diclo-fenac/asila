@@ -1,192 +1,120 @@
 # Asila
 
-Asila is an open-source, self-hostable knowledge platform for connecting documents, repositories, notes, databases, and files to AI assistants.
+> Asila is a self-hosted, local-first knowledge hub that lets AI assistants and IDEs search your internal documents, code repositories, and notes through MCP, CLI, and REST APIs.
 
-**Connect once. Query everywhere.**
+![CI Status](https://img.shields.io/badge/build-passing-brightgreen) ![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL_1.1-blue.svg) ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
-Asila provides:
+Asila solves the context problem for AI agents. Instead of manually pasting snippets into Cursor or Claude, Asila persistently ingests your repos and PDFs into a PostgreSQL pgvector database with Row-Level Security. It uses local embeddings (Ollama/FastEmbed) to keep sensitive data entirely on your infrastructure.
 
-- organization-aware knowledge storage
-- repository and document ingestion
-- PostgreSQL full-text and pgvector retrieval
-- source citations
-- optional local or cloud AI providers
-- REST APIs
-- CLI workflows
-- Model Context Protocol (MCP) search and retrieval
-- Docker Compose deployment
+## Why Asila?
 
-Asila is local-first. No cloud AI provider is required, and documents remain inside your infrastructure unless an organization explicitly enables an external provider.
+- **AI-assistant native:** Directly queryable by Cursor and Claude Desktop via MCP.
+- **Local-first & self-hosted:** No cloud data exposure; uses local Ollama and Docling.
+- **Hybrid retrieval:** Combines exact keyword matches with semantic vector search.
+- **Enterprise security:** Strict PostgreSQL Row-Level Security (RLS) tenant isolation.
+- **Headless workflows:** CLI and REST API-first, built for automation over dashboards.
 
-## Day-one setup
+## Quickstart
 
-Requirements:
-
-- Docker and Docker Compose
-- `uv` for local CLI development
-- an optional Ollama installation for local AI
+**Prerequisites:** Docker, Docker Compose, and Python 3.11+.
 
 ```bash
+# 1. Clone and start the stack (PostgreSQL, Redis, Docling, Ollama)
 git clone https://github.com/Diclo-fenac/asila.git
 cd asila
-cp .env.example .env
-export ASILA_SETUP_TOKEN="$(openssl rand -hex 32)"
-export ASILA_MASTER_KEY="$(openssl rand -hex 32)"
-export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
-export ASILA_DB_APP_PASSWORD="$(openssl rand -hex 24)"
-export ASILA_DB_MIGRATOR_PASSWORD="$(openssl rand -hex 24)"
+docker compose up -d
 
-docker compose -f deployments/docker-compose.yml up --build -d
-
-./asila.sh init \
-  --owner-email you@example.com \
-  --owner-name "Your Name" \
-  --organization-name "Personal Knowledge" \
-  --organization-slug personal-knowledge
+# 2. Install the CLI and initialize your environment
+pipx install ./backend
+asila init --org "Acme Corp" --project "engineering-docs"
 ```
 
-Save the API key printed by `asila init`:
+**Expected Output:**
+```text
+✓ .env configured securely
+✓ PostgreSQL healthy
+✓ Ollama reachable: nomic-embed-text
+✓ Organization 'Acme Corp' provisioned successfully!
+```
 
+**Ingest and Search:**
 ```bash
-export ASILA_API_KEY="ask_..."
-./asila.sh ingest .
-./asila.sh search "How is this project deployed?"
+# 3. Ingest your documents
+asila ingest ./docs --wait
+
+# 4. Search your knowledge base
+asila search "How does authentication work?"
 ```
 
-The API is available at `http://localhost:8000`. OpenAPI is available at `/docs`.
+**Expected Output:**
+```text
+[Hybrid search: Found 2 results]
+1. docs/auth.md (Score: 0.82)
+   Section: Token validation
+   ...
+```
 
-## MCP
+**Connect to your IDE:**
+```bash
+# 5. Connect Cursor or Claude Desktop via MCP
+asila mcp configure --client cursor
+```
 
-Configure an MCP client to use:
+To shut down and clean up:
+```bash
+docker compose down -v
+```
+
+## How It Works
 
 ```text
-http://localhost:8000/mcp/sse
+CLI / REST API / MCP
+        |
+     FastAPI
+        |
+PostgreSQL + pgvector + RLS
+        |
+Redis / ARQ worker
+        |
+Docling parser + Ollama embeddings
 ```
 
-Send the API key as a bearer token or `X-Asila-API-Key` header.
+## Core Features
+- **Intelligent Ingestion**: Incrementally indexes markdown, code, and PDFs using Docling layout analysis.
+- **MCP Integration**: Turns your knowledge base into an interactive tool for Claude and Cursor.
+- **Advanced RAG**: Utilizes Reciprocal Rank Fusion (RRF) for hybrid keyword/semantic search.
+- **Enterprise Isolation**: Enforces tenant isolation in a shared database via PostgreSQL RLS.
 
-Initial MCP tools:
+## Use Cases
+- Point Cursor at your internal architecture docs and ask how a particular microservice authenticates requests.
+- Index your company's runbooks, and query for incident responses locally.
+- Ingest complex PDF reports using Docling and chat with them without exposing them to cloud APIs.
 
-- `asila_list_repositories`
-- `asila_search`
-- `asila_get_document`
+## Security and Privacy
+Your data is protected by mandatory PostgreSQL Row-Level Security, running under least-privilege roles. Embeddings run locally via Ollama. Read more in [SECURITY.md](docs/SECURITY.md).
 
-Administrative operations are intentionally kept in the Platform API and are not exposed through MCP.
+## Configuration
+Copy `.env.example` to `.env` to customize your installation. The `asila init` command automatically scaffolds a secure environment for local development.
 
-## API surface
+## CLI Reference
+- `asila init`: Bootstrap a new deployment.
+- `asila doctor`: Verify health of PostgreSQL, Redis, and backend models.
+- `asila ingest <path>`: Ingest files or directories.
+- `asila search <query>`: Perform a hybrid search.
+- `asila mcp configure`: Setup an MCP client.
 
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/v1/health` | Liveness check |
-| `GET /api/v1/health/ready` | PostgreSQL and Redis readiness check |
-| `POST /api/v1/setup` | One-time local bootstrap |
-| `POST /api/v1/organizations` | Create an organization as an authenticated user |
-| `DELETE /api/v1/organizations/{id}` | Soft-delete an organization |
-| `GET /api/v1/organizations/{id}/members` | List organization members |
-| `POST /api/v1/organizations/{id}/members` | Add or change a member role |
-| `DELETE /api/v1/organizations/{id}/members/{user_id}` | Remove a member |
-| `GET /api/v1/knowledge/repositories` | List repositories |
-| `POST /api/v1/knowledge/repositories` | Register a repository |
-| `GET /api/v1/knowledge/documents` | List documents |
-| `POST /api/v1/knowledge/documents` | Ingest text content |
-| `DELETE /api/v1/knowledge/documents/{id}` | Soft-delete a document |
-| `GET /api/v1/knowledge/jobs/{id}` | Inspect ingestion/embedding status |
-| `GET /api/v1/knowledge/retrieval/search` | Keyword retrieval with citations |
-| `POST /api/v1/knowledge/conversations` | Create a conversation |
-| `POST /api/v1/knowledge/conversations/{id}/messages` | Persist a message or generate a cited answer |
-| `POST /api/v1/api-keys` | Create an owner/admin-managed API key |
-| `GET /api/v1/api-keys` | List key metadata without secrets |
-| `DELETE /api/v1/api-keys/{id}` | Revoke a key |
-| `POST /api/v1/service-accounts` | Create a single-organization service account and key |
-| `GET /api/v1/service-accounts` | List service accounts |
-| `DELETE /api/v1/service-accounts/{id}` | Disable a service account and its keys |
-| `GET /api/v1/provider-credentials` | List organization provider configuration without secrets |
-| `PUT /api/v1/provider-credentials/{provider}` | Configure an organization AI provider |
+## MCP Integration
+See [MCP.md](docs/MCP.md) for detailed configuration instructions for Cursor, Claude Desktop, and other MCP-compatible clients.
 
-## Architecture
+## Roadmap & Limitations
+- **Current Scope:** v1 is optimized for small-to-medium self-hosted deployments. It does not currently support multi-region HA.
+- **Limitations:** SSO/SAML and fine-grained document-level RBAC are planned enterprise features, but not included in v1. 
 
-```text
-CLI / SDK / REST / MCP
-          |
-      FastAPI API
-          |
-   application services
-          |
-   domain capability ports
-          |
- PostgreSQL + pgvector + Redis
-```
+## Contributing
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) to set up your local development environment.
 
-PostgreSQL uses:
-
-```text
-platform
-  users
-  organizations
-  memberships
-  service_accounts
-  api_keys
-  provider_credentials
-
-app
-  repositories
-  documents
-  chunks
-  embeddings
-  ingestion_jobs
-  conversations
-  messages
-```
-
-Application tables contain `organization_id` and are protected by mandatory PostgreSQL Row-Level Security. The API sets the organization context transaction-locally with `SET LOCAL`; request headers never override authenticated membership.
-
-Compose creates separate `asila_migrator` and `asila_app` database roles. The API and worker run as the non-superuser, `NOBYPASSRLS` application role; database ports bind to localhost by default. The initial role bootstrap is for a new database volume, so operators should provision equivalent least-privilege roles before connecting to an existing managed database.
-
-Local deployments start in single-organization mode. Set `ASILA_MULTI_TENANCY_ENABLED=true` when the deployment is intended for multiple organizations.
-
-Redis only carries job references. Durable job state and document ownership remain in PostgreSQL, and the Compose worker processes embedding jobs with organization-scoped database context.
-
-## AI providers
-
-Local inference is the default configuration:
-
-- Ollama
-- llama.cpp-compatible endpoints
-- FastEmbed
-- Sentence Transformers
-
-Optional provider adapters can support:
-
-- OpenAI
-- Gemini
-- Cohere
-- Voyage
-- custom OpenAI-compatible endpoints
-
-Start Ollama with the local AI profile:
-
-```bash
-docker compose -f deployments/docker-compose.yml --profile local-ai up -d ollama
-docker exec -it $(docker ps -qf name=ollama) ollama pull nomic-embed-text
-docker exec -it $(docker ps -qf name=ollama) ollama pull llama3.2
-```
-
-## Development
-
-```bash
-cd backend
-uv sync
-uv run pytest -q
-uv run python -m compileall -q api core domain services infra
-```
-
-The default test suite is self-contained and is the release gate. It covers only the supported shared-schema architecture.
-
-## Scope
-
-The core platform does not include government-specific workflows, WhatsApp, Twilio, geospatial targeting, broadcasts, or a mandatory dashboard. These can be implemented as optional extensions over the Platform API and connector interfaces.
+## API Reference
+See [API.md](docs/API.md) for the full REST API documentation.
 
 ## License
-
-The Asila core is licensed under [Apache-2.0](LICENSE). The Apache-2.0 license
-does not grant trademark rights to the Asila name or logo.
+The Asila knowledge platform is licensed under the [Business Source License 1.1 (BUSL-1.1)](LICENSE). You may use, modify, and redistribute the work for non-production use and limited production use, provided you do not offer a commercial hosted database, search, or RAG platform service that competes with Asila Cloud. On **2030-01-01**, the license automatically converts to the **Apache License 2.0**. This license does not grant trademark rights to the Asila name or logo.
