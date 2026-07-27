@@ -11,6 +11,12 @@ services:
       ASILA_DB_MIGRATOR_PASSWORD: ${ASILA_DB_MIGRATOR_PASSWORD:?Set ASILA_DB_MIGRATOR_PASSWORD before starting Asila}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,6 +30,12 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     volumes:
       - redis_data:/data
     healthcheck:
@@ -54,6 +66,12 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     ports:
       - "${ASILA_PORT:-8000}:8000"
     environment:
@@ -79,6 +97,14 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     command: ["arq", "workers.main.WorkerSettings"]
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
       REDIS_URL: redis://redis:6379/0
@@ -90,6 +116,7 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-llama3.2}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      DOCLING_URL: ${DOCLING_URL:-http://docling:5001}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -103,6 +130,21 @@ services:
       - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
+
+  docling:
+    image: quay.io/docling-project/docling-serve:latest
+    expose:
+      - "5001"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

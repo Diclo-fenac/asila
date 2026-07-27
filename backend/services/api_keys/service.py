@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import secrets
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -62,11 +63,19 @@ async def authenticate_api_key(
 
     result = await session.execute(
         select(ApiKey).where(
-            ApiKey.key_hash == hash_api_key(raw_secret),
+            ApiKey.key_prefix == raw_secret[:12],
             ApiKey.revoked_at.is_(None),
         )
     )
-    key = result.scalar_one_or_none()
+    keys = result.scalars().all()
+    
+    key = None
+    target_hash = hash_api_key(raw_secret)
+    for candidate in keys:
+        if hmac.compare_digest(candidate.key_hash, target_hash):
+            key = candidate
+            break
+
     if key is None:
         return None
 

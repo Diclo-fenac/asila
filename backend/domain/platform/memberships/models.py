@@ -28,7 +28,7 @@ class Membership(PlatformBase, TimestampMixin):
         String(64), ForeignKey("platform.users.id", ondelete="CASCADE"), nullable=False
     )
     role: Mapped[MembershipRole] = mapped_column(
-        Enum(MembershipRole, name="membership_role", schema="platform"),
+        Enum(MembershipRole, name="membership_role", schema="platform", values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
         default=MembershipRole.MEMBER,
     )

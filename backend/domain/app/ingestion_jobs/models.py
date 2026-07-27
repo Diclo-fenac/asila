@@ -33,7 +33,7 @@ class IngestionJob(AppBase, OrganizationScopedMixin, TimestampMixin):
     operation: Mapped[str] = mapped_column(String(64), nullable=False, default="embed")
     payload_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     status: Mapped[IngestionJobStatus] = mapped_column(
-        Enum(IngestionJobStatus, name="ingestion_job_status", schema="app"),
+        Enum(IngestionJobStatus, name="ingestion_job_status", schema="app", values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
         default=IngestionJobStatus.QUEUED,
     )

@@ -45,6 +45,7 @@ async def create_organization(
         role=MembershipRole.OWNER,
     )
     session.add(organization)
+    await session.flush()
     session.add(membership)
     await session.flush()
     return organization

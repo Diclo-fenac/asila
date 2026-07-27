@@ -24,7 +24,7 @@ class Organization(PlatformBase, TimestampMixin):
         String(64), ForeignKey("platform.users.id", ondelete="RESTRICT"), nullable=False
     )
     status: Mapped[OrganizationStatus] = mapped_column(
-        Enum(OrganizationStatus, name="organization_status", schema="platform"),
+        Enum(OrganizationStatus, name="organization_status", schema="platform", values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
         default=OrganizationStatus.ACTIVE,
     )

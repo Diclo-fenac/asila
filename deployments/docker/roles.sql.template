@@ -21,7 +21,7 @@ CREATE SCHEMA IF NOT EXISTS platform AUTHORIZATION asila_migrator;
 CREATE SCHEMA IF NOT EXISTS app AUTHORIZATION asila_migrator;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 GRANT USAGE, CREATE ON SCHEMA public TO asila_migrator;
-GRANT USAGE ON SCHEMA platform, app TO asila_app;
+GRANT USAGE ON SCHEMA public, platform, app TO asila_app;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE asila_migrator IN SCHEMA platform
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO asila_app;

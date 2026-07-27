@@ -27,6 +27,6 @@ class Chunk(AppBase, OrganizationScopedMixin, TimestampMixin):
     page_number: Mapped[int | None] = mapped_column(Integer)
     search_vector: Mapped[object] = mapped_column(
         TSVECTOR,
-        Computed("to_tsvector('simple', content)", persisted=True),
+        Computed("to_tsvector('english', content)", persisted=True),
         nullable=False,
     )

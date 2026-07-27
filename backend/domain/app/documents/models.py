@@ -36,7 +36,7 @@ class Document(AppBase, OrganizationScopedMixin, TimestampMixin):
     file_size: Mapped[int | None] = mapped_column(Integer)
     metadata_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     status: Mapped[DocumentStatus] = mapped_column(
-        Enum(DocumentStatus, name="document_status", schema="app"),
+        Enum(DocumentStatus, name="document_status", schema="app", values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
         default=DocumentStatus.PENDING,
     )

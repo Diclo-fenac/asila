@@ -41,7 +41,7 @@ class Message(AppBase, OrganizationScopedMixin, TimestampMixin):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     conversation_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     role: Mapped[MessageRole] = mapped_column(
-        Enum(MessageRole, name="message_role", schema="app"),
+        Enum(MessageRole, name="message_role", schema="app", values_callable=lambda obj: [e.value for e in obj]),
         nullable=False,
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
