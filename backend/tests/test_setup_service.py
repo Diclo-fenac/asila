@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from services.setup.service import create_initial_local_account
+from services.setup import create_initial_local_account
 
 
 @pytest.mark.asyncio

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from domain.app.ingestion_jobs.models import IngestionJobStatus
-from services.ingestion_jobs.service import (
+from services.ingestion_jobs import (
     complete_job,
     create_or_get_job,
     fail_job,

@@ -11,8 +11,8 @@ from core.database.platform_session import get_platform_db
 from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from domain.platform.service_accounts.models import ServiceAccount
-from services.api_keys.service import create_api_key
-from services.audit.service import record_audit_event
+from services.api_keys import create_api_key
+from services.audit import record_audit_event
 
 
 router = APIRouter(prefix="/service-accounts", tags=["service-accounts"])

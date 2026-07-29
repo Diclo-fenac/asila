@@ -16,16 +16,16 @@ from core.security.principals import Principal
 from core.organization.context import organization_scope
 from domain.app.documents.models import Document, DocumentStatus
 from domain.app.repositories.models import Repository
-from services.retrieval.service import keyword_search, normalize_search_limit, validate_query
-from services.ai.factory import build_organization_embedding_provider
-from services.retrieval.service import hybrid_search
+from services.retrieval import keyword_search, normalize_search_limit, validate_query
+from services.ai_factory import build_organization_embedding_provider
+from services.retrieval import hybrid_search
 from core.exceptions.resilience import ServiceUnavailableError, BulkheadRejectedError
 from core.resilience import circuit_breaker, bulkhead
-from services.documents.service import create_document
-from services.ingestion_jobs.service import create_or_get_job
+from services.documents import create_document
+from services.ingestion_jobs import create_or_get_job
 from core.queue import enqueue_ingestion_job
 from domain.app.ingestion_jobs.models import IngestionJob
-from services.audit.service import record_audit_event
+from services.audit import record_audit_event
 
 
 mcp_server = FastMCP("Asila")

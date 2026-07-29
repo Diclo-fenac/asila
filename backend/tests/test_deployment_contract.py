@@ -11,7 +11,7 @@ def test_compose_runs_canonical_migrations_and_has_no_dev_vault():
     assert "VAULT_DEV_ROOT_TOKEN_ID" not in source
     assert "profiles: [\"local-ai\"]" in source
     assert "worker:" in source
-    assert '"arq", "workers.main.WorkerSettings"' in source
+    assert '"python", "workers/core.py"' in source
 
 
 def test_compose_uses_a_non_bypass_runtime_database_role():

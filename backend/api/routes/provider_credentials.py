@@ -8,8 +8,8 @@ from core.database.platform_session import get_platform_db
 from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from domain.platform.provider_credentials.models import ProviderCredential
-from services.audit.service import record_audit_event
-from services.provider_credentials.service import upsert_provider_credential
+from services.audit import record_audit_event
+from services.provider_credentials import upsert_provider_credential
 
 
 router = APIRouter(prefix="/provider-credentials", tags=["provider-credentials"])

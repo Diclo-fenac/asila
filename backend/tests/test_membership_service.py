@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from domain.platform.memberships.models import MembershipRole
-from services.memberships.service import remove_membership
+from services.memberships import remove_membership
 
 
 @pytest.mark.asyncio

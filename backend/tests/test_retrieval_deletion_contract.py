@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-SERVICE = Path(__file__).parents[1] / "services/retrieval/service.py"
+SERVICE = Path(__file__).parents[1] / "services/retrieval.py"
 
 
 def test_retrieval_excludes_soft_deleted_documents():

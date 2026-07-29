@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from services.audit.service import record_audit_event
+from services.audit import record_audit_event
 
 
 @pytest.mark.asyncio

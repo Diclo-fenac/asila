@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from services.api_keys.service import authenticate_api_key
+from services.api_keys import authenticate_api_key
 
 
 @pytest.mark.asyncio

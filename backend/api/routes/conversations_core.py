@@ -8,11 +8,11 @@ from core.database.app_session import get_app_db
 from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from domain.app.conversations.models import MessageRole
-from services.ai.factory import (
+from services.ai_factory import (
     build_organization_embedding_provider,
     build_organization_generation_provider,
 )
-from services.conversations.service import (
+from services.conversations import (
     answer_question,
     append_message,
     create_conversation,

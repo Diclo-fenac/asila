@@ -10,9 +10,9 @@ from core.config.settings import settings
 from core.database.platform_session import get_platform_db
 from domain.platform.organizations.models import Organization
 from domain.platform.users.models import User
-from services.api_keys.service import create_api_key
-from services.organizations.service import create_organization
-from services.setup.service import create_initial_local_account
+from services.api_keys import create_api_key
+from services.organizations import create_organization
+from services.setup import create_initial_local_account
 
 
 router = APIRouter(prefix="/setup", tags=["setup"])

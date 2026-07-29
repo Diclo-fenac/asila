@@ -10,7 +10,7 @@ from core.security.oidc import OIDCVerifier
 from domain.platform.memberships.models import Membership
 from domain.platform.organizations.models import Organization, OrganizationStatus
 from domain.platform.users.models import User
-from services.api_keys.service import authenticate_api_key
+from services.api_keys import authenticate_api_key
 
 
 oidc_verifier = OIDCVerifier(

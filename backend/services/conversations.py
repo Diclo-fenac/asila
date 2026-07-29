@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.app.conversations.models import Conversation, Message, MessageRole
 from domain.ports.ai import EmbeddingProvider, GenerationProvider
-from services.retrieval.service import SearchResult, hybrid_search, keyword_search
+from services.retrieval import SearchResult, hybrid_search, keyword_search
 
 
 def _required_text(value: str, field: str) -> str:

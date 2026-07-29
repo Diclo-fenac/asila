@@ -25,25 +25,6 @@ services:
       timeout: 5s
       retries: 12
 
-  redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-
   migrate:
     build:
       context: ../backend
@@ -53,7 +34,6 @@ services:
       alembic -c alembic.app.ini upgrade head"
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_migrator:${ASILA_DB_MIGRATOR_PASSWORD}@postgres:5432/asila_platform
-      REDIS_URL: redis://redis:6379/0
       POSTGRES_HOST: postgres
       POSTGRES_USER: asila_migrator
       POSTGRES_PASSWORD: ${ASILA_DB_MIGRATOR_PASSWORD}
@@ -76,7 +56,6 @@ services:
       - "${ASILA_PORT:-8000}:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
-      REDIS_URL: redis://redis:6379/0
       POSTGRES_HOST: postgres
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
@@ -89,14 +68,12 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-      redis:
-        condition: service_healthy
 
   worker:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    command: ["arq", "workers.main.WorkerSettings"]
+    command: ["python", "workers/core.py"]
     restart: unless-stopped
     healthcheck:
       disable: true
@@ -107,7 +84,6 @@ services:
           memory: 1G
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
-      REDIS_URL: redis://redis:6379/0
       POSTGRES_HOST: postgres
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
@@ -120,8 +96,6 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-      redis:
-        condition: service_healthy
 
   ollama:
     image: ollama/ollama:latest
@@ -148,5 +122,4 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
   ollama_data:

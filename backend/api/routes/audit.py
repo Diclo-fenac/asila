@@ -7,7 +7,7 @@ from core.database.platform_session import get_platform_db
 from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from domain.platform.audit_logs.models import PlatformAuditLog
-from services.memberships.service import get_membership
+from services.memberships import get_membership
 from domain.platform.memberships.models import MembershipRole
 
 router = APIRouter(prefix="/audit", tags=["audit"])

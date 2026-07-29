@@ -1,4 +1,4 @@
-from services.retrieval.service import (
+from services.retrieval import (
     normalize_search_limit,
     reciprocal_rank_fusion,
     validate_query,

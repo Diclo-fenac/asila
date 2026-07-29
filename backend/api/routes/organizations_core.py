@@ -11,14 +11,14 @@ from core.security.principals import Principal
 from core.config.settings import settings
 from domain.platform.memberships.models import Membership, MembershipRole
 from domain.platform.organizations.models import Organization, OrganizationStatus
-from services.audit.service import record_audit_event
-from services.memberships.service import (
+from services.audit import record_audit_event
+from services.memberships import (
     get_membership,
     list_members,
     remove_membership,
     upsert_membership,
 )
-from services.organizations.service import create_organization
+from services.organizations import create_organization
 
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])

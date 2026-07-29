@@ -1,5 +1,5 @@
 from core.config.settings import Settings
-from services.ai.factory import build_embedding_provider
+from services.ai_factory import build_embedding_provider
 
 
 def test_provider_factory_defaults_to_ollama():

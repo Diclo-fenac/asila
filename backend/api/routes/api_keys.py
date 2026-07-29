@@ -10,8 +10,8 @@ from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from domain.platform.api_keys.models import ApiKey
 from domain.platform.memberships.models import Membership, MembershipRole
-from services.api_keys.service import create_api_key
-from services.audit.service import record_audit_event
+from services.api_keys import create_api_key
+from services.audit import record_audit_event
 
 
 router = APIRouter(prefix="/api-keys", tags=["api-keys"])

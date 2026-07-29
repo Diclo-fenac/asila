@@ -16,11 +16,11 @@ from domain.app.chunks.models import Chunk
 from domain.app.documents.models import Document, DocumentStatus
 from domain.app.ingestion_jobs.models import IngestionJob
 from domain.app.repositories.models import Repository
-from services.documents.service import create_document
-from services.retrieval.service import keyword_search
-from services.ai.factory import build_organization_embedding_provider
-from services.retrieval.service import hybrid_search
-from services.ingestion_jobs.service import create_or_get_job
+from services.documents import create_document
+from services.retrieval import keyword_search
+from services.ai_factory import build_organization_embedding_provider
+from services.retrieval import hybrid_search
+from services.ingestion_jobs import create_or_get_job
 
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])

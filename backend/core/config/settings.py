@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    REDIS_URL: str
+
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"

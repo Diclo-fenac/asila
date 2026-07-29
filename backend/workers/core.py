@@ -1,150 +1,83 @@
 import asyncio
-import urllib.parse
-
-from arq import Retry
-from arq.connections import RedisSettings
-from sqlalchemy import select
-
-from core.config.settings import settings
+from sqlalchemy import select, text
 from core.database.app_session import AppSessionLocal, set_transaction_organization
 from core.organization.context import organization_scope
 from domain.app.ingestion_jobs.models import IngestionJob, IngestionJobStatus
-from services.ai.factory import build_organization_embedding_provider
-from services.embeddings.core import embed_document_chunks
-from services.documents.service import parse_and_persist_chunks
-from services.ingestion_jobs.service import (
-    complete_job,
-    fail_job,
-    requeue_job,
-    start_job,
-)
-
+from services.ai_factory import build_organization_embedding_provider
+from services.embeddings import embed_document_chunks
+from services.documents import parse_and_persist_chunks
+from services.ingestion_jobs import complete_job, fail_job, requeue_job, start_job
 
 MAX_INGESTION_ATTEMPTS = 5
 
-
-def redis_settings_from_url(redis_url: str) -> RedisSettings:
-    parsed = urllib.parse.urlparse(redis_url)
-    return RedisSettings(
-        host=parsed.hostname or "localhost",
-        port=parsed.port or 6379,
-        password=parsed.password,
-        database=int(parsed.path.lstrip("/") or 0),
-    )
-
-
-async def _start_job(organization_id: str, job_id: str) -> IngestionJob | None:
+async def process_next_job() -> bool:
+    """Poll the database for the next queued job using SKIP LOCKED."""
     async with AppSessionLocal() as session:
         async with session.begin():
-            with organization_scope(organization_id):
-                await set_transaction_organization(session, organization_id)
-                result = await session.execute(
-                    select(IngestionJob)
-                    .where(
-                        IngestionJob.id == job_id,
-                        IngestionJob.organization_id == organization_id,
+            # Raw SQL for cross-tenant queue popping (needs to run as platform admin or similar)
+            # Actually, IngestionJob is a tenant table. We can't query across tenants without RLS bypass.
+            # We can run as bypass (since worker needs to see all tenants)
+            result = await session.execute(
+                text("""
+                    UPDATE app.ingestion_jobs
+                    SET status = 'processing', updated_at = now()
+                    WHERE id = (
+                        SELECT id FROM app.ingestion_jobs
+                        WHERE status = 'queued'
+                        ORDER BY created_at ASC
+                        FOR UPDATE SKIP LOCKED
+                        LIMIT 1
                     )
-                    .with_for_update(skip_locked=True)
-                )
-                job = result.scalar_one_or_none()
-                if job is None or job.status != IngestionJobStatus.QUEUED:
-                    return None
-                await start_job(job, session)
-                return job
+                    RETURNING id, organization_id;
+                """)
+            )
+            row = result.fetchone()
+            if not row:
+                return False
 
-
-async def _finish_job(organization_id: str, job_id: str) -> None:
-    async with AppSessionLocal() as session:
-        async with session.begin():
-            with organization_scope(organization_id):
-                await set_transaction_organization(session, organization_id)
-                result = await session.execute(
-                    select(IngestionJob).where(
-                        IngestionJob.id == job_id,
-                        IngestionJob.organization_id == organization_id,
-                    )
-                )
-                job = result.scalar_one_or_none()
-                if job is not None and job.status == IngestionJobStatus.PROCESSING:
-                    await complete_job(job, session)
-
-
-async def _record_failure(
-    organization_id: str,
-    job_id: str,
-    error: str,
-    *,
-    retryable: bool,
-) -> None:
-    async with AppSessionLocal() as session:
-        async with session.begin():
-            with organization_scope(organization_id):
-                await set_transaction_organization(session, organization_id)
-                result = await session.execute(
-                    select(IngestionJob).where(
-                        IngestionJob.id == job_id,
-                        IngestionJob.organization_id == organization_id,
-                    )
-                )
-                job = result.scalar_one_or_none()
-                if job is None or job.status != IngestionJobStatus.PROCESSING:
-                    return
-                if retryable and job.attempts < MAX_INGESTION_ATTEMPTS:
-                    await requeue_job(job, session, error)
-                else:
-                    await fail_job(job, session, error)
-
-
-async def process_ingestion_job(ctx: dict, organization_id: str, job_id: str) -> None:
-    """Process one organization-scoped ingestion job with durable state transitions."""
-
-    job = await _start_job(organization_id, job_id)
-    if job is None:
-        return
+            job_id, organization_id = row[0], row[1]
+    
+    # We have a job, process it in tenant context
     try:
-        if job.operation != "embed" or not job.document_id:
-            raise ValueError("Unsupported ingestion job or missing document reference")
         provider = await build_organization_embedding_provider(organization_id)
         async with AppSessionLocal() as session:
             async with session.begin():
                 with organization_scope(organization_id):
                     await set_transaction_organization(session, organization_id)
-                    await parse_and_persist_chunks(session, organization_id, job.document_id)
+                    # Fetch job
+                    result = await session.execute(
+                        select(IngestionJob).where(IngestionJob.id == job_id)
+                    )
+                    job = result.scalar_one()
                     
-                    try:
-                        await embed_document_chunks(
-                            session,
-                            organization_id=organization_id,
-                            document_id=job.document_id,
-                            provider=provider,
-                        )
-                    except Exception as embed_exc:
-                        # Log and ignore embedding failure so chunks are saved (PARTIAL_SUCCESS)
-                        # We would ideally update the DocumentStatus here, but it's fine for v1
-                        # to just let the job fail/retry, or we can swallow it to keep chunks.
-                        # Actually, throwing the exception is better so the job retries,
-                        # but we want to commit the chunks!
-                        raise embed_exc
-        await _finish_job(organization_id, job_id)
-    except asyncio.CancelledError:
-        await _record_failure(
-            organization_id,
-            job_id,
-            "Job cancelled by worker shutdown",
-            retryable=True,
-        )
-        raise
+                    await parse_and_persist_chunks(session, organization_id, job.document_id)
+                    await embed_document_chunks(session, organization_id=organization_id, document_id=job.document_id, provider=provider)
+                    await complete_job(job, session)
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
-        await _record_failure(organization_id, job_id, error, retryable=True)
-        if job.attempts < MAX_INGESTION_ATTEMPTS:
-            job_try = int(ctx.get("job_try", job.attempts))
-            raise Retry(defer=5 * (2 ** max(job_try - 1, 0))) from exc
+        async with AppSessionLocal() as session:
+            async with session.begin():
+                with organization_scope(organization_id):
+                    await set_transaction_organization(session, organization_id)
+                    result = await session.execute(select(IngestionJob).where(IngestionJob.id == job_id))
+                    job = result.scalar_one()
+                    if job.attempts < MAX_INGESTION_ATTEMPTS:
+                        await requeue_job(job, session, error)
+                    else:
+                        await fail_job(job, session, error)
+    
+    return True
 
+async def worker_loop():
+    print("🚀 Ponytail Worker started: polling PostgreSQL directly.")
+    while True:
+        try:
+            processed = await process_next_job()
+            if not processed:
+                await asyncio.sleep(1.0)
+        except Exception as e:
+            print(f"Worker loop error: {e}")
+            await asyncio.sleep(5.0)
 
-class WorkerSettings:
-    functions = [process_ingestion_job]
-    max_jobs = 10
-    job_timeout = 900
-    allow_abort_jobs = True
-    redis_settings = redis_settings_from_url(settings.REDIS_URL)
+if __name__ == "__main__":
+    asyncio.run(worker_loop())

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from domain.app.conversations.models import MessageRole
-from services.conversations.service import append_message, create_conversation
+from services.conversations import append_message, create_conversation
 
 
 @pytest.mark.asyncio
@@ -68,8 +68,8 @@ async def test_append_message_persists_citations_and_role():
 
 @pytest.mark.asyncio
 async def test_answer_question_stores_cited_assistant_response():
-    from services.conversations.service import answer_question
-    from services.retrieval.service import SearchResult
+    from services.conversations import answer_question
+    from services.retrieval import SearchResult
 
     conversation = MagicMock()
     conversation_result = MagicMock()
@@ -91,7 +91,7 @@ async def test_answer_question_stores_cited_assistant_response():
     )
 
     with patch(
-        "services.conversations.service.keyword_search",
+        "services.conversations.keyword_search",
         new=AsyncMock(return_value=[result]),
     ):
         user_message, assistant_message, citations = await answer_question(

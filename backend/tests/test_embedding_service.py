@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from services.embeddings.core import embed_document_chunks
+from services.embeddings import embed_document_chunks
 
 
 class FakeProvider:

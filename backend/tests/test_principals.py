@@ -6,7 +6,7 @@ import pytest
 from domain.platform.api_keys.models import ApiKey
 from domain.platform.organizations.models import Organization, OrganizationStatus
 from core.security.principals import Principal
-from services.api_keys.service import authenticate_api_key, hash_api_key
+from services.api_keys import authenticate_api_key, hash_api_key
 
 
 @pytest.mark.asyncio

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from services.api_keys.service import create_api_key, hash_api_key
+from services.api_keys import create_api_key, hash_api_key
 
 
 @pytest.mark.asyncio

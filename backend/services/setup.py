@@ -3,8 +3,8 @@ from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.platform.users.models import User
-from services.api_keys.service import create_api_key
-from services.organizations.service import create_organization
+from services.api_keys import create_api_key
+from services.organizations import create_organization
 
 
 async def create_initial_local_account(

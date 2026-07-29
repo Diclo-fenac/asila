@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from domain.platform.provider_credentials.models import ProviderCredential
-from services.provider_credentials.service import upsert_provider_credential
+from services.provider_credentials import upsert_provider_credential
 
 
 @pytest.mark.asyncio
@@ -14,7 +14,7 @@ async def test_provider_credentials_encrypt_api_key_before_persistence():
     session.execute = AsyncMock(return_value=result)
     session.flush = AsyncMock()
 
-    with patch("services.provider_credentials.service.settings.ASILA_MASTER_KEY", "master"):
+    with patch("services.provider_credentials.settings.ASILA_MASTER_KEY", "master"):
         credential = await upsert_provider_credential(
             session,
             organization_id="org_1",
@@ -34,7 +34,7 @@ async def test_provider_credentials_encrypt_api_key_before_persistence():
 @pytest.mark.asyncio
 async def test_cloud_provider_rejects_missing_master_key():
     session = MagicMock()
-    with patch("services.provider_credentials.service.settings.ASILA_MASTER_KEY", ""):
+    with patch("services.provider_credentials.settings.ASILA_MASTER_KEY", ""):
         with pytest.raises(ValueError, match="ASILA_MASTER_KEY"):
             await upsert_provider_credential(
                 session,
