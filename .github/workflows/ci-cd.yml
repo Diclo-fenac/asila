@@ -1,0 +1,102 @@
+name: Aasila Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [published]
+
+jobs:
+  integration-boot-test:
+    name: integration-boot-test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: asila_platform
+          POSTGRES_USER: asila_admin
+          POSTGRES_PASSWORD: asila_admin_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U asila_admin -d asila_platform"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'backend/pyproject.toml'
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run Alembic Database Migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          PLATFORM_DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          POSTGRES_PASSWORD: asila_admin_password
+          ASILA_SETUP_TOKEN: 3a85f2611195d7610f7a102f78dfc40fa3cb8421b7c51ea589b79461d93261f3
+        run: |
+          cd backend
+          alembic -c alembic.platform.ini upgrade head
+          alembic -c alembic.app.ini upgrade head
+
+      - name: Run Test Suite
+        env:
+          DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          PLATFORM_DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          POSTGRES_PASSWORD: asila_admin_password
+          ASILA_SETUP_TOKEN: 3a85f2611195d7610f7a102f78dfc40fa3cb8421b7c51ea589b79461d93261f3
+        run: |
+          cd backend
+          pytest tests/ -v -q
+          
+
+
+  docker-build:
+    name: Production Docker Container Build & Security Scan
+    needs: integration-boot-test
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deployments/docker/api.Dockerfile
+          push: false
+          tags: aasila/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Postgres DB Image
+        uses: docker/build-push-action@v5
+        with:
+          context: deployments
+          file: deployments/postgres.Dockerfile
+          push: false
+          tags: aasila/postgres:17-pgvector
