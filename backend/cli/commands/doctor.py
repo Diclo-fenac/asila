@@ -29,7 +29,7 @@ def doctor_command(
         table.add_column("Details")
         
         # We assume the health endpoint returns something like:
-        # {"status": "ok", "checks": {"postgres": "ok", "redis": "ok", "ollama": "ok", "docling": "error"}}
+        # {"status": "ok", "checks": {"postgres": "ok", "ollama": "ok", "docling": "error"}}
         checks = data.get("checks", {})
         
         def get_status_style(status_str: str) -> str:

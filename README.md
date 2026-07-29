@@ -19,7 +19,7 @@ Asila solves the context problem for AI agents. Instead of manually pasting snip
 **Prerequisites:** Docker, Docker Compose, and Python 3.11+.
 
 ```bash
-# 1. Clone and start the stack (PostgreSQL, Redis, Docling, Ollama)
+# 1. Clone and start the stack (PostgreSQL, Docling, Ollama)
 git clone https://github.com/Diclo-fenac/asila.git
 cd asila
 docker compose up -d
@@ -74,7 +74,7 @@ CLI / REST API / MCP
         |
 PostgreSQL + pgvector + RLS
         |
-Redis / ARQ worker
+Native PostgreSQL Worker
         |
 Docling parser + Ollama embeddings
 ```
@@ -98,7 +98,7 @@ Copy `.env.example` to `.env` to customize your installation. The `asila init` c
 
 ## CLI Reference
 - `asila init`: Bootstrap a new deployment.
-- `asila doctor`: Verify health of PostgreSQL, Redis, and backend models.
+- `asila doctor`: Verify health of PostgreSQL, and backend models.
 - `asila ingest <path>`: Ingest files or directories.
 - `asila search <query>`: Perform a hybrid search.
 - `asila mcp configure`: Setup an MCP client.

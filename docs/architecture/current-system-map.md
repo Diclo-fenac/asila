@@ -17,7 +17,7 @@ Aasila is designed around strict tenant isolation enforced at the database engin
                  ┌───────────────┴───────────────┐
                  ▼                               ▼
        [ Synchronous Services ]         [ Async Worker Queue ]
-     (Documents, Search, Keys)           (ARQ / Redis Engine)
+     (Documents, Search, Keys)           (PostgreSQL Queue)
                  │                               │
                  └───────────────┬───────────────┘
                                  ▼
@@ -52,7 +52,7 @@ Stores tenant-scoped knowledge assets. **Every table in this schema has Row-Leve
 
 ---
 
-## 3. Asynchronous Worker Queue (ARQ / Redis)
+## 3. Asynchronous Worker Queue (PostgreSQL Queue)
 
 Aasila decouples document ingestion from HTTP request lifecycles using Redis and ARQ:
 1. **Job Enqueuing**: When a document is uploaded via `POST /api/v1/knowledge/documents`, the API persists the initial `Document` and `IngestionJob` records in PostgreSQL, then pushes the `job_id` to Redis.

@@ -1,6 +1,6 @@
 # Runbook: Knowledge Ingestion & Hybrid Search Retrieval
 
-This runbook guides Knowledge Contributors and Consumers through creating repositories, ingesting complex documents (PDFs, markdown, text), monitoring background ARQ queue processing, and executing Reciprocal Rank Fusion (RRF) hybrid searches.
+This runbook guides Knowledge Contributors and Consumers through creating repositories, ingesting complex documents (PDFs, markdown, text), monitoring background PostgreSQL queue processing, and executing Reciprocal Rank Fusion (RRF) hybrid searches.
 
 ---
 

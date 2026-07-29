@@ -45,7 +45,7 @@ This document defines the end-to-end lifecycle of an Aasila deployment, mapping 
   2. Using the CLI, the contributor uploads markdown, PDF, or text files: `asila ingest --path ./docs/ --repo-id <repo_id>`.
   3. The backend immediately returns a `job_id` and queues the parsing task in Redis.
   4. The contributor monitors progress using `asila jobs get <job_id>` or `asila ingest-status <document_id>`.
-  5. Behind the scenes, the ARQ worker invokes the Docling OCR service (protected by circuit breakers) to extract text, chunks the content, generates embeddings via Ollama/OpenAI, and stores vector and full-text indexes in PostgreSQL.
+  5. Behind the scenes, the PostgreSQL worker invokes the Docling OCR service (protected by circuit breakers) to extract text, chunks the content, generates embeddings via Ollama/OpenAI, and stores vector and full-text indexes in PostgreSQL.
 * **Outcome**: Documents are fully indexed and ready for low-latency retrieval.
 
 ### Phase 4: Hybrid Search & AI MCP Integration

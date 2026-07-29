@@ -28,6 +28,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+import collections
+import time
+
+_rate_limit_cache = collections.defaultdict(lambda: {"count": 0, "reset_at": 0})
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Allow health checks to bypass rate limits
@@ -35,26 +40,23 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
             
         identifier = getattr(request.state, "organization_id", request.client.host if request.client else "unknown")
-        rate_limit_key = f"rate_limit:{identifier}"
         
-        try:
-            redis = Redis.from_url(settings.REDIS_URL, decode_responses=True)
-            current = await redis.incr(rate_limit_key)
-            if current == 1:
-                await redis.expire(rate_limit_key, 60)
+        now = time.time()
+        record = _rate_limit_cache[identifier]
+        
+        if now > record["reset_at"]:
+            record["count"] = 1
+            record["reset_at"] = now + 60
+        else:
+            record["count"] += 1
             
-            if current > 300:  # 300 requests per minute
-                from fastapi.responses import JSONResponse
-                return JSONResponse(
-                    status_code=429,
-                    content={"detail": "Too Many Requests", "type": "RateLimitExceeded"},
-                    headers={"Retry-After": "60"}
-                )
-        except Exception as e:
-            logger.warning(f"Rate limiting failed: {e}")
-        finally:
-            if 'redis' in locals():
-                await redis.aclose()
+        if record["count"] > 300:  # 300 requests per minute
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too Many Requests", "type": "RateLimitExceeded"},
+                headers={"Retry-After": str(int(record["reset_at"] - now))}
+            )
                 
         return await call_next(request)
 

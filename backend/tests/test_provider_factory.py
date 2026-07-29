@@ -5,7 +5,7 @@ from services.ai_factory import build_embedding_provider
 def test_provider_factory_defaults_to_ollama():
     settings = Settings(
         DATABASE_URL="postgresql+asyncpg://localhost/asila",
-        REDIS_URL="redis://localhost:6379/0",
+
         POSTGRES_PASSWORD="test",
         AI_PROVIDER="ollama",
     )
