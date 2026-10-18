@@ -57,6 +57,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
       POSTGRES_HOST: postgres
+      ASILA_STORAGE_ROOT: /var/lib/asila/private
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
       ASILA_SETUP_TOKEN: ${ASILA_SETUP_TOKEN:?Set ASILA_SETUP_TOKEN before starting Asila}
@@ -65,6 +66,8 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-llama3.2}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+    volumes:
+      - private_documents:/var/lib/asila/private
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -85,6 +88,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
       POSTGRES_HOST: postgres
+      ASILA_STORAGE_ROOT: /var/lib/asila/private
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
       ASILA_MASTER_KEY: ${ASILA_MASTER_KEY:?Set ASILA_MASTER_KEY before starting Asila}
@@ -93,6 +97,8 @@ services:
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-llama3.2}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
       DOCLING_URL: ${DOCLING_URL:-http://docling:5001}
+    volumes:
+      - private_documents:/var/lib/asila/private:ro
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -121,5 +127,6 @@ services:
       retries: 5
 
 volumes:
+  private_documents:
   postgres_data:
   ollama_data:

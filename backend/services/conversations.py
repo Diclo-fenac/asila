@@ -22,12 +22,14 @@ async def create_conversation(
     organization_id: str,
     title: str = "New conversation",
     created_by_user_id: str | None = None,
+    collection_id: str | None = None,
 ) -> Conversation:
     conversation = Conversation(
         id=f"conv_{uuid4().hex}",
         organization_id=organization_id,
         title=_required_text(title, "Conversation title"),
         created_by_user_id=created_by_user_id,
+        collection_id=collection_id,
     )
     session.add(conversation)
     await session.flush()
@@ -133,6 +135,9 @@ async def answer_question(
     mode: str = "keyword",
 ) -> tuple[Message, Message, list[dict]]:
     question = _required_text(question, "Question")
+    conversation = await get_conversation(session, organization_id=organization_id, conversation_id=conversation_id)
+    if conversation is None or not conversation.collection_id:
+        raise ValueError("An authorized conversation collection is required")
     user_message = await append_message(
         session,
         organization_id=organization_id,
@@ -149,9 +154,10 @@ async def answer_question(
             question,
             provider=embedding_provider,
             limit=10,
+            repository_id=conversation.collection_id,
         )
     else:
-        results = await keyword_search(session, question, limit=10)
+        results = await keyword_search(session, question, limit=10, repository_id=conversation.collection_id)
 
     citations = citations_for_results(results)
     context = "\n\n".join(

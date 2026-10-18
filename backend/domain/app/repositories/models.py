@@ -16,3 +16,5 @@ class Repository(AppBase, OrganizationScopedMixin, TimestampMixin):
     connector_type: Mapped[str] = mapped_column(String(64), nullable=False)
     external_id: Mapped[str] = mapped_column(String(512), nullable=False)
     default_branch: Mapped[str | None] = mapped_column(String(255))
+    application_id: Mapped[str | None] = mapped_column(String(128))
+    project_id: Mapped[str | None] = mapped_column(String(128))

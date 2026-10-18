@@ -10,7 +10,7 @@ from sqlalchemy import select
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
-from core.database.app_session import AppSessionLocal, set_transaction_organization
+from core.database.app_session import AppSessionLocal, set_transaction_principal
 from core.security.dependencies import get_current_principal
 from core.security.principals import Principal
 from core.organization.context import organization_scope
@@ -21,10 +21,7 @@ from services.ai_factory import build_organization_embedding_provider
 from services.retrieval import hybrid_search
 from core.exceptions.resilience import ServiceUnavailableError, BulkheadRejectedError
 from core.resilience import circuit_breaker, bulkhead
-from services.documents import create_document
-from services.ingestion_jobs import create_or_get_job
-from core.queue import enqueue_ingestion_job
-from domain.app.ingestion_jobs.models import IngestionJob
+from services.collections import collection_ids, require_collection
 from services.audit import record_audit_event
 
 
@@ -93,16 +90,19 @@ async def _search_for_principal(
     async with AppSessionLocal() as session:
         async with session.begin():
             with organization_scope(organization_id):
-                await set_transaction_organization(session, organization_id)
+                await set_transaction_principal(session, principal)
+                searchable = await collection_ids(session, principal, "search")
+                if not searchable:
+                    raise PermissionError("Collection action denied")
                 if mode == "hybrid":
                     results = await hybrid_search(
                         session,
                         query,
                         provider=await build_organization_embedding_provider(organization_id),
-                        limit=limit,
+                        limit=limit, repository_ids=searchable,
                     )
                 else:
-                    results = await keyword_search(session, query, limit=limit)
+                    results = await keyword_search(session, query, limit=limit, repository_ids=searchable)
                 res_dict = [result.as_dict() for result in results]
                 await record_audit_event(
                     session,
@@ -144,7 +144,7 @@ async def list_sources(ctx: Context) -> str:
         async with AppSessionLocal() as session:
             async with session.begin():
                 with organization_scope(principal.organization_id):
-                    await set_transaction_organization(session, principal.organization_id)
+                    await set_transaction_principal(session, principal)
                     result = await session.execute(
                         select(Repository).order_by(Repository.created_at.desc())
                     )
@@ -188,15 +188,17 @@ async def list_documents(limit: int = 50, ctx: Context | None = None) -> str:
         raise ValueError("MCP request context is required")
     try:
         principal = _principal_from_context(ctx)
-        _require_any_scope(principal, "search:read", "knowledge:read", "documents:list", "mcp:discover")
+        _require_any_scope(principal, "search:read", "documents:read", "knowledge:read", "documents:list", "mcp:discover")
 
         async with AppSessionLocal() as session:
             async with session.begin():
                 with organization_scope(principal.organization_id):
-                    await set_transaction_organization(session, principal.organization_id)
+                    await set_transaction_principal(session, principal)
+                    readable = set(await collection_ids(session, principal, "read")) | set(
+                        await collection_ids(session, principal, "search"))
                     result = await session.execute(
                         select(Document)
-                        .where(Document.status != DocumentStatus.DELETED)
+                        .where(Document.status != DocumentStatus.DELETED, Document.repository_id.in_(readable))
                         .order_by(Document.created_at.desc())
                         .limit(min(max(1, limit), 200))
                     )
@@ -289,19 +291,20 @@ async def get_document_content(document_id: str, ctx: Context | None = None) -> 
     if ctx is None:
         raise ValueError("MCP request context is required")
     principal = _principal_from_context(ctx)
-    _require_any_scope(principal, "search:read", "knowledge:read", "documents:list", "mcp:discover")
+    _require_any_scope(principal, "search:read", "documents:read", "knowledge:read", "documents:list", "mcp:discover")
 
     try:
         async with AppSessionLocal() as session:
             async with session.begin():
                 with organization_scope(principal.organization_id):
-                    await set_transaction_organization(session, principal.organization_id)
+                    await set_transaction_principal(session, principal)
                     result = await session.execute(
                         select(Document).where(Document.id == document_id)
                     )
                     document = result.scalar_one_or_none()
                     if document is None or document.status == DocumentStatus.DELETED:
                         raise ValueError("Document not found")
+                    await require_collection(session, principal, document.repository_id, "read")
                     await record_audit_event(
                         session,
                         action="mcp.tool_call",

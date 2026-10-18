@@ -9,8 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security.principals import Principal
 from domain.platform.api_keys.models import ApiKey
+from domain.platform.memberships.models import Membership
+from domain.platform.users.models import User
 from domain.platform.service_accounts.models import ServiceAccount
-from domain.platform.organizations.models import Organization, OrganizationStatus
+from domain.platform.organizations.models import (
+    Organization,
+    OrganizationStatus,
+)
 
 
 def hash_api_key(raw_secret: str) -> str:
@@ -34,7 +39,9 @@ async def create_api_key(
     if not scopes:
         raise ValueError("At least one API key scope is required")
     if user_id and service_account_id:
-        raise ValueError("An API key cannot belong to both a user and service account")
+        raise ValueError(
+            "An API key cannot belong to both a user and service account"
+        )
     if service_account_id and not organization_id:
         raise ValueError("Service-account keys must be organization-bound")
 
@@ -68,7 +75,7 @@ async def authenticate_api_key(
         )
     )
     keys = result.scalars().all()
-    
+
     key = None
     target_hash = hash_api_key(raw_secret)
     for candidate in keys:
@@ -83,6 +90,7 @@ async def authenticate_api_key(
         service_account_result = await session.execute(
             select(ServiceAccount).where(
                 ServiceAccount.id == key.service_account_id,
+                ServiceAccount.organization_id == key.organization_id,
                 ServiceAccount.is_active.is_(True),
             )
         )
@@ -99,6 +107,26 @@ async def authenticate_api_key(
         if organization_result.scalar_one_or_none() is None:
             return None
 
+    if key.user_id:
+        active_user = await session.scalar(
+            select(User.id).where(
+                User.id == key.user_id, User.is_active.is_(True)
+            )
+        )
+        if active_user is None:
+            return None
+        if (
+            key.organization_id
+            and await session.scalar(
+                select(Membership.id).where(
+                    Membership.user_id == key.user_id,
+                    Membership.organization_id == key.organization_id,
+                )
+            )
+            is None
+        ):
+            return None
+
     now = datetime.now(timezone.utc)
     if key.expires_at is not None and key.expires_at <= now:
         return None
@@ -112,4 +140,5 @@ async def authenticate_api_key(
         scopes=frozenset(key.scopes or []),
         user_id=key.user_id,
         service_account_id=key.service_account_id,
+        credential_id=key.id,
     )

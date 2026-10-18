@@ -97,6 +97,7 @@ async def create_document(
     existing_result = await session.execute(
         select(Document).where(
             Document.organization_id == organization_id,
+            Document.repository_id == repository_id,
             Document.source_uri == source_uri,
             Document.content_hash == content_hash,
         )

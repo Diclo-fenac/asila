@@ -3,6 +3,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from domain.app.conversations.models import Conversation
 
 from core.database.app_session import get_app_db
 from core.security.dependencies import get_current_principal
@@ -17,9 +19,9 @@ from services.conversations import (
     append_message,
     create_conversation,
     get_conversation,
-    list_conversations,
     list_messages,
 )
+from services.collections import require_collection, collection_ids
 
 
 router = APIRouter(prefix="/knowledge/conversations", tags=["conversations"])
@@ -31,6 +33,7 @@ def require_conversation_scope(principal: Principal, scope: str) -> None:
 
 
 class ConversationCreateRequest(BaseModel):
+    collection_id: str = Field(min_length=1, max_length=64)
     title: str = Field(default="New conversation", min_length=1, max_length=512)
 
 
@@ -45,8 +48,12 @@ def conversation_response(conversation) -> dict:
         "id": conversation.id,
         "title": conversation.title,
         "archived": conversation.archived,
-        "created_at": conversation.created_at.isoformat() if conversation.created_at else None,
-        "updated_at": conversation.updated_at.isoformat() if conversation.updated_at else None,
+        "created_at": conversation.created_at.isoformat()
+        if conversation.created_at
+        else None,
+        "updated_at": conversation.updated_at.isoformat()
+        if conversation.updated_at
+        else None,
     }
 
 
@@ -59,7 +66,9 @@ def message_response(message) -> dict:
         "citations": message.citations,
         "provider": message.provider,
         "model": message.model,
-        "created_at": message.created_at.isoformat() if message.created_at else None,
+        "created_at": message.created_at.isoformat()
+        if message.created_at
+        else None,
     }
 
 
@@ -71,12 +80,14 @@ async def create_conversation_route(
     principal: Principal = Depends(get_current_principal),
 ):
     require_conversation_scope(principal, "conversations:write")
+    await require_collection(db, principal, data.collection_id, "write")
     try:
         conversation = await create_conversation(
             db,
             organization_id=request.state.organization_id,
             title=data.title,
             created_by_user_id=principal.user_id,
+            collection_id=data.collection_id,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -91,10 +102,18 @@ async def list_conversations_route(
     limit: int = Query(default=50, ge=1, le=200),
 ):
     require_conversation_scope(principal, "conversations:read")
-    conversations = await list_conversations(
-        db,
-        organization_id=request.state.organization_id,
-        limit=limit,
+    readable = set(await collection_ids(db, principal, "read")) | set(
+        await collection_ids(db, principal, "search")
+    )
+    conversations = list(
+        (
+            await db.scalars(
+                select(Conversation)
+                .where(Conversation.collection_id.in_(readable))
+                .order_by(Conversation.updated_at.desc())
+                .limit(limit)
+            )
+        ).all()
     )
     return [conversation_response(item) for item in conversations]
 
@@ -114,6 +133,7 @@ async def get_conversation_route(
     )
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    await require_collection(db, principal, conversation.collection_id, "read")
     messages = await list_messages(
         db,
         organization_id=request.state.organization_id,
@@ -134,16 +154,31 @@ async def append_conversation_message_route(
     principal: Principal = Depends(get_current_principal),
 ):
     require_conversation_scope(principal, "conversations:write")
+    conversation = await get_conversation(
+        db,
+        organization_id=request.state.organization_id,
+        conversation_id=conversation_id,
+    )
+    if conversation is None:
+        raise HTTPException(404, "Conversation not found")
+    await require_collection(db, principal, conversation.collection_id, "write")
     try:
         if data.generate:
+            await require_collection(
+                db, principal, conversation.collection_id, "search"
+            )
             user_message, assistant_message, citations = await answer_question(
                 db,
                 organization_id=request.state.organization_id,
                 conversation_id=conversation_id,
                 question=data.content,
-                generation_provider=await build_organization_generation_provider(request.state.organization_id),
+                generation_provider=await build_organization_generation_provider(
+                    request.state.organization_id
+                ),
                 embedding_provider=(
-                    await build_organization_embedding_provider(request.state.organization_id)
+                    await build_organization_embedding_provider(
+                        request.state.organization_id
+                    )
                     if data.mode == "hybrid"
                     else None
                 ),
