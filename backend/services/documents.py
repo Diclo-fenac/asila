@@ -70,7 +70,11 @@ async def parse_and_persist_chunks(session: AsyncSession, organization_id: str, 
             
         await session.flush()
     except Exception as e:
-        logger.error(f"Docling parsing failed for {document_id}: {e}")
+        logger.error(
+            "Docling parsing failed for document_id=%s error_type=%s",
+            document_id,
+            type(e).__name__,
+        )
         if document:
             document.status = DocumentStatus.FAILED
             await session.flush()
@@ -125,3 +129,105 @@ async def create_document(
     # Chunks are no longer built synchronously here.
     # The worker will call parse_and_persist_chunks before embedding.
     return document
+
+
+async def delete_document_lifecycle(
+    session: AsyncSession,
+    *,
+    organization_id: str,
+    document_id: str,
+) -> dict:
+    """
+    Immediately tombstones document access, cancels active/queued jobs,
+    and purges chunks, revisions, and storage files.
+    """
+    from datetime import datetime, timezone
+    from domain.app.documents.revisions import DocumentRevision
+    from domain.app.ingestion_jobs.models import IngestionJob, IngestionJobStatus
+    from infra.storage.local import storage_service
+
+    result = await session.execute(
+        select(Document)
+        .where(
+            Document.id == document_id,
+            Document.organization_id == organization_id,
+        )
+        .with_for_update()
+    )
+    document = result.scalar_one_or_none()
+    if document is None or document.status == DocumentStatus.DELETED:
+        return {
+            "document_id": document_id,
+            "status": "already_deleted",
+            "cancelled_jobs": 0,
+        }
+
+    # 1. Immediate tombstoning of access
+    document.status = DocumentStatus.DELETED
+    revisions = list(
+        (
+            await session.scalars(
+                select(DocumentRevision)
+                .where(
+                    DocumentRevision.document_id == document_id,
+                    DocumentRevision.organization_id == organization_id,
+                )
+                .with_for_update()
+            )
+        ).all()
+    )
+    for rev in revisions:
+        rev.status = "deleted"
+        rev.publication_status = "blocked"
+
+    # 2. Cancel all active and queued jobs for this document
+    job_results = list(
+        (
+            await session.scalars(
+                select(IngestionJob)
+                .where(
+                    IngestionJob.document_id == document_id,
+                    IngestionJob.organization_id == organization_id,
+                    IngestionJob.status.in_(
+                        [IngestionJobStatus.QUEUED, IngestionJobStatus.PROCESSING]
+                    ),
+                )
+                .with_for_update()
+            )
+        ).all()
+    )
+    for job in job_results:
+        job.status = IngestionJobStatus.CANCELLED
+        job.last_error = "DOCUMENT_DELETED"
+        job.completed_at = datetime.now(timezone.utc)
+        job.lease_id = None
+        job.lease_expires_at = None
+
+    # 3. Purge chunks
+    await session.execute(
+        delete(Chunk).where(
+            Chunk.document_id == document_id,
+            Chunk.organization_id == organization_id,
+        )
+    )
+
+    await session.flush()
+
+    # 4. Storage cleanup
+    try:
+        storage_service.delete_document_storage(
+            organization_id=organization_id,
+            collection_id=document.repository_id or "default",
+            document_id=document.id,
+        )
+    except Exception:
+        logger.warning(
+            "Storage cleanup encountered error for document_id=%s", document_id
+        )
+
+    return {
+        "document_id": document_id,
+        "status": "deleted",
+        "revisions_deleted": len(revisions),
+        "cancelled_jobs": len(job_results),
+    }
