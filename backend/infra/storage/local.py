@@ -82,4 +82,41 @@ class LocalStorage:
             raise ValueError("Storage path escaped base directory")
         return str(file_path)
 
+    def delete_revision_storage(
+        self, organization_id: str, collection_id: str, document_id: str, revision_id: str
+    ) -> None:
+        """Purge private revision directory and original file."""
+        try:
+            original = self.original_path(
+                organization_id, collection_id, document_id, revision_id
+            )
+            revision_dir = original.parent
+            if revision_dir.is_dir():
+                shutil.rmtree(revision_dir, ignore_errors=True)
+        except Exception:
+            pass
+
+    def delete_document_storage(
+        self, organization_id: str, collection_id: str, document_id: str
+    ) -> None:
+        """Purge private document directory containing all revisions and artifacts."""
+        for value in (organization_id, collection_id, document_id):
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value):
+                raise ValueError("Invalid private object identity")
+        root = self.base_path.resolve()
+        path = (
+            root
+            / "organizations"
+            / organization_id
+            / "collections"
+            / collection_id
+            / "documents"
+            / document_id
+        )
+        if not path.resolve().is_relative_to(root):
+            raise ValueError("Private object escaped storage namespace")
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
+
+
 storage_service = LocalStorage(os.getenv("ASILA_STORAGE_ROOT", "storage"))

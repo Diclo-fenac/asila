@@ -15,7 +15,7 @@ from core.security.principals import Principal
 from domain.app.documents.models import Document, DocumentStatus
 from domain.app.ingestion_jobs.models import IngestionJob
 from domain.app.repositories.models import Repository
-from services.documents import create_document
+from services.documents import create_document, delete_document_lifecycle
 from services.retrieval import keyword_search
 from services.ai_factory import build_organization_embedding_provider
 from services.retrieval import hybrid_search
@@ -237,27 +237,12 @@ async def delete_knowledge_document(
     if document is None:
         raise HTTPException(status_code=404, detail="Document not found")
     await require_collection(db, principal, document.repository_id, "delete")
-    document.status = DocumentStatus.DELETED
-    revisions = list(
-        (
-            await db.scalars(
-                select(DocumentRevision)
-                .where(DocumentRevision.document_id == document_id)
-                .with_for_update()
-            )
-        ).all()
+    await delete_document_lifecycle(
+        db,
+        organization_id=principal.organization_id,
+        document_id=document.id,
     )
-    for revision in revisions:
-        revision.status = "deleted"
-    await db.flush()
     await db.commit()
-    for revision in revisions:
-        storage_service.original_path(
-            principal.organization_id,
-            document.repository_id,
-            document.id,
-            revision.id,
-        ).unlink(missing_ok=True)
 
 
 def safe_job_failure(job):
