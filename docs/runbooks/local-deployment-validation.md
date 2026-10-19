@@ -1,94 +1,104 @@
-# Runbook: Local Deployment & Stack Validation
+# Runbook: Local Deployment & Stack Validation (MAY-112 / DOC-04)
 
-This runbook guides Platform Operators through deploying, verifying, and troubleshooting a local or single-node production Aasila stack using Docker Compose and the Typer CLI.
-
----
-
-## 1. Prerequisites
-* **Operating System**: Linux or macOS
-* **Container Engine**: Docker Engine 24.0+ with Docker Compose v2+
-* **Python Runtime**: Python 3.11+ (for running the CLI or local backend)
+This runbook guides Platform Operators through deploying, verifying, and validating the hardened Asila document service deployment using Docker Compose, least-privilege PostgreSQL roles, and isolated microservice sockets.
 
 ---
 
-## 2. Standard Deployment Procedure
+## 1. Architecture & Service Isolation Invariants
 
-### Step 1: Clone & Bootstrap Configuration
-Navigate to the repository root and initialize the local environment configuration:
-```bash
-git clone https://github.com/asila-ai/aasila.git
-cd aasila
-python3 -m cli.main init
-```
-*Note: If `.env` is missing, `asila init` will automatically generate it from `.env.example`, populating secure, randomized hex secrets for `ASILA_MASTER_KEY`, `ASILA_SETUP_TOKEN`, and `POSTGRES_PASSWORD`.*
+The deployment stack enforces strict multi-tenancy, least-privilege database roles, and process isolation:
 
-### Step 2: Launch Container Services
-Start the underlying infrastructure (PostgreSQL with `pgvector`, Redis, Docling OCR, Ollama, and API backend) in detached mode:
+1. **PostgreSQL 16 (`postgres`)**:
+   - Pinned image `pgvector/pgvector:pg16`.
+   - Host binding: `127.0.0.1:${POSTGRES_PORT:-5432}:5432` (never `0.0.0.0`).
+   - Least-privilege roles bootstrapped on init:
+     - `asila_migrator`: Schema ownership (`platform`, `app`), `NOBYPASSRLS`, used solely by the `migrate` service.
+     - `asila_app`: DML table privileges (`SELECT, INSERT, UPDATE, DELETE`) and sequence usage; `NOBYPASSRLS` enforced across all tables (`FORCE ROW LEVEL SECURITY`).
+   - Transactional claim routine `app.claim_next_ingestion_job` runs with fixed `search_path = app, pg_catalog, pg_temp` and `SECURITY DEFINER` to dispatch jobs under RLS.
+
+2. **Database Migration (`migrate`)**:
+   - Executes dual Alembic heads (`alembic.platform.ini` and `alembic.app.ini`) as `asila_migrator`.
+   - Completes before `api` and `worker` start (`condition: service_completed_successfully`).
+
+3. **API Service (`api`)**:
+   - Runs as non-root user `asila` (UID 1000).
+   - Localhost-only published port: `127.0.0.1:${ASILA_PORT:-8000}:8000`.
+   - Volume mounts:
+     - `/var/lib/asila/private`: Read-write volume for document upload and physical deletion lifecycle.
+     - `/run/asila-scanner`: Read-only socket mount (`:ro`).
+     - `/run/asila-parser`: Read-only socket mount (`:ro`).
+
+4. **Worker Service (`worker`)**:
+   - Runs as non-root user `asila` (UID 1000).
+   - Reads storage volume strictly read-only (`/var/lib/asila/private:ro`).
+   - Communicates with scanner and parser strictly via isolated read-only Unix sockets.
+   - Enforces atomic attempt increments (capped at 5), exponential retry backoff, lease fencing (`FencedExecutionError`), and crash recovery.
+
+5. **Document Scanner (`document_scanner`)**:
+   - Pinned ClamAV image digest.
+   - `network_mode: none`, `read_only: true`, `cap_drop: [ALL]`.
+   - Listens on `/run/asila-scanner/clamd.sock`.
+
+6. **Document Parser (`document_parser`)**:
+   - Pinned Docling image digest with offline model cache.
+   - `network_mode: none`, `read_only: true`, `cap_drop: [ALL]`.
+   - Listens on `/run/asila-parser/parser.sock`.
+
+---
+
+## 2. Pinned Deployment Procedure
+
+### Step 1: Environment Configuration
+Copy `.env.example` and supply strong randomized passwords. For local test runs that coexist with host services, set non-conflicting ports:
 ```bash
-docker compose up -d
-```
-Verify container startup status:
-```bash
-docker compose ps
+cp .env.example .env
+export POSTGRES_PORT=5433
+export ASILA_PORT=8001
+export POSTGRES_PASSWORD=your_secure_admin_password
+export ASILA_DB_APP_PASSWORD=your_secure_app_password
+export ASILA_DB_MIGRATOR_PASSWORD=your_secure_migrator_password
+export ASILA_SETUP_TOKEN=$(openssl rand -hex 16)
+export ASILA_MASTER_KEY=$(openssl rand -hex 32)
 ```
 
-### Step 3: Run Diagnostics & Health Checks
-Execute the diagnostic health probe to confirm all internal service dependencies are operational:
+### Step 2: Launch Stack
+Boot the infrastructure and application services:
 ```bash
-python3 -m cli.main doctor
-# Or using the command alias:
-python3 -m cli.main status
+docker compose -f deployments/docker-compose.yml up -d postgres migrate api worker
 ```
-**Expected Output**:
-```
-Asila System Diagnostics
-================================================================================
-  ✔ PostgreSQL Database: Connected (latency: ~2ms)
-  ✔ Redis Queue Engine: Connected (latency: ~1ms)
-  ✔ Ollama Embedding Service: Healthy (latency: ~15ms)
-  ✔ Docling Document Converter: Ready (latency: ~8ms)
-================================================================================
-System Status: HEALTHY
+
+Verify service health:
+```bash
+docker compose -f deployments/docker-compose.yml ps
 ```
 
 ---
 
-## 3. Automated Release Verification
+## 3. Automated Service Acceptance Verification
 
-Before promoting a deployment or opening pull requests, execute the automated security and release verification gate:
+Execute the MAY-112 acceptance suite to verify the end-to-end security and isolation invariants:
 ```bash
-bash scripts/security_gate.sh
+DATABASE_URL="postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/asila_platform" \
+ASILA_TEST_ADMIN_URL="postgresql+asyncpg://asila_admin:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/asila_platform" \
+POSTGRES_PASSWORD="${ASILA_DB_APP_PASSWORD}" \
+pytest tests/test_service_acceptance.py -v
 ```
-This gate automatically validates Python AST syntax, PostgreSQL RLS migration policies, full pytest unit/integration suites, CLI operator interfaces, and MCP protocols.
+
+**Verified Invariants**:
+- `test_least_privilege_database_roles_and_rls`: Proves `asila_migrator` and `asila_app` are `NOBYPASSRLS` and all `app` tables have `FORCE RLS` enabled.
+- `test_isolated_document_upload_across_formats_without_ai_provider`: Proves PDF, DOCX, TXT, and Markdown upload, SHA-256 validation, and `0o700` storage directory isolation without external AI calls.
+- `test_multitenancy_and_collection_boundary_enforcement`: Proves cross-tenant requests and ungranted collections reject with 403/404 and RLS `42501`.
+- `test_midflight_revocation_and_deletion_stops_execution`: Proves revoked collection grants or deleted documents fail running jobs immediately without retrying (`AUTHORIZATION_REVOKED`, `SOURCE_DELETED`).
+- `test_queue_resilience_lease_fencing_and_deletion_lifecycle`: Proves 5-attempt retry exhaustion (`MAX_ATTEMPTS_EXCEEDED`), lease fencing (`FencedExecutionError`), and idempotent document deletion cleanup.
+- `test_privacy_and_logging_hygiene`: Proves zero document sentinel content or raw exception bodies leak into logs.
+- `test_deployment_specifications_and_cloud_blocker_invariants`: Verifies compose isolation, `127.0.0.1` bindings, and non-root user enforcement.
 
 ---
 
-## 4. Troubleshooting & Common Failure Modes
+## 4. Remaining Cloud & Production Blockers
 
-### Failure Mode A: Database Connection Refused / Out of Memory
-* **Symptom**: `asila doctor` reports PostgreSQL down or container exits with code 137.
-* **Diagnosis**: Check Docker logs for PostgreSQL memory limits or port conflicts on `5432`:
-  ```bash
-  docker compose logs postgresql
-  ```
-* **Resolution**: Ensure your host system has at least 4GB of available RAM allocated to Docker. If port 5432 is occupied by a local Postgres instance, modify `docker-compose.yml` port mappings.
-
-### Failure Mode B: Docling OCR Converter Timeout / Circuit Broken
-* **Symptom**: `asila doctor` reports Docling down or ingestion jobs fail with circuit breaker errors.
-* **Diagnosis**: The Docling container requires significant CPU/RAM during initial model weights download:
-  ```bash
-  docker compose logs -f docling
-  ```
-* **Resolution**: Wait 2-3 minutes on initial boot for PyTorch/Docling model initialization. If failures persist, restart the converter service:
-  ```bash
-  docker compose restart docling
-  ```
-
-### Failure Mode C: Setup Token Mismatch
-* **Symptom**: `asila init` returns `401 Invalid setup token`.
-* **Diagnosis**: The `ASILA_SETUP_TOKEN` exported in your terminal does not match the token in `.env`.
-* **Resolution**: Source the `.env` file directly before running CLI commands:
-  ```bash
-  export $(grep -v '^#' .env | xargs)
-  python3 -m cli.main init
-  ```
+Local volume storage and process isolation are verified. However, enterprise cloud production requirements remain explicit blockers pending specialist infrastructure delivery:
+1. **Cloud KMS & Storage-at-Rest Encryption**: Local volume storage enforces filesystem `0o700` permissions; managed cloud S3/GCS bucket-level encryption (KMS customer-managed keys) and envelope encryption remain unverified.
+2. **Private VPC Endpoints**: Cloud storage access must route over private VPC endpoints without public Internet transit.
+3. **Regional Multi-Zone Redundancy**: Multi-AZ failover and data residency guarantees remain external infrastructure dependencies.
+4. **Immutable Backup Retention & Disaster Recovery**: Cold storage retention and point-in-time recovery runbooks remain uncertified for production.

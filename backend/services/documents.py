@@ -1,5 +1,6 @@
 import hashlib
 import re
+from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import select, delete
@@ -136,6 +137,7 @@ async def delete_document_lifecycle(
     *,
     organization_id: str,
     document_id: str,
+    storage: Any = None,
 ) -> dict:
     """
     Immediately tombstones document access, cancels active/queued jobs,
@@ -215,7 +217,8 @@ async def delete_document_lifecycle(
 
     # 4. Storage cleanup
     try:
-        storage_service.delete_document_storage(
+        active_storage = storage or storage_service
+        active_storage.delete_document_storage(
             organization_id=organization_id,
             collection_id=document.repository_id or "default",
             document_id=document.id,
