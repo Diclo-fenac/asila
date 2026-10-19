@@ -241,6 +241,7 @@ async def delete_knowledge_document(
         db,
         organization_id=principal.organization_id,
         document_id=document.id,
+        storage=storage_service,
     )
     await db.commit()
 

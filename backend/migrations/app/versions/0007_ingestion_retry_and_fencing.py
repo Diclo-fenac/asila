@@ -80,6 +80,7 @@ def upgrade():
         SECURITY DEFINER
         SET search_path = app, pg_catalog, pg_temp
         AS $$
+        #variable_conflict use_column
         DECLARE
             v_job_id text;
             v_new_lease text;
@@ -94,8 +95,8 @@ def upgrade():
                 last_error = 'MAX_ATTEMPTS_EXCEEDED',
                 completed_at = clock_timestamp(),
                 updated_at = clock_timestamp()
-            WHERE attempts >= 5 AND status IN ('queued', 'processing')
-              AND (lease_expires_at IS NULL OR lease_expires_at < clock_timestamp());
+            WHERE ingestion_jobs.attempts >= 5 AND ingestion_jobs.status IN ('queued', 'processing')
+              AND (ingestion_jobs.lease_expires_at IS NULL OR ingestion_jobs.lease_expires_at < clock_timestamp());
 
             -- Select next eligible job with SKIP LOCKED
             -- 1. status = 'queued' AND (available_at IS NULL OR available_at <= now()) AND attempts < 5
