@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, 'feat/MAY-*' ]
   release:
     types: [published]
 
@@ -96,8 +96,8 @@ jobs:
       - name: Build API Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: deployments/docker/api.Dockerfile
+          context: backend
+          file: backend/Dockerfile
           push: false
           tags: aasila/api:latest
           cache-from: type=gha

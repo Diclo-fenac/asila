@@ -1,6 +1,7 @@
 import os
 import hvac
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,9 @@ class Settings(BaseSettings):
     ASILA_MASTER_KEY: str = ""
     ASILA_SETUP_TOKEN: str = ""
     ASILA_MULTI_TENANCY_ENABLED: bool = False
+    ASILA_SCANNER_SOCKET: str = ""
+    ASILA_PARSER_SOCKET: str = ""
+    ASILA_SCANNER_MAX_AGE_DAYS: int = Field(default=7, ge=1, le=30)
     OIDC_ISSUER: str = ""
     OIDC_AUDIENCE: str = ""
     OIDC_JWKS_URL: str = ""

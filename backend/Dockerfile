@@ -22,10 +22,11 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for security
-RUN useradd -m asila \
-    && mkdir -p /var/lib/asila/private \
-    && chown asila:asila /var/lib/asila/private \
-    && chmod 700 /var/lib/asila/private
+RUN useradd --uid 1000 --user-group -m asila \
+    && mkdir -p /var/lib/asila/private /run/asila-parser /run/asila-scanner \
+    && chown asila:asila /var/lib/asila/private /run/asila-parser /run/asila-scanner \
+    && chmod 700 /var/lib/asila/private \
+    && chmod 770 /run/asila-parser /run/asila-scanner
 USER asila
 
 WORKDIR /app

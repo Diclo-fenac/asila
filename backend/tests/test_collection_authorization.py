@@ -162,6 +162,7 @@ async def collection_context(tmp_path, monkeypatch):
                 "document_revisions",
                 "documents",
                 "collection_grants",
+                "organization_storage_usage",
                 "repositories",
             ):
                 await db.execute(
@@ -309,10 +310,8 @@ async def test_original_integrity_immutable_revision_and_revoked_download(
         and uploaded.json()["status"] == "quarantined"
     )
     download = await c["client"].get(base + "/content")
-    assert (
-        download.content == content
-        and download.headers["cache-control"] == "no-store"
-    )
+    assert download.status_code == 409
+    assert download.json()["detail"] == "Original awaits clean validation"
     path = c["storage"].original_path(
         c["org"],
         data["collection_id"],
