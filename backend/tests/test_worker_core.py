@@ -1,46 +1,35 @@
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+"""Unscoped queue dispatch must not bypass runtime collection RLS."""
 
-from domain.app.ingestion_jobs.models import IngestionJobStatus
+from uuid import uuid4
+
+import pytest
+from sqlalchemy import text
+
+from tests.test_collection_authorization import collection_context as collection_context
 from workers.core import process_next_job
 
-def _job():
-    return MagicMock(
-        id="job_1",
-        organization_id="org_1",
-        document_id="doc_1",
-        operation="embed",
-        status=IngestionJobStatus.PROCESSING,
-        attempts=0,
-    )
 
 @pytest.mark.asyncio
-async def test_worker_embeds_and_completes_job():
-    job = _job()
-    result = MagicMock()
-    result.fetchone.return_value = ("job_1", "org_1")
-    result.scalar_one.return_value = job
-    
-    session = MagicMock()
-    session.execute = AsyncMock(return_value=result)
-    session.begin = MagicMock()
-    session.begin.return_value.__aenter__ = AsyncMock()
-    session.begin.return_value.__aexit__ = AsyncMock(return_value=None)
-    session.commit = AsyncMock()
-    session.rollback = AsyncMock()
-    session.flush = AsyncMock()
-    
-    session_factory = MagicMock()
-    session_factory.return_value.__aenter__ = AsyncMock(return_value=session)
-    session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
-
-    with (
-        patch("workers.core.AppSessionLocal", session_factory),
-        patch("workers.core.build_organization_embedding_provider", new=AsyncMock(return_value=MagicMock())),
-        patch("workers.core.parse_and_persist_chunks", new=AsyncMock(return_value=None)),
-        patch("workers.core.embed_document_chunks", new=AsyncMock(return_value=[])),
-    ):
-        processed = await process_next_job()
-
-    assert processed is True
-    assert job.status == IngestionJobStatus.COMPLETED
+async def test_worker_does_not_claim_without_authorized_dispatch_context(
+    collection_context,
+):
+    c = collection_context
+    job_id = f"job_{uuid4().hex}"
+    async with c["admin"].begin() as db:
+        await db.execute(
+            text("""INSERT INTO app.ingestion_jobs
+            (id,organization_id,document_id,idempotency_key,operation,payload_json,status,attempts)
+            VALUES (:id,:org,:doc,:id,'embed','{}','queued',0)"""),
+            {"id": job_id, "org": c["org"], "doc": c["documents"][0]},
+        )
+    assert await process_next_job() is False
+    async with c["admin"].connect() as db:
+        state = (
+            await db.execute(
+                text(
+                    "SELECT status,attempts FROM app.ingestion_jobs WHERE id=:id"
+                ),
+                {"id": job_id},
+            )
+        ).one()
+    assert state == ("queued", 0)

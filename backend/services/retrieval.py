@@ -46,6 +46,7 @@ async def keyword_search(
     *,
     limit: int | None = None,
     repository_id: str | None = None,
+    repository_ids: list[str] | None = None,
 ) -> list[SearchResult]:
     query = validate_query(query)
     limit = normalize_search_limit(limit)
@@ -61,6 +62,8 @@ async def keyword_search(
         .order_by(rank.desc(), Chunk.ordinal.asc())
         .limit(limit)
     )
+    if repository_ids is not None:
+        statement = statement.where(Document.repository_id.in_(repository_ids))
     if repository_id:
         statement = statement.where(Document.repository_id == repository_id)
     result = await session.execute(statement)
@@ -85,6 +88,7 @@ async def semantic_search(
     provider: EmbeddingProvider,
     limit: int | None = None,
     repository_id: str | None = None,
+    repository_ids: list[str] | None = None,
 ) -> list[SearchResult]:
     query = validate_query(query)
     limit = normalize_search_limit(limit)
@@ -109,6 +113,8 @@ async def semantic_search(
         .order_by(distance.asc(), Chunk.ordinal.asc())
         .limit(limit)
     )
+    if repository_ids is not None:
+        statement = statement.where(Document.repository_id.in_(repository_ids))
     if repository_id:
         statement = statement.where(Document.repository_id == repository_id)
     result = await session.execute(statement)
@@ -145,6 +151,7 @@ async def hybrid_search(
     provider: EmbeddingProvider,
     limit: int | None = None,
     repository_id: str | None = None,
+    repository_ids: list[str] | None = None,
 ) -> list[SearchResult]:
     query_str = validate_query(query)
     search_limit = normalize_search_limit(limit)
@@ -163,6 +170,8 @@ async def hybrid_search(
             Document.status != DocumentStatus.DELETED,
         )
     )
+    if repository_ids is not None:
+        lexical_stmt = lexical_stmt.where(Document.repository_id.in_(repository_ids))
     if repository_id:
         lexical_stmt = lexical_stmt.where(Document.repository_id == repository_id)
     lexical_cte = lexical_stmt.limit(search_limit).cte("lexical")
@@ -178,7 +187,7 @@ async def hybrid_search(
         query_vector = vectors[0]
     except (ServiceUnavailableError, Exception) as e:
         logging.getLogger(__name__).warning(f"Semantic search degraded: {e}")
-        return await keyword_search(session, query, limit=limit, repository_id=repository_id)
+        return await keyword_search(session, query, limit=limit, repository_id=repository_id, repository_ids=repository_ids)
         
     collection_key = f"{provider.model}:{len(query_vector)}"
     distance = Embedding.embedding.max_inner_product(query_vector).label("distance")
@@ -195,6 +204,8 @@ async def hybrid_search(
             Document.status != DocumentStatus.DELETED,
         )
     )
+    if repository_ids is not None:
+        semantic_stmt = semantic_stmt.where(Document.repository_id.in_(repository_ids))
     if repository_id:
         semantic_stmt = semantic_stmt.where(Document.repository_id == repository_id)
     semantic_cte = semantic_stmt.limit(search_limit).cte("semantic")

@@ -58,6 +58,9 @@ async def _authenticate_oidc(request: Request, token: str) -> Principal:
             session.add(user)
             await session.flush()
 
+        if not user.is_active:
+            raise HTTPException(status_code=403, detail="User access denied")
+
         memberships_result = await session.execute(
             select(Membership)
             .join(Organization, Organization.id == Membership.organization_id)
@@ -138,6 +141,7 @@ async def get_current_principal(request: Request) -> Principal:
             roles=principal.roles,
             user_id=principal.user_id,
             service_account_id=principal.service_account_id,
+            credential_id=principal.credential_id,
         )
 
     organization_id = requested_organization or principal.organization_id

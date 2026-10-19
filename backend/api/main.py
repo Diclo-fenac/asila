@@ -13,6 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import text
 
 from api.routes import api_keys, audit, conversations_core, knowledge, mcp_core, metrics, organizations_core, provider_credentials, service_accounts, setup
+from api.routes import private_documents
 from core.config.settings import settings
 from core.database.app_session import app_engine
 from core.exceptions.handlers import global_exception_handler
@@ -106,6 +107,7 @@ api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(setup.router)
 api_router.include_router(organizations_core.router)
 api_router.include_router(knowledge.router)
+api_router.include_router(private_documents.router)
 api_router.include_router(conversations_core.router)
 api_router.include_router(api_keys.router)
 api_router.include_router(provider_credentials.router)

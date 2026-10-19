@@ -47,9 +47,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Configure least-privilege database roles
+        env:
+          PGPASSWORD: asila_admin_password
+        run: |
+          psql -h localhost -U asila_admin -d asila_platform \
+            -v ON_ERROR_STOP=1 -v database_name=asila_platform \
+            -v migrator_password=ci_migrator -v app_password=ci_runtime \
+            -f deployments/docker/roles.sql.template
+
       - name: Run Alembic Database Migrations
         env:
-          DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          DATABASE_URL: postgresql+asyncpg://asila_migrator:ci_migrator@localhost:5432/asila_platform
           PLATFORM_DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
           POSTGRES_PASSWORD: asila_admin_password
           ASILA_SETUP_TOKEN: 3a85f2611195d7610f7a102f78dfc40fa3cb8421b7c51ea589b79461d93261f3
@@ -60,7 +69,8 @@ jobs:
 
       - name: Run Test Suite
         env:
-          DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
+          DATABASE_URL: postgresql+asyncpg://asila_app:ci_runtime@localhost:5432/asila_platform
+          ASILA_TEST_ADMIN_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
           PLATFORM_DATABASE_URL: postgresql+asyncpg://asila_admin:asila_admin_password@localhost:5432/asila_platform
           POSTGRES_PASSWORD: asila_admin_password
           ASILA_SETUP_TOKEN: 3a85f2611195d7610f7a102f78dfc40fa3cb8421b7c51ea589b79461d93261f3

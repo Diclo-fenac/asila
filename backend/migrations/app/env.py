@@ -14,6 +14,8 @@ from domain.app.documents.models import Document
 from domain.app.embeddings.models import Embedding
 from domain.app.ingestion_jobs.models import IngestionJob
 from domain.app.repositories.models import Repository
+from domain.app.repositories.grants import CollectionGrant
+from domain.app.documents.revisions import DocumentRevision
 from domain.app.conversations.models import Conversation, Message
 
 config = context.config

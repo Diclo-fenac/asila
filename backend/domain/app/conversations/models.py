@@ -17,10 +17,13 @@ class Conversation(AppBase, OrganizationScopedMixin, TimestampMixin):
     __tablename__ = "conversations"
     __table_args__ = (
         UniqueConstraint("id", "organization_id", name="uq_conversation_id_organization"),
+        ForeignKeyConstraint(["collection_id", "organization_id"],
+                             ["app.repositories.id", "app.repositories.organization_id"]),
         {"schema": "app"},
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    collection_id: Mapped[str | None] = mapped_column(String(64))
     created_by_user_id: Mapped[str | None] = mapped_column(String(64))
     title: Mapped[str] = mapped_column(String(512), nullable=False, default="New conversation")
     archived: Mapped[bool] = mapped_column(nullable=False, default=False)
