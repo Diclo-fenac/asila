@@ -40,4 +40,4 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["api*", "cli*", "core*", "domain*", "infra*", "migrations*", "services*", "workers*"]
+include = ["api*", "cli*", "core*", "domain*", "infra*", "migrations*", "services*", "workers*", "document_processing*"]

@@ -6,8 +6,9 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import select
+from sqlalchemy.exc import DBAPIError
 
 from core.database.app_session import get_app_db
 from core.database.platform_session import PlatformSessionLocal
@@ -29,6 +30,19 @@ from services.collections import (
     require_collection,
     lock_collection_grant,
 )
+
+from domain.app.documents.contracts import JobContract
+from domain.app.ingestion_jobs.models import IngestionJobStatus
+from services.ingestion_jobs import (
+    create_or_get_job,
+    start_job,
+    complete_job,
+    fail_job,
+)
+from services.document_extraction import scan_original, parse_original
+from services.job_authorization import job_principal
+from document_processing.contracts import ProcessingError
+from core.database.app_session import set_transaction_principal
 
 router = APIRouter(prefix="/knowledge", tags=["private-documents"])
 
@@ -150,6 +164,11 @@ def revision_response(document, revision):
         mime_type=revision.mime_type,
         size_bytes=revision.size_bytes,
         status=revision.status,
+        validation_status=revision.validation_status,
+        extraction_status=revision.extraction_status,
+        review_status=revision.review_status,
+        publication_status=revision.publication_status,
+        failure_reason=revision.failure_reason,
     )
 
 
@@ -169,13 +188,22 @@ async def authorized_revision(
             Document.status != DocumentStatus.DELETED,
         )
     )
-    if lock:
-        statement = statement.with_for_update()
     row = (await db.execute(statement)).first()
     if row is None:
         raise HTTPException(404, "Document revision not found")
     revision, document = row
     await require_collection(db, principal, document.repository_id, action)
+    if lock:
+        row = (
+            await db.execute(
+                statement.with_for_update().execution_options(
+                    populate_existing=True
+                )
+            )
+        ).first()
+        if row is None:
+            raise HTTPException(404, "Document revision not found")
+        revision, document = row
     return document, revision
 
 
@@ -214,7 +242,17 @@ async def create_original(
     db.add(document)
     await db.flush()
     db.add(revision)
-    await db.flush()
+    try:
+        await db.flush()
+    except DBAPIError as error:
+        if (
+            error.orig.sqlstate == "P0001"
+            and "organization_storage_quota_exceeded" in str(error.orig)
+        ):
+            raise HTTPException(
+                413, "Organization storage quota exceeded"
+            ) from None
+        raise
     return revision_response(document, revision)
 
 
@@ -290,7 +328,17 @@ async def create_revision(
         citations=[],
     )
     db.add(revision)
-    await db.flush()
+    try:
+        await db.flush()
+    except DBAPIError as error:
+        if (
+            error.orig.sqlstate == "P0001"
+            and "organization_storage_quota_exceeded" in str(error.orig)
+        ):
+            raise HTTPException(
+                413, "Organization storage quota exceeded"
+            ) from None
+        raise
     return revision_response(document, revision)
 
 
@@ -359,6 +407,8 @@ async def download_original(
     )
     if revision.status not in {"quarantined", "ready"}:
         raise HTTPException(409, "Original is not available")
+    if revision.validation_status != "clean":
+        raise HTTPException(409, "Original awaits clean validation")
     path = storage_service.original_path(
         principal.organization_id,
         document.repository_id,
@@ -392,7 +442,8 @@ async def get_extraction(
         db, principal, document_id, revision_id, "read"
     )
     if (
-        revision.status != "ready"
+        revision.validation_status != "clean"
+        or revision.extraction_status != "complete"
         or not revision.parser_version
         or revision.extracted_text is None
     ):
@@ -406,4 +457,131 @@ async def get_extraction(
         parser_version=revision.parser_version,
         text=revision.extracted_text,
         citations=revision.citations,
+        parser_artifact_id=revision.parser_artifact_id,
+        warnings=revision.warnings,
+        review_status=revision.review_status,
+        publication_status=revision.publication_status,
+    )
+
+
+@router.post("/documents/{document_id}/revisions/{revision_id}/extract")
+async def extract_revision(
+    document_id: str,
+    revision_id: str,
+    db=Depends(get_app_db),
+    principal=Depends(get_current_principal),
+):
+    """Run one authorized extract-only job; retain review and publication gates."""
+
+    document, revision = await authorized_revision(
+        db, principal, document_id, revision_id, "extract", lock=True
+    )
+    if revision.status not in {"quarantined", "ready"}:
+        raise HTTPException(409, "Original is not finalized")
+    job = await create_or_get_job(
+        db,
+        organization_id=principal.organization_id,
+        idempotency_key=f"extract:{revision.id}",
+        document_id=document.id,
+        operation="extract_only",
+        payload={"revision_id": revision.id},
+        principal=principal,
+    )
+    if job.status != IngestionJobStatus.QUEUED:
+        return JobContract(
+            job_id=job.id,
+            document_id=document.id,
+            revision_id=revision.id,
+            status=job.status.value,
+            failure_reason=revision.failure_reason,
+        )
+    await start_job(job, db)
+    revision.validation_status = "validating"
+    revision.extraction_status = "processing"
+    await db.commit()
+    document, revision = await authorized_revision(
+        db, principal, document_id, revision_id, "extract", lock=True
+    )
+    path = storage_service.original_path(
+        principal.organization_id,
+        document.repository_id,
+        document.id,
+        revision.id,
+    )
+    try:
+        try:
+            await asyncio.to_thread(
+                storage_service.validate_original,
+                path,
+                revision.size_bytes,
+                revision.sha256,
+            )
+        except (ValueError, OSError):
+            raise ProcessingError("ORIGINAL_INTEGRITY_FAILED") from None
+        scanner_version = await scan_original(path)
+        parsed = await parse_original(path, revision.mime_type, revision.sha256)
+        try:
+            extraction = ExtractionContract(
+                document_id=document.id,
+                revision_id=revision.id,
+                original_sha256=revision.sha256,
+                parser_version=parsed.parser_version,
+                parser_artifact_id=parsed.parser_artifact_id,
+                text=parsed.text,
+                warnings=parsed.warnings,
+                citations=[
+                    {
+                        **citation.model_dump(),
+                        "document_id": document.id,
+                        "revision_id": revision.id,
+                        "original_sha256": revision.sha256,
+                    }
+                    for citation in parsed.citations
+                ],
+            )
+        except ValidationError:
+            raise ProcessingError("PARSER_FAILED") from None
+        try:
+            current = await job_principal(
+                principal.organization_id, job.payload_json
+            )
+            await set_transaction_principal(db, current)
+            await require_collection(
+                db, current, document.repository_id, "extract"
+            )
+        except HTTPException:
+            raise ProcessingError("AUTHORIZATION_REVOKED") from None
+        revision.validation_status = "clean"
+        revision.extraction_status = "complete"
+        revision.scanner_version = scanner_version
+        revision.parser_version = extraction.parser_version
+        revision.parser_artifact_id = extraction.parser_artifact_id
+        revision.extracted_text = extraction.text
+        revision.citations = [
+            citation.model_dump(mode="json")
+            for citation in extraction.citations
+        ]
+        revision.warnings = extraction.warnings
+        revision.failure_reason = None
+        # The original and its extraction never enter search/model context here.
+        revision.review_status, revision.publication_status = (
+            "pending",
+            "blocked",
+        )
+        await complete_job(job, db)
+    except ProcessingError as error:
+        # A revoked credential may record a safe terminal failure in its existing
+        # request context, but must never publish extraction under stale scopes.
+        await set_transaction_principal(db, principal)
+        revision.validation_status = "quarantined"
+        revision.extraction_status = "failed"
+        revision.failure_reason = error.reason
+        await fail_job(job, db, error.reason)
+    await db.flush()
+    return JobContract(
+        job_id=job.id,
+        document_id=document.id,
+        revision_id=revision.id,
+        status=job.status.value,
+        failure_reason=revision.failure_reason,
     )

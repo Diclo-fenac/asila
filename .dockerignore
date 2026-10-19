@@ -1,0 +1,10 @@
+.git
+.worktrees
+**/.git
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.env
+**/.env.*
+!**/.env.example
+**/storage

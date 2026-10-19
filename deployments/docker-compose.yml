@@ -58,6 +58,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
       POSTGRES_HOST: postgres
       ASILA_STORAGE_ROOT: /var/lib/asila/private
+      ASILA_SCANNER_SOCKET: /run/asila-scanner/clamd.sock
+      ASILA_PARSER_SOCKET: /run/asila-parser/parser.sock
+      ASILA_SCANNER_MAX_AGE_DAYS: ${ASILA_SCANNER_MAX_AGE_DAYS:-7}
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
       ASILA_SETUP_TOKEN: ${ASILA_SETUP_TOKEN:?Set ASILA_SETUP_TOKEN before starting Asila}
@@ -68,6 +71,8 @@ services:
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
     volumes:
       - private_documents:/var/lib/asila/private
+      - scanner_socket:/run/asila-scanner:ro
+      - parser_socket:/run/asila-parser:ro
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -89,6 +94,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://asila_app:${ASILA_DB_APP_PASSWORD}@postgres:5432/asila_platform
       POSTGRES_HOST: postgres
       ASILA_STORAGE_ROOT: /var/lib/asila/private
+      ASILA_SCANNER_SOCKET: /run/asila-scanner/clamd.sock
+      ASILA_PARSER_SOCKET: /run/asila-parser/parser.sock
+      ASILA_SCANNER_MAX_AGE_DAYS: ${ASILA_SCANNER_MAX_AGE_DAYS:-7}
       POSTGRES_USER: asila_app
       POSTGRES_PASSWORD: ${ASILA_DB_APP_PASSWORD}
       ASILA_MASTER_KEY: ${ASILA_MASTER_KEY:?Set ASILA_MASTER_KEY before starting Asila}
@@ -99,6 +107,8 @@ services:
       DOCLING_URL: ${DOCLING_URL:-http://docling:5001}
     volumes:
       - private_documents:/var/lib/asila/private:ro
+      - scanner_socket:/run/asila-scanner:ro
+      - parser_socket:/run/asila-parser:ro
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -111,22 +121,52 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
-  docling:
-    image: quay.io/docling-project/docling-serve:latest
-    expose:
-      - "5001"
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  document_parser:
+    profiles: ["document-processing"]
+    build:
+      context: ..
+      dockerfile: deployments/docling.Dockerfile
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    cpus: 2
+    mem_limit: 6g
+    environment:
+      HOME: /tmp
+      MPLCONFIGDIR: /tmp/matplotlib
+    tmpfs:
+      - /tmp:size=256m,mode=1777,noexec,nosuid,nodev
+    volumes:
+      - parser_socket:/run/asila-parser
+
+  document_scanner:
+    profiles: ["document-processing"]
+    build:
+      context: ..
+      dockerfile: deployments/scanner.Dockerfile
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    cpus: 1
+    mem_limit: 2g
+    tmpfs:
+      - /tmp:size=128m,mode=1777,noexec,nosuid,nodev
+    volumes:
+      - scanner_socket:/run/asila-scanner
+      - type: bind
+        source: ${ASILA_CLAMAV_DATABASE_DIR:-./clamav-signatures}
+        target: /var/lib/clamav
+        read_only: true
+        bind:
+          create_host_path: false
 
 volumes:
+  scanner_socket:
+  parser_socket:
   private_documents:
   postgres_data:
   ollama_data:

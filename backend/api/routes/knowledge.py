@@ -260,6 +260,18 @@ async def delete_knowledge_document(
         ).unlink(missing_ok=True)
 
 
+def safe_job_failure(job):
+    from pydantic import TypeAdapter, ValidationError
+    from document_processing.contracts import FailureReason
+
+    if job.status.value != "failed":
+        return None
+    try:
+        return TypeAdapter(FailureReason).validate_python(job.last_error)
+    except ValidationError:
+        return "PROCESSING_FAILED"
+
+
 @router.get("/jobs/{job_id}")
 async def get_ingestion_job(
     job_id: str,
@@ -285,13 +297,10 @@ async def get_ingestion_job(
         job_id=job.id,
         document_id=job.document_id,
         status=job.status.value,
-        failure_reason=(
-            "AUTHORIZATION_REVOKED"
-            if job.last_error == "AUTHORIZATION_REVOKED"
-            else "PROCESSING_FAILED"
-            if job.status.value == "failed"
-            else None
-        ),
+        revision_id=job.payload_json.get("revision_id")
+        if job.operation == "extract_only"
+        else None,
+        failure_reason=safe_job_failure(job),
     )
 
 
